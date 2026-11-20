@@ -408,7 +408,7 @@
                                     <span id="syncStatusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
                                     <span id="syncStatusDot" class="relative inline-flex rounded-full h-1.5 w-1.5 bg-sky-500"></span>
                                 </span>
-                                <p id="syncStatusText" class="text-[10px] text-slate-500 dark:text-slate-400 truncate leading-tight" data-i18n="saved_locally">Saved locally</p>
+                                <p id="syncStatusText" class="text-[10px] text-slate-500 dark:text-slate-400 truncate leading-tight">Connecting to cloud...</p>
                             </div>
                         </div>
                     </div>
@@ -1417,8 +1417,9 @@
                 auth_connected: 'Connected',
                 auth_sync_now: 'Sync Now',
                 auth_signout_btn: 'Sign Out',
-                sync_realtime: 'Real-time sync',
-                sync_signin_prompt: 'Offline • Sign in',
+                sync_realtime: 'Synced in cloud',
+                sync_signin_prompt: 'Sign in to cloud',
+                sync_connecting: 'Connecting to cloud...',
                 sync_sub_online: 'Cloud Firestore active',
                 sync_sub_offline: 'Click to connect',
                 months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -1572,8 +1573,9 @@
                 auth_connected: 'Conectado',
                 auth_sync_now: 'Sincronizar',
                 auth_signout_btn: 'Sair',
-                sync_realtime: 'Sincronizado ao vivo',
-                sync_signin_prompt: 'Offline • Entrar',
+                sync_realtime: 'Sincronizado na nuvem',
+                sync_signin_prompt: 'Entre para sincronizar',
+                sync_connecting: 'Conectando à nuvem...',
                 sync_sub_online: 'Cloud Firestore ativo',
                 sync_sub_offline: 'Clique para conectar',
                 months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
@@ -1618,6 +1620,12 @@
             renderMemberFilterButtons();
             updateViewHeaderMeta(currentView);
             renderCurrentView();
+            if (typeof fbCurrentUser !== 'undefined') {
+                if (fbCurrentUser) updateSyncIndicator(t('sync_realtime'), true);
+                else updateSyncIndicator(t('sync_signin_prompt'), false);
+            } else {
+                updateSyncIndicator(t('sync_connecting'), true);
+            }
 
             if (notify) {
                 const labels = { en: 'Language: English', pt: 'Idioma: Português', es: 'Idioma: Español' };
