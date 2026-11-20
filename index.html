@@ -393,40 +393,26 @@
                 </div>
             </div>
 
-            <!-- Sidebar Footer: Sync Status & Active Profile -->
-            <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 space-y-2.5 w-60 shrink-0">
-                <button onclick="openAuthModal()" id="syncStatusCard" title="Cloud Sync &amp; Account"
-                    class="w-full flex items-center justify-between gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/70 hover:bg-sky-50/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all cursor-pointer group">
+            <!-- Sidebar Footer: Unified Account & Real-time Sync Card -->
+            <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 w-60 shrink-0">
+                <button onclick="openAuthModal()" id="syncStatusCard" title="Account &amp; Cloud Sync"
+                    class="w-full flex items-center justify-between gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-800/70 hover:bg-sky-50/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all cursor-pointer group">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <div id="syncStatusIconWrap" class="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
-                            <i id="syncStatusIcon" class="fa-solid fa-cloud text-xs"></i>
+                        <div id="syncStatusIconWrap" class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 transition-colors">
+                            <i id="syncStatusIcon" class="fa-regular fa-user text-xs"></i>
                         </div>
                         <div class="text-left min-w-0">
-                            <p id="syncStatusText" class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate leading-tight" data-i18n="saved_locally">Saved locally</p>
-                            <p id="syncStatusSub" class="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight mt-0.5" data-i18n="sync_sub_offline">Click to connect</p>
+                            <p id="activeUserName" class="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate leading-tight">Anderson Ramirez</p>
+                            <div class="flex items-center gap-1.5 mt-0.5">
+                                <span class="relative flex h-1.5 w-1.5 shrink-0">
+                                    <span id="syncStatusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                    <span id="syncStatusDot" class="relative inline-flex rounded-full h-1.5 w-1.5 bg-sky-500"></span>
+                                </span>
+                                <p id="syncStatusText" class="text-[10px] text-slate-500 dark:text-slate-400 truncate leading-tight" data-i18n="saved_locally">Saved locally</p>
+                            </div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0 pr-0.5">
-                        <span class="relative flex h-2 w-2">
-                            <span id="syncStatusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
-                            <span id="syncStatusDot" class="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
-                        </span>
-                        <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 dark:text-slate-600 group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all"></i>
-                    </div>
-                </button>
-
-                <button onclick="openMembersModal()" title="Switch or manage active profile"
-                    class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition">
-                    <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                            <i class="fa-regular fa-user text-xs"></i>
-                        </div>
-                        <div class="text-left min-w-0">
-                            <p id="activeUserName" class="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">Anderson Ramirez</p>
-                            <p data-i18n="active_profile" class="text-[10px] text-slate-400 dark:text-slate-500">Active Profile</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-sliders text-xs text-slate-400"></i>
+                    <i class="fa-solid fa-chevron-right text-[10px] text-slate-300 dark:text-slate-600 group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all shrink-0"></i>
                 </button>
             </div>
         </aside>
@@ -1858,24 +1844,20 @@
             const dot = document.getElementById('syncStatusDot');
             const ping = document.getElementById('syncStatusPing');
             const label = document.getElementById('syncStatusText');
-            const sub = document.getElementById('syncStatusSub');
             const iconWrap = document.getElementById('syncStatusIconWrap');
             if (dot && label) {
-                dot.className = `relative inline-flex rounded-full h-2 w-2 ${isOnline ? 'bg-sky-500' : 'bg-amber-500'}`;
+                dot.className = `relative inline-flex rounded-full h-1.5 w-1.5 ${isOnline ? 'bg-sky-500' : 'bg-amber-500'}`;
                 if (ping) {
                     ping.className = isOnline
                         ? 'animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75'
                         : 'hidden';
                 }
                 if (iconWrap) {
-                    iconWrap.className = `w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                    iconWrap.className = `w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                         isOnline
                             ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
                             : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                     }`;
-                }
-                if (sub) {
-                    sub.textContent = isOnline ? t('sync_sub_online') : t('sync_sub_offline');
                 }
                 label.textContent = text;
             }
@@ -3492,7 +3474,11 @@
             const nameEl = document.getElementById('activeUserName');
             const member = plannerData.members.find(m => m.id === activeUserId) || plannerData.members[0];
             if (nameEl) {
-                nameEl.textContent = member ? member.fullName : 'No profile';
+                if (fbCurrentUser) {
+                    nameEl.textContent = fbCurrentUser.displayName || (member && member.fullName) || fbCurrentUser.email || 'Worldaily User';
+                } else {
+                    nameEl.textContent = member ? member.fullName : (currentLang === 'pt' ? 'Entrar na conta' : 'Sign in');
+                }
             }
         }
 
@@ -3513,6 +3499,7 @@
                 container.innerHTML = `<p class="text-center text-slate-400 py-4">No members registered.</p>`;
                 return;
             }
+            const youLabel = currentLang === 'pt' ? 'Você' : 'You';
             container.innerHTML = plannerData.members.map(m => {
                 const isCurrent = m.id === activeUserId;
                 return `
@@ -3521,11 +3508,15 @@
                         <div class="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
                             <i class="fa-regular fa-user text-xs"></i>
                         </div>
-                        <span class="font-semibold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(m.fullName)}</span>
-                        ${isCurrent ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-semibold">Active</span>` : ''}
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-semibold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(m.fullName)}</span>
+                                ${isCurrent ? `<span class="text-[10px] px-1.5 py-0.5 rounded bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-300 font-semibold shrink-0">${youLabel}</span>` : ''}
+                            </div>
+                            ${m.email ? `<p class="text-[10px] text-slate-400 dark:text-slate-500 truncate">${escapeHtml(m.email)}</p>` : ''}
+                        </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
-                        ${!isCurrent ? `<button onclick="setActiveSessionUser('${m.id}')" class="text-xs text-sky-600 dark:text-sky-400 font-semibold hover:underline px-1.5 py-1">Use profile</button>` : ''}
                         <button onclick="removeMember('${m.id}')" title="Remove member" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition cursor-pointer">
                             <i class="fa-regular fa-trash-can text-xs"></i>
                         </button>
@@ -3636,9 +3627,12 @@
                     fbCurrentUser = user;
                     updateAuthModalUI();
                     if (user) {
+                        syncAuthenticatedUserToMembers(user);
+                        renderHeaderAvatars();
                         startFirestoreRealtimeListeners();
                     } else {
                         stopFirestoreRealtimeListeners();
+                        renderHeaderAvatars();
                         updateSyncIndicator(t('sync_signin_prompt'), false);
                     }
                 });
@@ -3870,6 +3864,9 @@
                     : rebuiltProjects[0].id;
 
                 bindActiveProjectReference();
+                if (fbCurrentUser) {
+                    syncAuthenticatedUserToMembers(fbCurrentUser, true);
+                }
                 snapshotLastSyncedState();
 
                 try {
@@ -3996,6 +3993,51 @@
             fbLastSynced = { membersJson: null, projects: {}, tasks: {} };
             await syncDiffToFirestore();
             if (notify) showToast(currentLang === 'pt' ? 'Sincronizado com o Firestore!' : 'Synced with Firestore!');
+        }
+
+        function syncAuthenticatedUserToMembers(user, fromRemote = false) {
+            if (!user) return;
+            const email = (user.email || '').trim().toLowerCase();
+            const fallbackName = email ? email.split('@')[0] : 'Team Member';
+            const displayName = (user.displayName || fallbackName).trim();
+
+            let matched = (workspaceStore.members || []).find(m =>
+                (m.uid && m.uid === user.uid) ||
+                (email && m.email && m.email.toLowerCase() === email) ||
+                (m.fullName && m.fullName.trim().toLowerCase() === displayName.toLowerCase())
+            );
+
+            let changed = false;
+            if (matched) {
+                if (email && matched.email !== email) { matched.email = email; changed = true; }
+                if (user.uid && matched.uid !== user.uid) { matched.uid = user.uid; changed = true; }
+            } else {
+                const initials = displayName.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'WD';
+                const colors = ['#0284C7', '#0D9488', '#D97706', '#E11D48', '#2563EB'];
+                matched = {
+                    id: 'm-' + user.uid.slice(0, 10),
+                    name: displayName,
+                    fullName: displayName,
+                    email: email,
+                    uid: user.uid,
+                    initials,
+                    color: colors[(workspaceStore.members || []).length % colors.length]
+                };
+                workspaceStore.members.push(matched);
+                changed = true;
+            }
+
+            activeUserId = matched.id;
+            plannerData.members = workspaceStore.members;
+            workspaceStore.projects.forEach(p => { p.members = workspaceStore.members; });
+
+            if (changed && !fromRemote) {
+                debouncedSyncToFirestore();
+            } else if (changed && fromRemote) {
+                setTimeout(() => debouncedSyncToFirestore(), 200);
+            }
+            renderMemberFilterButtons();
+            renderHeaderAvatars();
         }
     </script>
 </body>
