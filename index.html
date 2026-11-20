@@ -255,6 +255,88 @@
         </div>
     </div>
 
+    <!-- Mandatory Login Gate Screen (Shown when unauthenticated or after 24h session expiration) -->
+    <div id="loginGateScreen" class="fixed inset-0 z-[90] hidden flex-col items-center justify-center p-4 overflow-y-auto" style="background-color: var(--bg-app);">
+        <!-- Top-right quick controls (Language & Theme) -->
+        <div class="fixed top-4 right-4 sm:top-6 sm:right-6 flex items-center gap-2">
+            <div class="relative flex items-center" title="Language / Idioma">
+                <i class="fa-solid fa-globe text-[11px] text-slate-400 absolute left-2.5 pointer-events-none"></i>
+                <select id="gateLanguageSelect" onchange="setLanguage(this.value)"
+                    class="appearance-none h-8 pl-7 pr-6 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold outline-none cursor-pointer shadow-2xs transition">
+                    <option value="en">EN</option>
+                    <option value="pt">PT</option>
+                </select>
+                <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 absolute right-2 pointer-events-none"></i>
+            </div>
+            <button onclick="toggleTheme()" title="Toggle Light / Dark Mode"
+                class="w-8 h-8 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 flex items-center justify-center shadow-2xs transition cursor-pointer">
+                <i class="fa-regular fa-moon text-xs"></i>
+            </button>
+        </div>
+
+        <div class="w-full max-w-md bg-white dark:bg-[#111827] rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 overflow-hidden my-auto">
+            <!-- Brand Header -->
+            <div class="px-6 pt-7 pb-5 bg-gradient-to-b from-sky-50/80 to-white dark:from-sky-950/25 dark:to-[#111827] border-b border-slate-200/60 dark:border-slate-800 text-center space-y-3">
+                <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 text-white flex items-center justify-center shadow-md shadow-sky-500/25 mx-auto">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5z" fill="rgba(255,255,255,0.25)" />
+                        <path d="M2 17l10 5 10-5" />
+                        <path d="M2 12l10 5 10-5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-display font-bold text-xl text-slate-900 dark:text-white tracking-tight">Worldaily</h1>
+                    <p data-i18n="gate_subtitle" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Sign in to access your team workspace</p>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <div class="p-6 text-xs space-y-4">
+                <button type="button" onclick="signInWithGoogle()"
+                    class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-sky-50/70 dark:hover:bg-slate-700/80 hover:border-sky-300 dark:hover:border-sky-600 text-slate-700 dark:text-slate-100 font-semibold flex items-center justify-center gap-2.5 shadow-2xs transition cursor-pointer">
+                    <i class="fa-brands fa-google text-sky-500 text-sm"></i>
+                    <span data-i18n="auth_google_btn">Continue with Google</span>
+                </button>
+
+                <div class="relative flex items-center py-0.5">
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                    <span data-i18n="auth_or_email" class="px-3 text-[10px] font-medium uppercase tracking-wider text-slate-400">or with email</span>
+                    <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                </div>
+
+                <div class="space-y-2.5">
+                    <div class="relative">
+                        <i class="fa-regular fa-envelope text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <input id="gateEmailInput" type="email" data-i18n-placeholder="auth_email_ph" placeholder="Email address"
+                            class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 transition" />
+                    </div>
+                    <div class="relative">
+                        <i class="fa-solid fa-lock text-slate-400 text-xs absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                        <input id="gatePasswordInput" type="password" data-i18n-placeholder="auth_password_ph" placeholder="Password (min. 6 chars)" onkeydown="if(event.key==='Enter') signInWithEmail('gate')"
+                            class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl pl-9 pr-3.5 py-2.5 text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 focus:bg-white dark:focus:bg-slate-900 transition" />
+                    </div>
+                    <div class="grid grid-cols-2 gap-2.5 pt-1">
+                        <button type="button" onclick="signInWithEmail('gate')" data-i18n="auth_signin_btn"
+                            class="py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold shadow-sm shadow-sky-500/20 transition cursor-pointer">
+                            Sign In
+                        </button>
+                        <button type="button" onclick="signUpWithEmail('gate')" data-i18n="auth_signup_btn"
+                            class="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition cursor-pointer">
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+
+                <p id="gateErrorMsg" class="hidden text-[11px] text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl px-3 py-2"></p>
+
+                <div class="pt-2 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
+                    <i class="fa-solid fa-shield-halved text-sky-500"></i>
+                    <span data-i18n="gate_session_note">Session expires automatically every 24 hours for security.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ============================================================================ -->
     <!-- 1. GLOBAL FIXED TOP HEADER (Single fixed logo + Panel toggle + KPIs + Actions) -->
     <!-- ============================================================================ -->
@@ -1399,6 +1481,8 @@
                 auth_sync_now: 'Sync Now',
                 auth_signout_btn: 'Sign Out',
                 members_auto_hint: 'Members appear here automatically when they sign in with an authorized account.',
+                gate_subtitle: 'Sign in to access your team workspace',
+                gate_session_note: 'Session expires automatically every 24 hours for security.',
                 sync_realtime: 'Synced in cloud',
                 sync_signin_prompt: 'Sign in to cloud',
                 sync_connecting: 'Connecting to cloud...',
@@ -1556,6 +1640,8 @@
                 auth_sync_now: 'Sincronizar',
                 auth_signout_btn: 'Sair',
                 members_auto_hint: 'Os membros aparecem aqui automaticamente ao entrar com uma conta autorizada.',
+                gate_subtitle: 'Entre para acessar o espaço de trabalho da equipe',
+                gate_session_note: 'Por segurança, sua sessão expira automaticamente a cada 24 horas.',
                 sync_realtime: 'Sincronizado na nuvem',
                 sync_signin_prompt: 'Entre para sincronizar',
                 sync_connecting: 'Conectando à nuvem...',
@@ -1597,6 +1683,8 @@
 
             const sel = document.getElementById('languageSelect');
             if (sel) sel.value = lang;
+            const gateSel = document.getElementById('gateLanguageSelect');
+            if (gateSel) gateSel.value = lang;
 
             applyTranslations();
             renderSidebarProjectSelector();
@@ -3548,6 +3636,20 @@
             tasks: {}
         };
 
+        const SESSION_LOGIN_AT_KEY = 'worldaily_session_login_at';
+        const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+        function showBootOverlay(msg) {
+            const overlay = document.getElementById('appBootOverlay');
+            const bootText = document.getElementById('bootOverlayText');
+            if (bootText) {
+                bootText.textContent = msg || (currentLang === 'pt' ? 'Carregando espaço de trabalho...' : 'Loading workspace...');
+            }
+            if (!overlay) return;
+            overlay.dataset.hidden = '0';
+            overlay.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+        }
+
         function hideBootOverlay() {
             const overlay = document.getElementById('appBootOverlay');
             if (!overlay || overlay.dataset.hidden === '1') return;
@@ -3556,15 +3658,61 @@
             setTimeout(() => overlay.classList.add('hidden'), 220);
         }
 
-        function initFirebase() {
-            const bootText = document.getElementById('bootOverlayText');
-            if (bootText) {
-                bootText.textContent = currentLang === 'pt' ? 'Carregando espaço de trabalho...' : 'Loading workspace...';
+        function showLoginGate(message = '') {
+            const gate = document.getElementById('loginGateScreen');
+            if (!gate) return;
+            gate.classList.remove('hidden');
+            gate.classList.add('flex');
+            if (message) showAuthError(message);
+            else clearAuthError();
+        }
+
+        function hideLoginGate() {
+            const gate = document.getElementById('loginGateScreen');
+            if (!gate) return;
+            gate.classList.add('hidden');
+            gate.classList.remove('flex');
+        }
+
+        function recordLoginTimestamp() {
+            try { localStorage.setItem(SESSION_LOGIN_AT_KEY, String(Date.now())); } catch (e) {}
+        }
+
+        function isSessionExpired(user) {
+            if (!user) return false;
+            let loginAt = 0;
+            try {
+                const raw = localStorage.getItem(SESSION_LOGIN_AT_KEY);
+                if (raw) loginAt = parseInt(raw, 10) || 0;
+            } catch (e) {}
+            if (!loginAt && user.metadata && user.metadata.lastSignInTime) {
+                loginAt = Date.parse(user.metadata.lastSignInTime) || Date.now();
+                try { localStorage.setItem(SESSION_LOGIN_AT_KEY, String(loginAt)); } catch (e) {}
             }
-            setTimeout(hideBootOverlay, 4500);
+            if (!loginAt) return false;
+            return (Date.now() - loginAt) >= SESSION_MAX_AGE_MS;
+        }
+
+        async function enforceSessionExpirationIfNeeded() {
+            if (!fbAuth || !fbCurrentUser) return false;
+            if (isSessionExpired(fbCurrentUser)) {
+                try { localStorage.removeItem(SESSION_LOGIN_AT_KEY); } catch (e) {}
+                await fbAuth.signOut();
+                showLoginGate(currentLang === 'pt'
+                    ? 'Sua sessão de 24 horas expirou. Faça login novamente.'
+                    : 'Your 24-hour session expired. Please sign in again.');
+                return true;
+            }
+            return false;
+        }
+
+        function initFirebase() {
+            showBootOverlay();
+            setTimeout(hideBootOverlay, 5000);
 
             if (typeof firebase === 'undefined') {
                 updateSyncIndicator(t('saved_locally'), false);
+                showLoginGate();
                 hideBootOverlay();
                 return;
             }
@@ -3573,10 +3721,22 @@
                 fbAuth = firebase.auth();
                 fbDb = firebase.firestore();
 
-                fbAuth.onAuthStateChanged((user) => {
+                fbAuth.onAuthStateChanged(async (user) => {
+                    if (user && isSessionExpired(user)) {
+                        try { localStorage.removeItem(SESSION_LOGIN_AT_KEY); } catch (e) {}
+                        await fbAuth.signOut();
+                        showLoginGate(currentLang === 'pt'
+                            ? 'Sua sessão de 24 horas expirou. Faça login novamente.'
+                            : 'Your 24-hour session expired. Please sign in again.');
+                        hideBootOverlay();
+                        return;
+                    }
+
                     fbCurrentUser = user;
                     updateAuthModalUI();
                     if (user) {
+                        hideLoginGate();
+                        showBootOverlay();
                         renderHeaderAvatars();
                         startFirestoreRealtimeListeners();
                     } else {
@@ -3590,12 +3750,19 @@
                         updateExecutiveKPIs();
                         renderCurrentView();
                         updateSyncIndicator(t('sync_signin_prompt'), false);
+                        showLoginGate();
                         hideBootOverlay();
                     }
                 });
+
+                document.addEventListener('visibilitychange', () => {
+                    if (document.visibilityState === 'visible') enforceSessionExpirationIfNeeded();
+                });
+                setInterval(enforceSessionExpirationIfNeeded, 5 * 60 * 1000);
             } catch (err) {
                 console.error('Firebase init error:', err);
                 updateSyncIndicator(t('saved_locally'), false);
+                showLoginGate();
                 hideBootOverlay();
             }
         }
@@ -3613,17 +3780,21 @@
         }
 
         function showAuthError(msg) {
-            const el = document.getElementById('authErrorMsg');
-            if (!el) return;
-            el.textContent = msg;
-            el.classList.remove('hidden');
+            ['authErrorMsg', 'gateErrorMsg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = msg;
+                el.classList.remove('hidden');
+            });
         }
 
         function clearAuthError() {
-            const el = document.getElementById('authErrorMsg');
-            if (!el) return;
-            el.textContent = '';
-            el.classList.add('hidden');
+            ['authErrorMsg', 'gateErrorMsg'].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.textContent = '';
+                el.classList.add('hidden');
+            });
         }
 
         function formatFirebaseAuthError(err) {
@@ -3684,6 +3855,7 @@
             try {
                 const provider = new firebase.auth.GoogleAuthProvider();
                 await fbAuth.signInWithPopup(provider);
+                recordLoginTimestamp();
                 closeAuthModal();
                 showToast(currentLang === 'pt' ? 'Conectado ao Firebase!' : 'Connected to Firebase!');
             } catch (err) {
@@ -3691,17 +3863,20 @@
             }
         }
 
-        async function signInWithEmail() {
+        async function signInWithEmail(source = 'modal') {
             if (!fbAuth) return;
             clearAuthError();
-            const email = (document.getElementById('authEmailInput')?.value || '').trim();
-            const password = document.getElementById('authPasswordInput')?.value || '';
+            const emailId = source === 'gate' ? 'gateEmailInput' : 'authEmailInput';
+            const passId = source === 'gate' ? 'gatePasswordInput' : 'authPasswordInput';
+            const email = (document.getElementById(emailId)?.value || '').trim();
+            const password = document.getElementById(passId)?.value || '';
             if (!email || !password) {
                 showAuthError(currentLang === 'pt' ? 'Preencha e-mail e senha.' : 'Please enter email and password.');
                 return;
             }
             try {
                 await fbAuth.signInWithEmailAndPassword(email, password);
+                recordLoginTimestamp();
                 closeAuthModal();
                 showToast(currentLang === 'pt' ? 'Conectado ao Firebase!' : 'Connected to Firebase!');
             } catch (err) {
@@ -3709,17 +3884,20 @@
             }
         }
 
-        async function signUpWithEmail() {
+        async function signUpWithEmail(source = 'modal') {
             if (!fbAuth) return;
             clearAuthError();
-            const email = (document.getElementById('authEmailInput')?.value || '').trim();
-            const password = document.getElementById('authPasswordInput')?.value || '';
+            const emailId = source === 'gate' ? 'gateEmailInput' : 'authEmailInput';
+            const passId = source === 'gate' ? 'gatePasswordInput' : 'authPasswordInput';
+            const email = (document.getElementById(emailId)?.value || '').trim();
+            const password = document.getElementById(passId)?.value || '';
             if (!email || password.length < 6) {
                 showAuthError(currentLang === 'pt' ? 'Informe um e-mail válido e senha com 6+ caracteres.' : 'Enter a valid email and 6+ char password.');
                 return;
             }
             try {
                 await fbAuth.createUserWithEmailAndPassword(email, password);
+                recordLoginTimestamp();
                 closeAuthModal();
                 showToast(currentLang === 'pt' ? 'Conta criada e conectada!' : 'Account created & connected!');
             } catch (err) {
@@ -3730,7 +3908,9 @@
         async function signOutFirebase() {
             if (!fbAuth) return;
             try {
+                try { localStorage.removeItem(SESSION_LOGIN_AT_KEY); } catch (e) {}
                 await fbAuth.signOut();
+                closeAuthModal();
                 showToast(currentLang === 'pt' ? 'Desconectado da nuvem.' : 'Signed out from cloud.');
             } catch (err) {
                 showAuthError(formatFirebaseAuthError(err));
