@@ -396,12 +396,23 @@
             <!-- Sidebar Footer: Sync Status & Active Profile -->
             <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 space-y-2.5 w-60 shrink-0">
                 <button onclick="openAuthModal()" id="syncStatusCard" title="Cloud Sync &amp; Account"
-                    class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800/80 hover:bg-sky-50 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 hover:border-sky-300 dark:hover:border-sky-700 text-[11px] text-slate-500 dark:text-slate-400 transition cursor-pointer">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                        <span id="syncStatusText" class="truncate" data-i18n="saved_locally">Saved locally</span>
+                    class="w-full flex items-center justify-between gap-2.5 p-2 rounded-xl bg-white dark:bg-slate-800/70 hover:bg-sky-50/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all cursor-pointer group">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <div id="syncStatusIconWrap" class="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-colors">
+                            <i id="syncStatusIcon" class="fa-solid fa-cloud text-xs"></i>
+                        </div>
+                        <div class="text-left min-w-0">
+                            <p id="syncStatusText" class="text-[11px] font-semibold text-slate-700 dark:text-slate-200 truncate leading-tight" data-i18n="saved_locally">Saved locally</p>
+                            <p id="syncStatusSub" class="text-[10px] text-slate-400 dark:text-slate-500 truncate leading-tight mt-0.5" data-i18n="sync_sub_offline">Click to connect</p>
+                        </div>
                     </div>
-                    <i class="fa-solid fa-cloud text-[10px] text-sky-500 shrink-0"></i>
+                    <div class="flex items-center gap-1.5 shrink-0 pr-0.5">
+                        <span class="relative flex h-2 w-2">
+                            <span id="syncStatusPing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span id="syncStatusDot" class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 dark:text-slate-600 group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all"></i>
+                    </div>
                 </button>
 
                 <button onclick="openMembersModal()" title="Switch or manage active profile"
@@ -1394,6 +1405,8 @@
                 auth_signout_btn: 'Sign Out',
                 sync_realtime: 'Real-time sync',
                 sync_signin_prompt: 'Offline • Sign in',
+                sync_sub_online: 'Cloud Firestore active',
+                sync_sub_offline: 'Click to connect',
                 months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             },
             pt: {
@@ -1545,6 +1558,8 @@
                 auth_signout_btn: 'Sair',
                 sync_realtime: 'Sincronizado ao vivo',
                 sync_signin_prompt: 'Offline • Entrar',
+                sync_sub_online: 'Cloud Firestore ativo',
+                sync_sub_offline: 'Clique para conectar',
                 months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
             }
         };
@@ -1811,9 +1826,27 @@
 
         function updateSyncIndicator(text, isOnline = true) {
             const dot = document.getElementById('syncStatusDot');
+            const ping = document.getElementById('syncStatusPing');
             const label = document.getElementById('syncStatusText');
+            const sub = document.getElementById('syncStatusSub');
+            const iconWrap = document.getElementById('syncStatusIconWrap');
             if (dot && label) {
-                dot.className = `w-2 h-2 rounded-full shrink-0 ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`;
+                dot.className = `relative inline-flex rounded-full h-2 w-2 ${isOnline ? 'bg-emerald-500' : 'bg-amber-500'}`;
+                if (ping) {
+                    ping.className = isOnline
+                        ? 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75'
+                        : 'hidden';
+                }
+                if (iconWrap) {
+                    iconWrap.className = `w-7 h-7 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                        isOnline
+                            ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                            : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                    }`;
+                }
+                if (sub) {
+                    sub.textContent = isOnline ? t('sync_sub_online') : t('sync_sub_offline');
+                }
                 label.textContent = text;
             }
         }
