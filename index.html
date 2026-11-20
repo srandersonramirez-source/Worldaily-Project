@@ -1068,11 +1068,10 @@
                 <button onclick="closeMembersModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
             </div>
             <div class="p-6 space-y-4 text-xs">
-                <div id="membersListContainer" class="space-y-2 max-h-56 overflow-y-auto"></div>
-                <div class="flex gap-2 pt-2 border-t border-slate-200/70 dark:border-slate-800">
-                    <input id="newMemberNameInput" type="text" data-i18n-placeholder="new_member_ph" placeholder="New member name..." onkeydown="if(event.key==='Enter') addNewMember()"
-                        class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
-                    <button onclick="addNewMember()" data-i18n="add_btn" class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl transition">Add</button>
+                <div id="membersListContainer" class="space-y-2 max-h-64 overflow-y-auto"></div>
+                <div class="flex items-start gap-2 p-3 rounded-xl bg-sky-50/70 dark:bg-sky-950/30 border border-sky-200/70 dark:border-sky-900/50 text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+                    <i class="fa-solid fa-circle-info text-sky-500 mt-0.5 shrink-0"></i>
+                    <span data-i18n="members_auto_hint">Members appear here automatically when they sign in with an authorized account.</span>
                 </div>
             </div>
         </div>
@@ -1419,6 +1418,7 @@
                 auth_connected: 'Connected',
                 auth_sync_now: 'Sync Now',
                 auth_signout_btn: 'Sign Out',
+                members_auto_hint: 'Members appear here automatically when they sign in with an authorized account.',
                 sync_realtime: 'Synced in cloud',
                 sync_signin_prompt: 'Sign in to cloud',
                 sync_connecting: 'Connecting to cloud...',
@@ -1575,6 +1575,7 @@
                 auth_connected: 'Conectado',
                 auth_sync_now: 'Sincronizar',
                 auth_signout_btn: 'Sair',
+                members_auto_hint: 'Os membros aparecem aqui automaticamente ao entrar com uma conta autorizada.',
                 sync_realtime: 'Sincronizado na nuvem',
                 sync_signin_prompt: 'Entre para sincronizar',
                 sync_connecting: 'Conectando à nuvem...',
@@ -3528,8 +3529,10 @@
                 return `
                 <div class="flex items-center justify-between p-2.5 bg-slate-50 dark:bg-slate-800/70 rounded-xl border ${isCurrent ? 'border-sky-300 dark:border-sky-700' : 'border-slate-200 dark:border-slate-700'}">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <div class="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                            <i class="fa-regular fa-user text-xs"></i>
+                        <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 overflow-hidden">
+                            ${m.photoURL
+                                ? `<img src="${escapeHtml(m.photoURL)}" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl" onerror="this.remove();" />`
+                                : `<i class="fa-regular fa-user text-xs"></i>`}
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
@@ -3540,15 +3543,17 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-2 shrink-0">
+                        ${!isCurrent ? `
                         <button onclick="removeMember('${m.id}')" title="Remove member" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition cursor-pointer">
                             <i class="fa-regular fa-trash-can text-xs"></i>
-                        </button>
+                        </button>` : ''}
                     </div>
                 </div>
             `}).join('');
         }
 
         function removeMember(memberId) {
+            if (fbCurrentUser && memberId === activeUserId) return;
             const member = plannerData.members.find(m => m.id === memberId);
             if (!member) return;
             plannerData.members = plannerData.members.filter(m => m.id !== memberId);
@@ -3566,26 +3571,6 @@
             renderMembersModalList();
             renderMemberFilterButtons();
             saveDataState(`Member "${member.fullName}" removed!`);
-        }
-
-        function setActiveSessionUser(memberId) {
-            activeUserId = memberId;
-            renderHeaderAvatars();
-            closeMembersModal();
-            showToast(`Active profile: ${plannerData.members.find(m => m.id === memberId)?.fullName}`);
-        }
-
-        function addNewMember() {
-            const input = document.getElementById('newMemberNameInput');
-            const fullName = input.value.trim();
-            if (!fullName) return;
-            const initials = fullName.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
-            const colors = ['#0284C7', '#0D9488', '#D97706', '#E11D48', '#2563EB'];
-            plannerData.members.push({ id: 'm-' + Date.now(), name: fullName, fullName, initials, color: colors[plannerData.members.length % colors.length] });
-            input.value = '';
-            renderMembersModalList();
-            renderMemberFilterButtons();
-            saveDataState(`Member "${fullName}" added!`);
         }
 
         function formatShortDate(dateStr) {
@@ -4047,6 +4032,7 @@
             if (matched) {
                 if (email && matched.email !== email) { matched.email = email; changed = true; }
                 if (user.uid && matched.uid !== user.uid) { matched.uid = user.uid; changed = true; }
+                if (user.photoURL && matched.photoURL !== user.photoURL) { matched.photoURL = user.photoURL; changed = true; }
             } else {
                 const initials = displayName.split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase() || 'WD';
                 const colors = ['#0284C7', '#0D9488', '#D97706', '#E11D48', '#2563EB'];
@@ -4056,6 +4042,7 @@
                     fullName: displayName,
                     email: email,
                     uid: user.uid,
+                    photoURL: user.photoURL || '',
                     initials,
                     color: colors[(workspaceStore.members || []).length % colors.length]
                 };
