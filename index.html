@@ -399,7 +399,7 @@
                     class="w-full flex items-center justify-between gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-800/70 hover:bg-sky-50/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all cursor-pointer group">
                     <div class="flex items-center gap-2.5 min-w-0">
                         <div id="syncStatusIconWrap" class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 overflow-hidden transition-colors">
-                            <img id="sidebarUserPhoto" src="" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover hidden" onerror="this.classList.add('hidden'); document.getElementById('syncStatusIcon').classList.remove('hidden');" />
+                            <img id="sidebarUserPhoto" src="" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl hidden" onerror="this.classList.add('hidden'); document.getElementById('syncStatusIcon').classList.remove('hidden');" />
                             <i id="syncStatusIcon" class="fa-regular fa-user text-xs"></i>
                         </div>
                         <div class="text-left min-w-0">
@@ -1146,7 +1146,7 @@
                     <div class="p-4 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 space-y-3">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 overflow-hidden">
-                                <img id="authUserPhoto" src="" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover hidden" onerror="this.classList.add('hidden'); document.getElementById('authUserIcon').classList.remove('hidden');" />
+                                <img id="authUserPhoto" src="" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl hidden" onerror="this.classList.add('hidden'); document.getElementById('authUserIcon').classList.remove('hidden');" />
                                 <i id="authUserIcon" class="fa-regular fa-user text-base"></i>
                             </div>
                             <div class="min-w-0 flex-1">
@@ -1863,7 +1863,7 @@
                         : 'hidden';
                 }
                 if (iconWrap) {
-                    iconWrap.className = `w-8 h-8 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
+                    iconWrap.className = `w-8 h-8 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-colors ${
                         isOnline
                             ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
                             : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
