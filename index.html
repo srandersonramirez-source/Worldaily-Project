@@ -14,6 +14,11 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+    <!-- Firebase SDK (App, Auth & Cloud Firestore) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+
     <!-- FontAwesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -390,10 +395,14 @@
 
             <!-- Sidebar Footer: Sync Status & Active Profile -->
             <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 space-y-2.5 w-60 shrink-0">
-                <div class="flex items-center gap-2 px-2 py-1 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60 text-[11px] text-slate-500 dark:text-slate-400">
-                    <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
-                    <span id="syncStatusText" class="truncate" data-i18n="saved_locally">Saved locally</span>
-                </div>
+                <button onclick="openAuthModal()" id="syncStatusCard" title="Cloud Sync &amp; Account"
+                    class="w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800/80 hover:bg-sky-50 dark:hover:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60 hover:border-sky-300 dark:hover:border-sky-700 text-[11px] text-slate-500 dark:text-slate-400 transition cursor-pointer">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span id="syncStatusDot" class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                        <span id="syncStatusText" class="truncate" data-i18n="saved_locally">Saved locally</span>
+                    </div>
+                    <i class="fa-solid fa-cloud text-[10px] text-sky-500 shrink-0"></i>
+                </button>
 
                 <button onclick="openMembersModal()" title="Switch or manage active profile"
                     class="w-full flex items-center justify-between p-2 rounded-xl hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition">
@@ -1071,6 +1080,84 @@
         </div>
     </div>
 
+    <!-- ============================================================================ -->
+    <!-- CLOUD SYNC & AUTH MODAL (Firebase Auth + Firestore) -->
+    <!-- ============================================================================ -->
+    <div id="authModal" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#111827] rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-200/70 dark:border-slate-800 flex items-center justify-between">
+                <h3 class="font-display font-bold text-sm text-slate-800 dark:text-white flex items-center gap-2">
+                    <i class="fa-solid fa-cloud text-sky-500"></i> <span data-i18n="auth_modal_title">Cloud Sync &amp; Team Login</span>
+                </h3>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="p-6 text-xs space-y-4">
+                <!-- Signed-out view -->
+                <div id="authSignedOutPanel" class="space-y-4">
+                    <p data-i18n="auth_desc" class="text-slate-500 dark:text-slate-400 leading-relaxed">
+                        Sign in to sync projects and tasks in real time with your team via Cloud Firestore.
+                    </p>
+                    <button type="button" onclick="signInWithGoogle()"
+                        class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-100 font-semibold flex items-center justify-center gap-2.5 transition cursor-pointer">
+                        <i class="fa-brands fa-google text-sky-500"></i>
+                        <span data-i18n="auth_google_btn">Continue with Google</span>
+                    </button>
+
+                    <div class="relative flex items-center py-1">
+                        <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                        <span data-i18n="auth_or_email" class="px-3 text-[10px] uppercase tracking-wider text-slate-400">or with email</span>
+                        <div class="flex-grow border-t border-slate-200 dark:border-slate-800"></div>
+                    </div>
+
+                    <div class="space-y-2.5">
+                        <input id="authEmailInput" type="email" data-i18n-placeholder="auth_email_ph" placeholder="Email address"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
+                        <input id="authPasswordInput" type="password" data-i18n-placeholder="auth_password_ph" placeholder="Password (min. 6 chars)" onkeydown="if(event.key==='Enter') signInWithEmail()"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
+                        <div class="grid grid-cols-2 gap-2 pt-1">
+                            <button type="button" onclick="signInWithEmail()" data-i18n="auth_signin_btn"
+                                class="py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-semibold transition cursor-pointer">
+                                Sign In
+                            </button>
+                            <button type="button" onclick="signUpWithEmail()" data-i18n="auth_signup_btn"
+                                class="py-2.5 px-4 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold transition cursor-pointer">
+                                Create Account
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Signed-in view -->
+                <div id="authSignedInPanel" class="hidden space-y-4">
+                    <div class="flex items-center gap-3 p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200/80 dark:border-slate-700/80">
+                        <div class="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                            <i class="fa-regular fa-user text-sm"></i>
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <p id="authUserDisplayName" class="font-semibold text-slate-800 dark:text-slate-100 truncate">User</p>
+                            <p id="authUserEmail" class="text-[11px] text-slate-500 dark:text-slate-400 truncate">user@example.com</p>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold shrink-0" data-i18n="auth_connected">Connected</span>
+                    </div>
+
+                    <div class="flex items-center justify-between gap-2 pt-1">
+                        <button type="button" onclick="syncAllToFirestore(true)" data-i18n="auth_force_sync"
+                            class="px-3.5 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-sky-600 dark:text-sky-400 font-semibold transition cursor-pointer flex items-center gap-1.5">
+                            <i class="fa-solid fa-rotate text-[11px]"></i>
+                            <span data-i18n="auth_sync_now">Sync Now</span>
+                        </button>
+                        <button type="button" onclick="signOutFirebase()" data-i18n="auth_signout_btn"
+                            class="px-4 py-2 rounded-xl bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 font-semibold transition cursor-pointer">
+                            Sign Out
+                        </button>
+                    </div>
+                </div>
+
+                <p id="authErrorMsg" class="hidden text-[11px] text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl px-3 py-2"></p>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toastNotification" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-sky-600 text-white px-4 py-3 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 z-50 opacity-0 pointer-events-none transition-opacity duration-200">
         <i class="fa-solid fa-circle-check text-emerald-400 dark:text-white text-sm"></i>
@@ -1294,6 +1381,19 @@
                 kanban_delete_stage: 'Delete stage',
                 kanban_color_stage: 'Change stage color',
                 kanban_add_task_here: 'Add task to this stage',
+                auth_modal_title: 'Cloud Sync & Team Login',
+                auth_desc: 'Sign in to sync projects and tasks in real time with your team via Cloud Firestore.',
+                auth_google_btn: 'Continue with Google',
+                auth_or_email: 'or with email',
+                auth_email_ph: 'Email address',
+                auth_password_ph: 'Password (min. 6 chars)',
+                auth_signin_btn: 'Sign In',
+                auth_signup_btn: 'Create Account',
+                auth_connected: 'Connected',
+                auth_sync_now: 'Sync Now',
+                auth_signout_btn: 'Sign Out',
+                sync_realtime: 'Real-time sync',
+                sync_signin_prompt: 'Offline • Sign in',
                 months: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
             },
             pt: {
@@ -1432,6 +1532,19 @@
                 kanban_delete_stage: 'Excluir etapa',
                 kanban_color_stage: 'Trocar cor da etapa',
                 kanban_add_task_here: 'Adicionar tarefa nesta etapa',
+                auth_modal_title: 'Sincronização em Nuvem & Login',
+                auth_desc: 'Entre com sua conta para sincronizar projetos e tarefas em tempo real com o time via Cloud Firestore.',
+                auth_google_btn: 'Continuar com Google',
+                auth_or_email: 'ou com e-mail',
+                auth_email_ph: 'Seu e-mail',
+                auth_password_ph: 'Senha (mín. 6 caracteres)',
+                auth_signin_btn: 'Entrar',
+                auth_signup_btn: 'Criar Conta',
+                auth_connected: 'Conectado',
+                auth_sync_now: 'Sincronizar',
+                auth_signout_btn: 'Sair',
+                sync_realtime: 'Sincronizado ao vivo',
+                sync_signin_prompt: 'Offline • Entrar',
                 months: ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']
             }
         };
@@ -1684,6 +1797,7 @@
             if (githubConfig.owner && githubConfig.repo && githubConfig.token) startGitHubSyncPolling();
 
             initLanguage();
+            initFirebase();
             renderSidebarProjectSelector();
             renderMemberFilterButtons();
             renderHeaderAvatars();
@@ -1717,6 +1831,7 @@
             updateExecutiveKPIs();
             renderCurrentView();
             debouncedSaveToGitHub();
+            debouncedSyncToFirestore();
             if (msg) showToast(msg);
         }
 
@@ -3411,6 +3526,413 @@
             document.getElementById('toastMessageText').textContent = msg;
             toast.classList.remove('opacity-0', 'pointer-events-none');
             setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2600);
+        }
+
+        // ============================================================================
+        // FIREBASE AUTH & REAL-TIME CLOUD FIRESTORE SYNC (CONCURRENT-SAFE)
+        // ============================================================================
+        const FIREBASE_CONFIG = {
+            apiKey: "AIzaSyAoK0DRDUPqd3dMLObViJZvlgfkdRP3vv4",
+            authDomain: "worldaily-planner.firebaseapp.com",
+            projectId: "worldaily-planner",
+            storageBucket: "worldaily-planner.firebasestorage.app",
+            messagingSenderId: "524991983013",
+            appId: "1:524991983013:web:a4a62a8cc1f1172f660c4c"
+        };
+
+        let fbApp = null;
+        let fbAuth = null;
+        let fbDb = null;
+        let fbCurrentUser = null;
+        let fbUnsubscribers = [];
+        let fbSyncTimer = null;
+        let fbIsApplyingRemote = false;
+        let fbInitialSyncDone = false;
+        let fbRemoteCache = {
+            membersJson: null,
+            projects: {},
+            tasks: {}
+        };
+        let fbLastSynced = {
+            membersJson: null,
+            projects: {},
+            tasks: {}
+        };
+
+        function initFirebase() {
+            if (typeof firebase === 'undefined') {
+                updateSyncIndicator(t('saved_locally'), false);
+                return;
+            }
+            try {
+                fbApp = firebase.apps.length ? firebase.app() : firebase.initializeApp(FIREBASE_CONFIG);
+                fbAuth = firebase.auth();
+                fbDb = firebase.firestore();
+
+                fbAuth.onAuthStateChanged((user) => {
+                    fbCurrentUser = user;
+                    updateAuthModalUI();
+                    if (user) {
+                        startFirestoreRealtimeListeners();
+                    } else {
+                        stopFirestoreRealtimeListeners();
+                        updateSyncIndicator(t('sync_signin_prompt'), false);
+                    }
+                });
+            } catch (err) {
+                console.error('Firebase init error:', err);
+                updateSyncIndicator(t('saved_locally'), false);
+            }
+        }
+
+        function openAuthModal() {
+            clearAuthError();
+            updateAuthModalUI();
+            document.getElementById('authModal').classList.remove('hidden');
+            document.getElementById('authModal').classList.add('flex');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('flex');
+        }
+
+        function showAuthError(msg) {
+            const el = document.getElementById('authErrorMsg');
+            if (!el) return;
+            el.textContent = msg;
+            el.classList.remove('hidden');
+        }
+
+        function clearAuthError() {
+            const el = document.getElementById('authErrorMsg');
+            if (!el) return;
+            el.textContent = '';
+            el.classList.add('hidden');
+        }
+
+        function formatFirebaseAuthError(err) {
+            const code = err && err.code ? err.code : '';
+            const isPt = currentLang === 'pt';
+            if (code === 'auth/invalid-credential' || code === 'auth/wrong-password' || code === 'auth/user-not-found') {
+                return isPt ? 'E-mail ou senha inválidos.' : 'Invalid email or password.';
+            }
+            if (code === 'auth/email-already-in-use') {
+                return isPt ? 'Este e-mail já está cadastrado.' : 'This email is already in use.';
+            }
+            if (code === 'auth/weak-password') {
+                return isPt ? 'A senha deve ter pelo menos 6 caracteres.' : 'Password must be at least 6 characters.';
+            }
+            if (code === 'auth/unauthorized-domain') {
+                return isPt ? 'Domínio não autorizado no Firebase Auth (adicione este domínio em Authentication → Settings).' : 'Unauthorized domain in Firebase Auth settings.';
+            }
+            if (code === 'auth/popup-closed-by-user') {
+                return isPt ? 'Login cancelado.' : 'Sign-in popup closed.';
+            }
+            return err && err.message ? err.message : (isPt ? 'Erro ao autenticar.' : 'Authentication error.');
+        }
+
+        function updateAuthModalUI() {
+            const outPanel = document.getElementById('authSignedOutPanel');
+            const inPanel = document.getElementById('authSignedInPanel');
+            if (!outPanel || !inPanel) return;
+
+            if (fbCurrentUser) {
+                outPanel.classList.add('hidden');
+                inPanel.classList.remove('hidden');
+                const nameEl = document.getElementById('authUserDisplayName');
+                const emailEl = document.getElementById('authUserEmail');
+                if (nameEl) nameEl.textContent = fbCurrentUser.displayName || fbCurrentUser.email || 'Worldaily User';
+                if (emailEl) emailEl.textContent = fbCurrentUser.email || '';
+            } else {
+                outPanel.classList.remove('hidden');
+                inPanel.classList.add('hidden');
+            }
+        }
+
+        async function signInWithGoogle() {
+            if (!fbAuth) return;
+            clearAuthError();
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                await fbAuth.signInWithPopup(provider);
+                closeAuthModal();
+                showToast(currentLang === 'pt' ? 'Conectado ao Firebase!' : 'Connected to Firebase!');
+            } catch (err) {
+                showAuthError(formatFirebaseAuthError(err));
+            }
+        }
+
+        async function signInWithEmail() {
+            if (!fbAuth) return;
+            clearAuthError();
+            const email = (document.getElementById('authEmailInput')?.value || '').trim();
+            const password = document.getElementById('authPasswordInput')?.value || '';
+            if (!email || !password) {
+                showAuthError(currentLang === 'pt' ? 'Preencha e-mail e senha.' : 'Please enter email and password.');
+                return;
+            }
+            try {
+                await fbAuth.signInWithEmailAndPassword(email, password);
+                closeAuthModal();
+                showToast(currentLang === 'pt' ? 'Conectado ao Firebase!' : 'Connected to Firebase!');
+            } catch (err) {
+                showAuthError(formatFirebaseAuthError(err));
+            }
+        }
+
+        async function signUpWithEmail() {
+            if (!fbAuth) return;
+            clearAuthError();
+            const email = (document.getElementById('authEmailInput')?.value || '').trim();
+            const password = document.getElementById('authPasswordInput')?.value || '';
+            if (!email || password.length < 6) {
+                showAuthError(currentLang === 'pt' ? 'Informe um e-mail válido e senha com 6+ caracteres.' : 'Enter a valid email and 6+ char password.');
+                return;
+            }
+            try {
+                await fbAuth.createUserWithEmailAndPassword(email, password);
+                closeAuthModal();
+                showToast(currentLang === 'pt' ? 'Conta criada e conectada!' : 'Account created & connected!');
+            } catch (err) {
+                showAuthError(formatFirebaseAuthError(err));
+            }
+        }
+
+        async function signOutFirebase() {
+            if (!fbAuth) return;
+            try {
+                await fbAuth.signOut();
+                showToast(currentLang === 'pt' ? 'Desconectado da nuvem.' : 'Signed out from cloud.');
+            } catch (err) {
+                showAuthError(formatFirebaseAuthError(err));
+            }
+        }
+
+        function stopFirestoreRealtimeListeners() {
+            fbUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
+            fbUnsubscribers = [];
+            fbInitialSyncDone = false;
+        }
+
+        function startFirestoreRealtimeListeners() {
+            if (!fbDb || !fbCurrentUser) return;
+            stopFirestoreRealtimeListeners();
+            updateSyncIndicator(t('sync_realtime'), true);
+
+            let gotMembers = false;
+            let gotProjects = false;
+            let gotTasks = false;
+
+            const tryInitialMergeOrSeed = async () => {
+                if (!gotMembers || !gotProjects || !gotTasks) return;
+                if (!fbInitialSyncDone) {
+                    fbInitialSyncDone = true;
+                    const remoteProjectsCount = Object.keys(fbRemoteCache.projects).length;
+                    if (remoteProjectsCount === 0 && workspaceStore.projects.length > 0) {
+                        await syncAllToFirestore(false);
+                        return;
+                    }
+                }
+                applyRemoteFirestoreCache();
+            };
+
+            const unsubShared = fbDb.collection('workspaces').doc('shared').onSnapshot((doc) => {
+                gotMembers = true;
+                if (doc.exists && Array.isArray(doc.data().members)) {
+                    fbRemoteCache.membersJson = JSON.stringify(doc.data().members);
+                }
+                tryInitialMergeOrSeed();
+            }, (err) => {
+                console.error('Firestore members listener error:', err);
+                updateSyncIndicator(currentLang === 'pt' ? 'Sem permissão no Firestore' : 'Firestore permission error', false);
+            });
+
+            const unsubProjects = fbDb.collection('projects').onSnapshot((snap) => {
+                gotProjects = true;
+                const nextProjects = {};
+                snap.forEach(doc => { nextProjects[doc.id] = { ...doc.data(), id: doc.id }; });
+                fbRemoteCache.projects = nextProjects;
+                tryInitialMergeOrSeed();
+            }, (err) => {
+                console.error('Firestore projects listener error:', err);
+                updateSyncIndicator(currentLang === 'pt' ? 'Sem permissão no Firestore' : 'Firestore permission error', false);
+            });
+
+            const unsubTasks = fbDb.collection('tasks').onSnapshot((snap) => {
+                gotTasks = true;
+                const nextTasks = {};
+                snap.forEach(doc => { nextTasks[doc.id] = { ...doc.data(), id: doc.id }; });
+                fbRemoteCache.tasks = nextTasks;
+                tryInitialMergeOrSeed();
+            }, (err) => {
+                console.error('Firestore tasks listener error:', err);
+                updateSyncIndicator(currentLang === 'pt' ? 'Sem permissão no Firestore' : 'Firestore permission error', false);
+            });
+
+            fbUnsubscribers.push(unsubShared, unsubProjects, unsubTasks);
+        }
+
+        function applyRemoteFirestoreCache() {
+            const projectIds = Object.keys(fbRemoteCache.projects);
+            if (projectIds.length === 0) return;
+
+            fbIsApplyingRemote = true;
+            try {
+                const members = fbRemoteCache.membersJson ? JSON.parse(fbRemoteCache.membersJson) : workspaceStore.members;
+                const tasksByProject = {};
+                Object.values(fbRemoteCache.tasks).forEach(task => {
+                    const pid = task.projectId;
+                    if (!pid) return;
+                    if (!tasksByProject[pid]) tasksByProject[pid] = [];
+                    tasksByProject[pid].push(task);
+                });
+
+                const rebuiltProjects = projectIds
+                    .map(pid => {
+                        const meta = fbRemoteCache.projects[pid];
+                        return {
+                            ...meta,
+                            members,
+                            tasks: tasksByProject[pid] || []
+                        };
+                    })
+                    .sort((a, b) => (a.createdAt || a.id).localeCompare(b.createdAt || b.id));
+
+                const prevActiveId = workspaceStore.activeProjectId;
+                workspaceStore.members = members;
+                workspaceStore.projects = rebuiltProjects;
+                workspaceStore.activeProjectId = rebuiltProjects.some(p => p.id === prevActiveId)
+                    ? prevActiveId
+                    : rebuiltProjects[0].id;
+
+                bindActiveProjectReference();
+                snapshotLastSyncedState();
+
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_STORE_KEY, JSON.stringify(workspaceStore));
+                    localStorage.setItem(LOCAL_STORAGE_DATA_KEY, JSON.stringify(plannerData));
+                } catch (e) {}
+
+                renderSidebarProjectSelector();
+                renderHeaderAvatars();
+                renderMemberFilterButtons();
+                updateExecutiveKPIs();
+                renderCurrentView();
+                updateSyncIndicator(t('sync_realtime'), true);
+            } finally {
+                fbIsApplyingRemote = false;
+            }
+        }
+
+        function serializeProjectMeta(proj) {
+            const { tasks, members, ...meta } = proj;
+            return JSON.parse(JSON.stringify(meta));
+        }
+
+        function snapshotLastSyncedState() {
+            fbLastSynced.membersJson = JSON.stringify(workspaceStore.members || []);
+            const nextProj = {};
+            const nextTasks = {};
+            (workspaceStore.projects || []).forEach(proj => {
+                nextProj[proj.id] = JSON.stringify(serializeProjectMeta(proj));
+                (proj.tasks || []).forEach(task => {
+                    nextTasks[task.id] = JSON.stringify({ ...task, projectId: proj.id });
+                });
+            });
+            fbLastSynced.projects = nextProj;
+            fbLastSynced.tasks = nextTasks;
+        }
+
+        function debouncedSyncToFirestore() {
+            if (!fbDb || !fbCurrentUser || fbIsApplyingRemote) return;
+            clearTimeout(fbSyncTimer);
+            fbSyncTimer = setTimeout(() => syncDiffToFirestore(), 450);
+        }
+
+        async function commitFirestoreOps(ops) {
+            for (let i = 0; i < ops.length; i += 450) {
+                const batch = fbDb.batch();
+                ops.slice(i, i + 450).forEach(op => {
+                    if (op.type === 'set') batch.set(op.ref, op.data, { merge: true });
+                    else if (op.type === 'delete') batch.delete(op.ref);
+                });
+                await batch.commit();
+            }
+        }
+
+        async function syncDiffToFirestore() {
+            if (!fbDb || !fbCurrentUser || fbIsApplyingRemote) return;
+            const ops = [];
+            const nowIso = new Date().toISOString();
+
+            const currentMembersJson = JSON.stringify(workspaceStore.members || []);
+            if (currentMembersJson !== fbLastSynced.membersJson) {
+                ops.push({
+                    type: 'set',
+                    ref: fbDb.collection('workspaces').doc('shared'),
+                    data: { members: workspaceStore.members || [], updatedAt: nowIso, updatedBy: fbCurrentUser.email || fbCurrentUser.uid }
+                });
+            }
+
+            const currentProjIds = new Set();
+            const currentTaskIds = new Set();
+
+            (workspaceStore.projects || []).forEach(proj => {
+                currentProjIds.add(proj.id);
+                const meta = serializeProjectMeta(proj);
+                const metaJson = JSON.stringify(meta);
+                if (metaJson !== fbLastSynced.projects[proj.id]) {
+                    ops.push({
+                        type: 'set',
+                        ref: fbDb.collection('projects').doc(proj.id),
+                        data: { ...meta, updatedAt: nowIso }
+                    });
+                }
+
+                (proj.tasks || []).forEach(task => {
+                    currentTaskIds.add(task.id);
+                    const taskPayload = JSON.parse(JSON.stringify({ ...task, projectId: proj.id }));
+                    const taskJson = JSON.stringify(taskPayload);
+                    if (taskJson !== fbLastSynced.tasks[task.id]) {
+                        ops.push({
+                            type: 'set',
+                            ref: fbDb.collection('tasks').doc(task.id),
+                            data: { ...taskPayload, updatedAt: nowIso }
+                        });
+                    }
+                });
+            });
+
+            Object.keys(fbLastSynced.projects).forEach(oldPid => {
+                if (!currentProjIds.has(oldPid)) {
+                    ops.push({ type: 'delete', ref: fbDb.collection('projects').doc(oldPid) });
+                }
+            });
+
+            Object.keys(fbLastSynced.tasks).forEach(oldTid => {
+                if (!currentTaskIds.has(oldTid)) {
+                    ops.push({ type: 'delete', ref: fbDb.collection('tasks').doc(oldTid) });
+                }
+            });
+
+            if (ops.length === 0) return;
+
+            try {
+                await commitFirestoreOps(ops);
+                snapshotLastSyncedState();
+                updateSyncIndicator(t('sync_realtime'), true);
+            } catch (err) {
+                console.error('Firestore sync error:', err);
+                updateSyncIndicator(currentLang === 'pt' ? 'Erro ao sincronizar' : 'Sync error', false);
+            }
+        }
+
+        async function syncAllToFirestore(notify = true) {
+            if (!fbDb || !fbCurrentUser) return;
+            fbLastSynced = { membersJson: null, projects: {}, tasks: {} };
+            await syncDiffToFirestore();
+            if (notify) showToast(currentLang === 'pt' ? 'Sincronizado com o Firestore!' : 'Synced with Firestore!');
         }
     </script>
 </body>
