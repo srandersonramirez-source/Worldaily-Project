@@ -240,6 +240,21 @@
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden">
 
+    <!-- Initial Boot Overlay (Prevents flash of unhydrated state before Firebase Auth & Firestore resolve) -->
+    <div id="appBootOverlay" class="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-3.5 transition-opacity duration-200" style="background-color: var(--bg-app);">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 text-white flex items-center justify-center shadow-lg shadow-sky-500/25 animate-pulse">
+            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2L2 7l10 5 10-5-10-5z" fill="rgba(255,255,255,0.25)" />
+                <path d="M2 17l10 5 10-5" />
+                <path d="M2 12l10 5 10-5" />
+            </svg>
+        </div>
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-500 dark:text-slate-400">
+            <i class="fa-solid fa-circle-notch fa-spin text-sky-500"></i>
+            <span id="bootOverlayText">Worldaily...</span>
+        </div>
+    </div>
+
     <!-- ============================================================================ -->
     <!-- 1. GLOBAL FIXED TOP HEADER (Single fixed logo + Panel toggle + KPIs + Actions) -->
     <!-- ============================================================================ -->
@@ -340,7 +355,7 @@
                         <div class="flex items-start gap-2 min-w-0">
                             <i id="sidebarActiveProjectIcon" class="fa-solid fa-briefcase text-sky-500 text-xs mt-0.5 shrink-0"></i>
                             <span id="sidebarProjectTitleDisplay" class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 leading-snug break-words">
-                                Cake Portfolio Development
+                                —
                             </span>
                         </div>
                         <i id="sidebarProjectChevron" class="fa-solid fa-chevron-down text-[10px] text-slate-400 group-hover:text-sky-500 mt-1 shrink-0 transition-transform duration-300 ease-out"></i>
@@ -427,7 +442,7 @@
                 <div class="flex items-center justify-between gap-2 min-w-0">
                     <div class="flex items-center gap-2 min-w-0">
                         <span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 font-display font-bold text-[11px] shrink-0" id="mobileProgressPct">0%</span>
-                        <h2 id="mobilePlanTitleDisplay" class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 truncate">Cake Portfolio Development</h2>
+                        <h2 id="mobilePlanTitleDisplay" class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 truncate">—</h2>
                     </div>
                     <button onclick="switchView('projects')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-sky-600 dark:text-sky-400 flex items-center gap-1 shrink-0">
                         <i class="fa-solid fa-repeat text-[10px]"></i>
@@ -3533,9 +3548,24 @@
             tasks: {}
         };
 
+        function hideBootOverlay() {
+            const overlay = document.getElementById('appBootOverlay');
+            if (!overlay || overlay.dataset.hidden === '1') return;
+            overlay.dataset.hidden = '1';
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => overlay.classList.add('hidden'), 220);
+        }
+
         function initFirebase() {
+            const bootText = document.getElementById('bootOverlayText');
+            if (bootText) {
+                bootText.textContent = currentLang === 'pt' ? 'Carregando espaço de trabalho...' : 'Loading workspace...';
+            }
+            setTimeout(hideBootOverlay, 4500);
+
             if (typeof firebase === 'undefined') {
                 updateSyncIndicator(t('saved_locally'), false);
+                hideBootOverlay();
                 return;
             }
             try {
@@ -3560,11 +3590,13 @@
                         updateExecutiveKPIs();
                         renderCurrentView();
                         updateSyncIndicator(t('sync_signin_prompt'), false);
+                        hideBootOverlay();
                     }
                 });
             } catch (err) {
                 console.error('Firebase init error:', err);
                 updateSyncIndicator(t('saved_locally'), false);
+                hideBootOverlay();
             }
         }
 
@@ -3740,10 +3772,12 @@
                         renderMemberFilterButtons();
                         updateExecutiveKPIs();
                         renderCurrentView();
+                        hideBootOverlay();
                         return;
                     }
                 }
                 applyRemoteFirestoreCache();
+                hideBootOverlay();
             };
 
             const unsubShared = fbDb.collection('workspaces').doc('shared').onSnapshot((doc) => {
