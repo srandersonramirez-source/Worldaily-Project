@@ -173,11 +173,10 @@
             color: transparent !important;
         }
         #appSidebar.sidebar-mini #sidebarTeamMiniBtn {
-            opacity: 1;
+            display: flex;
         }
         #appSidebar:not(.sidebar-mini) #sidebarTeamMiniBtn {
-            opacity: 0;
-            pointer-events: none;
+            display: none;
         }
         #appSidebar.sidebar-mini #syncStatusCard {
             border-color: transparent;
@@ -479,7 +478,7 @@
 
         <!-- ISOLATED SIDEBAR PANEL (Instagram-style hover expand on desktop, drawer on mobile) -->
         <aside id="appSidebar" onmouseenter="onSidebarMouseEnter()" onmouseleave="onSidebarMouseLeave()"
-            class="absolute inset-y-0 left-0 w-0 md:w-16 border-r-0 md:border-r bg-white dark:bg-[#111827] border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between shrink-0 z-40 shadow-none transition-all duration-250 ease-out overflow-hidden">
+            class="absolute inset-y-0 left-0 w-0 md:w-16 border-r-0 md:border-r bg-white dark:bg-[#111827] border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between shrink-0 z-40 shadow-none transition-all duration-200 ease-out overflow-hidden">
             <div id="sidebarExpandedTop" class="p-3 pt-4 space-y-5 w-60 overflow-y-auto overflow-x-hidden">
                 <!-- Active Project / Quick Switcher Card -->
                 <div id="sidebarProjectCard" class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 transition-colors">
@@ -1945,7 +1944,7 @@
             if (!sidebar) return;
 
             const isDesktop = window.innerWidth >= 768;
-            sidebar.classList.remove('w-60', 'w-16', 'border-r', 'w-0', 'border-r-0', 'sidebar-mini', 'shadow-2xl', 'shadow-none');
+            sidebar.classList.remove('w-60', 'md:w-60', 'w-16', 'md:w-16', 'border-r', 'md:border-r', 'w-0', 'border-r-0', 'sidebar-mini', 'shadow-2xl', 'shadow-none');
 
             if (isSidebarCollapsed) {
                 if (isDesktop) {
