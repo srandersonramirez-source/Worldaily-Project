@@ -751,6 +751,7 @@
                                         <th data-i18n="col_start" class="py-3 px-3 min-w-[125px]">Start</th>
                                         <th data-i18n="col_finish" class="py-3 px-3 min-w-[125px]">Finish</th>
                                         <th data-i18n="col_due" class="py-3 px-3 min-w-[125px]">Due Date</th>
+                                        <th data-i18n="col_budget" class="py-3 px-3 min-w-[115px]">Budget</th>
                                         <th data-i18n="col_labels" class="py-3 px-3 min-w-[150px]">Labels</th>
                                         <th class="w-12 py-3 px-2 text-center"></th>
                                     </tr>
@@ -1083,13 +1084,13 @@
     <!-- WORLDAILY TASK INSPECTOR MODAL (Modern SaaS Slide-Over / Workspace Card) -->
     <!-- ============================================================================ -->
     <div id="taskModal" onclick="if(event.target === this) closeTaskModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] flex flex-col border border-slate-200/90 dark:border-slate-800 overflow-hidden">
+        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] flex flex-col ring-1 ring-slate-200/80 dark:ring-slate-800 overflow-hidden">
 
-            <!-- Top Accent Line -->
+            <!-- Top Accent Line (Flush with rounded top, no thin white gap) -->
             <div class="h-1 w-full bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 shrink-0"></div>
 
-            <!-- Modal Top Bar (Breadcrumb + Quick Actions) -->
-            <div class="px-5 sm:px-6 pt-4 pb-3 border-b border-slate-100 dark:border-slate-800/80 flex items-center justify-between gap-3 shrink-0">
+            <!-- Modal Top Bar (Breadcrumb + Quick Actions — seamless into title) -->
+            <div class="px-5 sm:px-6 pt-4 pb-2 flex items-center justify-between gap-3 shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="w-6 h-6 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xs">
                         <i class="fa-solid fa-layer-group"></i>
@@ -1238,7 +1239,7 @@
                     </div>
                 </div>
 
-                <!-- Stage, Owner & Goal Metadata Grid -->
+                <!-- Stage, Goal & Budget Metadata Grid -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
                         <label class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
@@ -1249,18 +1250,27 @@
 
                     <div class="p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
                         <label class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
-                            <i class="fa-regular fa-user text-sky-500"></i> <span data-i18n="col_assigned">Assigned To</span>
-                        </label>
-                        <select id="modalTaskAssignee" class="w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 cursor-pointer"></select>
-                    </div>
-
-                    <div class="p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
-                        <label class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
                             <i class="fa-solid fa-bullseye text-sky-500"></i> <span data-i18n="modal_goal">Goal / Milestone</span>
                         </label>
                         <input id="modalTaskGoal" type="text" data-i18n-placeholder="modal_goal_ph" placeholder="e.g. Q4 Launch"
                             class="w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
                     </div>
+
+                    <div class="p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
+                        <label class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
+                            <i class="fa-solid fa-coins text-sky-500"></i> <span data-i18n="col_budget">Budget</span>
+                        </label>
+                        <input id="modalTaskBudget" type="text" data-i18n-placeholder="modal_budget_ph" placeholder="e.g. $ 1,500"
+                            class="w-full bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
+                    </div>
+                </div>
+
+                <!-- Multi-Select Assigned To Card -->
+                <div class="p-3 rounded-2xl bg-slate-50/90 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-800">
+                    <label class="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-2">
+                        <i class="fa-regular fa-user text-sky-500"></i> <span data-i18n="col_assigned">Assigned To</span>
+                    </label>
+                    <div id="modalAssignedMultiPicker" class="flex flex-wrap gap-1.5"></div>
                 </div>
 
                 <!-- Timeline Dates Strip -->
@@ -1646,6 +1656,7 @@
                 col_start: 'Start',
                 col_finish: 'Finish',
                 col_due: 'Due Date',
+                col_budget: 'Budget',
                 col_labels: 'Labels',
                 unassigned: 'Unassigned',
                 cal_today: 'Today',
@@ -1679,6 +1690,7 @@
                 prio_urgent: 'Urgent',
                 modal_goal: 'Goal / Milestone',
                 modal_goal_ph: 'e.g. Q4 Launch',
+                modal_budget_ph: 'e.g. $ 1,500',
                 modal_dates_title: 'Schedule & Deadlines',
                 modal_start_date: 'Start Date',
                 modal_finish_date: 'Finish Date',
@@ -1834,6 +1846,7 @@
                 col_start: 'Início',
                 col_finish: 'Término',
                 col_due: 'Vencimento',
+                col_budget: 'Orçamento',
                 col_labels: 'Etiquetas',
                 unassigned: 'Sem responsável',
                 cal_today: 'Hoje',
@@ -1867,6 +1880,7 @@
                 prio_urgent: 'Urgente',
                 modal_goal: 'Meta / Marco',
                 modal_goal_ph: 'ex: Lançamento Q4',
+                modal_budget_ph: 'ex: R$ 1.500',
                 modal_dates_title: 'Cronograma & Prazos',
                 modal_start_date: 'Data de Início',
                 modal_finish_date: 'Data de Término',
@@ -2463,12 +2477,18 @@
             renderCurrentView();
         }
 
+        function getTaskAssignees(task) {
+            if (!task || !task.assignedTo) return [];
+            if (Array.isArray(task.assignedTo)) return task.assignedTo.filter(Boolean);
+            return [task.assignedTo];
+        }
+
         function getFilteredTasks() {
             const query = (document.getElementById('globalSearchInput')?.value || '').toLowerCase().trim();
             return plannerData.tasks.filter(t => {
-                if (currentFilterId !== 'ALL' && t.assignedTo !== currentFilterId) return false;
+                if (currentFilterId !== 'ALL' && !getTaskAssignees(t).includes(currentFilterId)) return false;
                 if (query) {
-                    const hay = `${t.title} ${t.notes || ''} ${t.goals || ''}`.toLowerCase();
+                    const hay = `${t.title} ${t.notes || ''} ${t.goals || ''} ${t.budget || ''}`.toLowerCase();
                     if (!hay.includes(query)) return false;
                 }
                 return true;
@@ -2816,7 +2836,7 @@
             tasks.forEach((task, idx) => {
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-slate-50/90 dark:hover:bg-slate-800/40 transition group";
-                const member = plannerData.members.find(m => m.id === task.assignedTo);
+                const assignees = getTaskAssignees(task).map(id => plannerData.members.find(m => m.id === id)).filter(Boolean);
                 const isCompleted = task.status === 'Completed';
 
                 const labelsHtml = (task.labels || []).map(lblId => {
@@ -2864,14 +2884,11 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-2.5 px-3">
-                        <div class="relative inline-flex items-center w-full max-w-[185px]">
-                            <i class="fa-regular fa-user text-[11px] ${member ? 'text-sky-500' : 'text-slate-400'} absolute left-2.5 pointer-events-none"></i>
-                            <select onchange="inlineUpdateTask('${task.id}', 'assignedTo', this.value)" class="appearance-none bg-transparent hover:bg-slate-100/80 dark:hover:bg-slate-800/70 text-xs text-slate-700 dark:text-slate-200 pl-7 pr-6 py-1 rounded-lg outline-none cursor-pointer w-full truncate transition">
-                                <option value="" class="dark:bg-slate-900">${t('unassigned')}</option>
-                                ${plannerData.members.map(m => `<option value="${m.id}" class="dark:bg-slate-900" ${m.id === task.assignedTo ? 'selected' : ''}>${m.fullName}</option>`).join('')}
-                            </select>
-                            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2 pointer-events-none"></i>
+                    <td class="py-2.5 px-3 cursor-pointer" onclick="openTaskModal('${task.id}')">
+                        <div class="flex flex-wrap items-center gap-1 max-w-[200px]">
+                            ${assignees.length
+                                ? assignees.map(m => `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-medium text-slate-700 dark:text-slate-200"><i class="fa-regular fa-user text-[9px] text-sky-500"></i>${escapeHtml(m.fullName.split(' ')[0])}</span>`).join('')
+                                : `<span class="text-xs text-slate-400">${t('unassigned')}</span>`}
                         </div>
                     </td>
                     <td class="py-2.5 px-3">
@@ -2912,6 +2929,9 @@
                     </td>
                     <td class="py-2.5 px-3">
                         <input type="date" value="${task.dueDate || ''}" onchange="inlineUpdateTask('${task.id}', 'dueDate', this.value)" class="bg-transparent text-xs text-slate-600 dark:text-slate-300 outline-none cursor-pointer w-full" />
+                    </td>
+                    <td class="py-2.5 px-3">
+                        <input type="text" value="${escapeHtml(task.budget || '')}" placeholder="—" onchange="inlineUpdateTask('${task.id}', 'budget', this.value.trim())" class="bg-transparent hover:bg-slate-100/80 dark:hover:bg-slate-800/70 focus:bg-white dark:focus:bg-slate-900 rounded-lg px-2 py-1 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none w-full max-w-[110px]" />
                     </td>
                     <td class="py-2.5 px-3 cursor-pointer" onclick="openTaskModal('${task.id}')">
                         <div class="flex flex-wrap gap-1 items-center">${labelsHtml || '<span class="text-xs text-slate-400 opacity-0 group-hover:opacity-100">+ Label</span>'}</div>
@@ -2982,14 +3002,12 @@
                         </div>
 
                         <div class="flex items-center justify-between gap-2 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
-                            <div class="flex items-center gap-1.5 min-w-0">
-                                <i class="fa-regular fa-user text-[10px] ${member ? 'text-sky-500' : 'text-slate-400'}"></i>
-                                <select onchange="inlineUpdateTask('${task.id}', 'assignedTo', this.value)" class="bg-transparent text-slate-700 dark:text-slate-300 font-medium outline-none truncate max-w-[140px]">
-                                    <option value="" class="dark:bg-slate-900">Unassigned</option>
-                                    ${plannerData.members.map(m => `<option value="${m.id}" class="dark:bg-slate-900" ${m.id === task.assignedTo ? 'selected' : ''}>${m.fullName}</option>`).join('')}
-                                </select>
-                            </div>
+                            <button onclick="openTaskModal('${task.id}')" class="flex items-center gap-1.5 min-w-0 text-left cursor-pointer">
+                                <i class="fa-regular fa-user text-[10px] ${assignees.length ? 'text-sky-500' : 'text-slate-400'}"></i>
+                                <span class="text-slate-700 dark:text-slate-300 font-medium truncate max-w-[140px]">${assignees.length ? assignees.map(m => escapeHtml(m.fullName.split(' ')[0])).join(', ') : t('unassigned')}</span>
+                            </button>
                             <div class="flex items-center gap-2 shrink-0">
+                                ${task.budget ? `<span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">${escapeHtml(task.budget)}</span>` : ''}
                                 ${task.goals ? `<span class="text-[10px] text-sky-600 dark:text-sky-400 font-medium truncate max-w-[110px]">🎯 ${escapeHtml(task.goals)}</span>` : ''}
                                 ${task.dueDate ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px]"><i class="fa-regular fa-calendar mr-1 text-sky-500"></i>${formatShortDate(task.dueDate)}</span>` : ''}
                             </div>
@@ -3007,7 +3025,8 @@
             plannerData.tasks.push({
                 id: 't-' + Date.now(),
                 title,
-                assignedTo: activeUserId,
+                assignedTo: activeUserId ? [activeUserId] : [],
+                budget: '',
                 startDate: '',
                 finishDate: '',
                 dueDate: '',
@@ -3231,7 +3250,7 @@
             card.ondragend = () => card.classList.remove('dragging');
 
             const isCompleted = task.status === 'Completed';
-            const member = plannerData.members.find(m => m.id === task.assignedTo);
+            const assignees = getTaskAssignees(task).map(id => plannerData.members.find(m => m.id === id)).filter(Boolean);
             const labelsHtml = (task.labels || []).map(id => {
                 const l = plannerData.labelsCatalog.find(x => x.id === id);
                 return l ? `<span style="background:${l.bg};color:${l.text}" class="px-2 py-0.5 rounded-md text-[10px] font-semibold">${l.name}</span>` : '';
@@ -3265,9 +3284,10 @@
                         ${task.checklist?.length ? `<span class="flex items-center gap-1 text-[11px]"><i class="fa-regular fa-square-check text-sky-500"></i> ${task.checklist.filter(c=>c.done).length}/${task.checklist.length}</span>` : ''}
                         ${task.dueDate ? `<span class="text-[11px] bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-300"><i class="fa-regular fa-calendar mr-1 text-sky-500"></i>${formatShortDate(task.dueDate)}</span>` : ''}
                         ${task.goals ? `<span class="text-[10px] text-sky-600 dark:text-sky-400 font-medium truncate max-w-[90px]">🎯 ${escapeHtml(task.goals)}</span>` : ''}
+                        ${task.budget ? `<span class="text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-1.5 py-0.5 rounded font-semibold"><i class="fa-solid fa-coins mr-1 text-[9px]"></i>${escapeHtml(task.budget)}</span>` : ''}
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
-                        ${member ? `<span class="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md" title="${escapeHtml(member.fullName)}"><i class="fa-regular fa-user text-[10px] text-sky-500"></i>${escapeHtml(member.fullName.split(' ')[0])}</span>` : ''}
+                    <div class="flex items-center gap-1 flex-wrap justify-end shrink-0">
+                        ${assignees.map(m => `<span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md" title="${escapeHtml(m.fullName)}"><i class="fa-regular fa-user text-[10px] text-sky-500"></i>${escapeHtml(m.fullName.split(' ')[0])}</span>`).join('')}
                     </div>
                 </div>
             `;
@@ -3622,7 +3642,8 @@
                     }
 
                     group.items.forEach(({ task, start, end }) => {
-                        const member = plannerData.members.find(m => m.id === task.assignedTo);
+                        const assignees = getTaskAssignees(task).map(id => plannerData.members.find(m => m.id === id)).filter(Boolean);
+                        const member = assignees[0];
                         const stage = (plannerData.buckets || []).find(b => b.id === task.bucketId);
                         const cl = task.checklist || [];
                         const clDone = cl.filter(c => c.done).length;
@@ -4187,9 +4208,9 @@
                 data: {
                     labels: memberLabels,
                     datasets: [
-                        { label: tStatus('Not started'), data: plannerData.members.map(m => tasks.filter(t => t.assignedTo === m.id && t.status === 'Not started').length), backgroundColor: '#BAE6FD', barThickness: 28, borderRadius: 5 },
-                        { label: tStatus('In progress'), data: plannerData.members.map(m => tasks.filter(t => t.assignedTo === m.id && t.status === 'In progress').length), backgroundColor: '#0EA5E9', barThickness: 28, borderRadius: 5 },
-                        { label: tStatus('Completed'), data: plannerData.members.map(m => tasks.filter(t => t.assignedTo === m.id && t.status === 'Completed').length), backgroundColor: '#10B981', barThickness: 28, borderRadius: 5 }
+                        { label: tStatus('Not started'), data: plannerData.members.map(m => tasks.filter(t => getTaskAssignees(t).includes(m.id) && t.status === 'Not started').length), backgroundColor: '#BAE6FD', barThickness: 28, borderRadius: 5 },
+                        { label: tStatus('In progress'), data: plannerData.members.map(m => tasks.filter(t => getTaskAssignees(t).includes(m.id) && t.status === 'In progress').length), backgroundColor: '#0EA5E9', barThickness: 28, borderRadius: 5 },
+                        { label: tStatus('Completed'), data: plannerData.members.map(m => tasks.filter(t => getTaskAssignees(t).includes(m.id) && t.status === 'Completed').length), backgroundColor: '#10B981', barThickness: 28, borderRadius: 5 }
                     ]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { stacked: true, grid: { display: false }, ticks: { color: tickColor, font: { size: 11 } } }, y: { stacked: true, beginAtZero: true, grid: { color: gridColor }, ticks: { color: tickColor, stepSize: 1, font: { size: 10 } } } } }
@@ -4223,12 +4244,44 @@
             });
         }
 
+        let modalTempAssignees = [];
+
+        function renderModalAssigneesPicker() {
+            const container = document.getElementById('modalAssignedMultiPicker');
+            if (!container) return;
+            if (!plannerData.members.length) {
+                container.innerHTML = `<span class="text-[11px] text-slate-400">${t('unassigned')}</span>`;
+                return;
+            }
+            container.innerHTML = plannerData.members.map(m => {
+                const isSelected = modalTempAssignees.includes(m.id);
+                return `
+                    <button type="button" onclick="toggleModalAssignee('${m.id}')"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold border transition cursor-pointer ${
+                            isSelected
+                                ? 'bg-sky-500/15 border-sky-400 dark:border-sky-600 text-sky-700 dark:text-sky-300 shadow-2xs'
+                                : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-sky-300'
+                        }">
+                        <i class="${isSelected ? 'fa-solid fa-circle-check text-sky-500' : 'fa-regular fa-user text-slate-400'} text-[11px]"></i>
+                        <span>${escapeHtml(m.fullName)}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleModalAssignee(memberId) {
+            if (modalTempAssignees.includes(memberId)) {
+                modalTempAssignees = modalTempAssignees.filter(id => id !== memberId);
+            } else {
+                modalTempAssignees.push(memberId);
+            }
+            renderModalAssigneesPicker();
+        }
+
         function openTaskModal(taskId = null, presetField = null, presetValue = null) {
             editingTaskId = taskId;
             const bucketSelect = document.getElementById('modalTaskBucket');
             bucketSelect.innerHTML = plannerData.buckets.map(b => `<option value="${b.id}">${b.name}</option>`).join('');
-            const assigneeSelect = document.getElementById('modalTaskAssignee');
-            assigneeSelect.innerHTML = `<option value="">Unassigned</option>` + plannerData.members.map(m => `<option value="${m.id}">${m.fullName}</option>`).join('');
             const headerBadge = document.getElementById('modalHeaderBadge');
 
             if (taskId) {
@@ -4239,11 +4292,12 @@
                 bucketSelect.value = task.bucketId;
                 setModalStatus(task.status || 'Not started');
                 setModalPriority(task.priority || 'Medium');
-                assigneeSelect.value = task.assignedTo || '';
+                modalTempAssignees = [...getTaskAssignees(task)];
                 document.getElementById('modalTaskStart').value = task.startDate || '';
                 document.getElementById('modalTaskFinish').value = task.finishDate || '';
                 document.getElementById('modalTaskDue').value = task.dueDate || '';
                 document.getElementById('modalTaskGoal').value = task.goals || '';
+                document.getElementById('modalTaskBudget').value = task.budget || '';
                 document.getElementById('modalTaskNotes').value = task.notes || '';
                 modalTempLabels = [...(task.labels || [])];
                 modalTempChecklist = JSON.parse(JSON.stringify(task.checklist || []));
@@ -4254,16 +4308,18 @@
                 bucketSelect.value = (presetField === 'bucketId' && presetValue) ? presetValue : (plannerData.buckets[0]?.id || '');
                 setModalStatus((presetField === 'status' && presetValue) ? presetValue : 'Not started');
                 setModalPriority((presetField === 'priority' && presetValue) ? presetValue : 'Medium');
-                assigneeSelect.value = (presetField === 'assignedTo' && presetValue) ? presetValue : activeUserId;
+                modalTempAssignees = (presetField === 'assignedTo' && presetValue) ? [presetValue] : (activeUserId ? [activeUserId] : []);
                 document.getElementById('modalTaskStart').value = '';
                 document.getElementById('modalTaskFinish').value = '';
                 document.getElementById('modalTaskDue').value = '';
                 document.getElementById('modalTaskGoal').value = '';
+                document.getElementById('modalTaskBudget').value = '';
                 document.getElementById('modalTaskNotes').value = '';
                 modalTempLabels = [];
                 modalTempChecklist = [];
                 document.getElementById('btnDeleteTaskModal').classList.add('hidden');
             }
+            renderModalAssigneesPicker();
             renderModalLabels();
             toggleTagManagerPanel(false);
             renderModalChecklist();
@@ -4530,11 +4586,12 @@
                 bucketId: document.getElementById('modalTaskBucket').value,
                 status: document.getElementById('modalTaskStatus').value,
                 priority: document.getElementById('modalTaskPriority').value,
-                assignedTo: document.getElementById('modalTaskAssignee').value,
+                assignedTo: [...modalTempAssignees],
                 startDate: document.getElementById('modalTaskStart').value,
                 finishDate: document.getElementById('modalTaskFinish').value,
                 dueDate: document.getElementById('modalTaskDue').value,
                 goals: document.getElementById('modalTaskGoal').value.trim(),
+                budget: document.getElementById('modalTaskBudget').value.trim(),
                 notes: document.getElementById('modalTaskNotes').value.trim(),
                 labels: modalTempLabels,
                 checklist: modalTempChecklist
@@ -4582,7 +4639,7 @@
             `;
             html += plannerData.members.map(m => {
                 const isActive = currentFilterId === m.id;
-                const count = plannerData.tasks.filter(t => t.assignedTo === m.id).length;
+                const count = plannerData.tasks.filter(t => getTaskAssignees(t).includes(m.id)).length;
                 return `
                     <button onclick="quickFilterMember('${m.id}')" class="nav-item justify-between ${isActive ? 'active' : ''}">
                         <span class="flex items-center gap-2.5 truncate">
@@ -4604,7 +4661,7 @@
                 `;
                 chipsHtml += plannerData.members.map(m => {
                     const isActive = currentFilterId === m.id;
-                    const count = plannerData.tasks.filter(t => t.assignedTo === m.id).length;
+                    const count = plannerData.tasks.filter(t => getTaskAssignees(t).includes(m.id)).length;
                     const firstName = m.fullName.split(' ')[0];
                     return `
                         <button onclick="quickFilterMember('${m.id}')" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold flex items-center gap-1.5 shrink-0 transition ${isActive ? 'bg-sky-600 text-white shadow-2xs' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}">
@@ -4706,7 +4763,8 @@
             workspaceStore.projects.forEach(p => {
                 p.members = plannerData.members;
                 (p.tasks || []).forEach(t => {
-                    if (t.assignedTo === memberId) t.assignedTo = '';
+                    const list = getTaskAssignees(t).filter(id => id !== memberId);
+                    t.assignedTo = list;
                 });
             });
             if (currentFilterId === memberId) currentFilterId = 'ALL';
