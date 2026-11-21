@@ -473,16 +473,13 @@
         <!-- Backdrop to close sidebar on Mobile (sits below header so logo is never covered) -->
         <div id="mobileSidebarBackdrop" onclick="toggleSidebar()" class="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] z-30 hidden md:hidden"></div>
 
-        <!-- Desktop Spacer (Reserves 64px rail width so hover expansion overlays smoothly like Instagram) -->
-        <div class="hidden md:block w-16 shrink-0"></div>
-
-        <!-- ISOLATED SIDEBAR PANEL (Instagram-style hover expand on desktop, drawer on mobile) -->
+        <!-- ISOLATED SIDEBAR PANEL (Instagram-style hover expand on desktop pushing content beside it, drawer on mobile) -->
         <aside id="appSidebar" onmouseenter="onSidebarMouseEnter()" onmouseleave="onSidebarMouseLeave()"
-            class="absolute inset-y-0 left-0 w-0 md:w-16 border-r-0 md:border-r bg-white dark:bg-[#111827] border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between shrink-0 z-40 shadow-none transition-all duration-200 ease-out overflow-hidden">
+            class="absolute md:static inset-y-0 left-0 border-r bg-white dark:bg-[#111827] border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between shrink-0 z-40 md:z-20 shadow-none transition-all duration-200 ease-out overflow-hidden">
             <div id="sidebarExpandedTop" class="p-3 pt-4 space-y-5 w-60 overflow-y-auto overflow-x-hidden">
                 <!-- Active Project / Quick Switcher Card -->
-                <div id="sidebarProjectCard" class="p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 transition-colors">
-                    <div id="sidebarProjectCardHeader" class="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 px-1 transition-opacity">
+                <div id="sidebarProjectCard" class="p-1.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 transition-colors">
+                    <div id="sidebarProjectCardHeader" class="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 px-1.5 transition-opacity">
                         <span id="sidebarProjectCategoryLabel">Active Project</span>
                         <div class="flex items-center gap-1">
                             <button onclick="openProjectModal(null, workspaceStore.activeProjectId)" title="Edit current workspace" class="w-4 h-4 rounded hover:bg-slate-200/70 dark:hover:bg-slate-700 text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 flex items-center justify-center transition cursor-pointer">
@@ -494,9 +491,9 @@
                         </div>
                     </div>
 
-                    <!-- Switcher Button (Icon stays locked in exact position) -->
+                    <!-- Switcher Button (Icon locked at exact same 24px X-axis as nav icons) -->
                     <button id="sidebarProjectSwitchBtn" type="button" onclick="toggleSidebarProjectDropdown()"
-                        class="w-full text-left bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 dark:hover:border-sky-500 rounded-xl px-2 py-2 flex items-center justify-between gap-2 transition cursor-pointer group">
+                        class="w-full text-left bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 dark:hover:border-sky-500 rounded-xl px-1.5 py-2 flex items-center justify-between gap-2 transition cursor-pointer group">
                         <div class="flex items-center gap-2.5 min-w-0">
                             <i id="sidebarActiveProjectIcon" class="fa-solid fa-briefcase w-4 text-center text-sky-500 text-xs shrink-0"></i>
                             <span id="sidebarProjectTitleDisplay" class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 leading-snug truncate transition-opacity">
@@ -1956,13 +1953,15 @@
                 if (toggleIcon) toggleIcon.className = 'fa-solid fa-bars text-xs';
                 if (backdrop) backdrop.classList.add('hidden');
             } else {
-                sidebar.classList.add('w-60', 'border-r', 'shadow-2xl');
+                sidebar.classList.add('w-60', 'border-r');
+                if (!isDesktop) sidebar.classList.add('shadow-2xl');
                 if (toggleIcon) toggleIcon.className = 'fa-solid fa-xmark text-xs';
                 if (backdrop) {
                     if (!isDesktop) backdrop.classList.remove('hidden');
                     else backdrop.classList.add('hidden');
                 }
             }
+            setTimeout(() => { if (currentView === 'charts') renderChartsView(); }, 220);
         }
 
         function onSidebarMouseEnter() {
