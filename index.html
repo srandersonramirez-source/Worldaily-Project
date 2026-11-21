@@ -552,6 +552,16 @@
                         <i class="fa-solid fa-chart-pie w-4 text-center shrink-0"></i>
                         <span data-i18n="nav_metrics">Insights &amp; Metrics</span>
                     </button>
+
+                    <p data-i18n="nav_strategy_ops" class="sidebar-section-label px-3 pt-2 text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1">Strategy &amp; Operations</p>
+                    <button onclick="switchView('bmc')" id="pill-bmc" title="Business Model Canvas" class="nav-item">
+                        <i class="fa-solid fa-table-cells-large w-4 text-center shrink-0"></i>
+                        <span data-i18n="nav_bmc">Business Model Canvas</span>
+                    </button>
+                    <button onclick="switchView('mindmap')" id="pill-mindmap" title="Strategy Mind Map" class="nav-item">
+                        <i class="fa-solid fa-diagram-project w-4 text-center shrink-0"></i>
+                        <span data-i18n="nav_mindmap">Strategy Mind Map</span>
+                    </button>
                 </div>
 
                 <!-- Quick Member Filter -->
@@ -928,6 +938,111 @@
                             </div>
                             <div class="p-5 flex-1 relative min-h-[210px]">
                                 <canvas id="chartMembersCanvas"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================================ -->
+                <!-- VIEW 5: BUSINESS MODEL CANVAS (Strategy & Operations) -->
+                <!-- ============================================================================ -->
+                <section id="view-bmc" class="h-full w-full flex flex-col overflow-hidden hidden">
+                    <!-- Top Toolbar -->
+                    <div class="bg-white/90 dark:bg-[#111827]/90 border-b border-slate-200/80 dark:border-slate-800 px-3.5 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+                        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                            <span class="font-semibold text-slate-700 dark:text-slate-200" data-i18n="bmc_note_color">Card color:</span>
+                            <div class="flex items-center gap-1.5" id="bmcColorPicker">
+                                <button onclick="setBmcCardColor('sky')" data-bmc-color="sky" class="w-5 h-5 rounded-full bg-sky-500 ring-2 ring-offset-2 ring-sky-500 dark:ring-offset-slate-900 cursor-pointer transition"></button>
+                                <button onclick="setBmcCardColor('amber')" data-bmc-color="amber" class="w-5 h-5 rounded-full bg-amber-400 cursor-pointer transition"></button>
+                                <button onclick="setBmcCardColor('emerald')" data-bmc-color="emerald" class="w-5 h-5 rounded-full bg-emerald-500 cursor-pointer transition"></button>
+                                <button onclick="setBmcCardColor('violet')" data-bmc-color="violet" class="w-5 h-5 rounded-full bg-violet-500 cursor-pointer transition"></button>
+                                <button onclick="setBmcCardColor('rose')" data-bmc-color="rose" class="w-5 h-5 rounded-full bg-rose-500 cursor-pointer transition"></button>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 ml-auto">
+                            <span id="bmcTotalCardsBadge" class="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 text-[11px] font-semibold">0 cards</span>
+                        </div>
+                    </div>
+
+                    <!-- 9-Block Osterwalder Canvas Grid -->
+                    <div class="flex-1 overflow-auto p-3 sm:p-5">
+                        <div id="bmcGridContainer" class="min-w-[960px] lg:min-w-0 max-w-[1600px] mx-auto grid grid-cols-10 gap-2.5 sm:gap-3 auto-rows-fr">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ============================================================================ -->
+                <!-- VIEW 6: STRATEGY MIND MAP & DRAWING CANVAS (Strategy & Operations) -->
+                <!-- ============================================================================ -->
+                <section id="view-mindmap" class="h-full w-full flex flex-col overflow-hidden hidden">
+                    <!-- Mind Map & Drawing Toolbar -->
+                    <div class="bg-white/90 dark:bg-[#111827]/90 border-b border-slate-200/80 dark:border-slate-800 px-3.5 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <!-- Tool Mode Switcher -->
+                            <div class="inline-flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60">
+                                <button onclick="setMindMapTool('select')" id="mm-tool-select" class="w-[88px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-arrow-pointer text-[10px]"></i>
+                                    <span data-i18n="mm_select">Move</span>
+                                </button>
+                                <button onclick="setMindMapTool('draw')" id="mm-tool-draw" class="w-[88px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-pen text-[10px]"></i>
+                                    <span data-i18n="mm_draw">Draw</span>
+                                </button>
+                                <button onclick="setMindMapTool('connect')" id="mm-tool-connect" class="w-[96px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5">
+                                    <i class="fa-solid fa-link text-[10px]"></i>
+                                    <span data-i18n="mm_connect">Connect</span>
+                                </button>
+                            </div>
+
+                            <!-- Node & Stroke Color Picker -->
+                            <div class="flex items-center gap-1.5 px-2 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60" id="mmColorPicker">
+                                <button onclick="setMindMapColor('#0284C7')" data-mm-color="#0284C7" class="w-4 h-4 rounded-full bg-sky-600 ring-2 ring-offset-1 ring-sky-500 dark:ring-offset-slate-800 cursor-pointer"></button>
+                                <button onclick="setMindMapColor('#10B981')" data-mm-color="#10B981" class="w-4 h-4 rounded-full bg-emerald-500 cursor-pointer"></button>
+                                <button onclick="setMindMapColor('#F59E0B')" data-mm-color="#F59E0B" class="w-4 h-4 rounded-full bg-amber-500 cursor-pointer"></button>
+                                <button onclick="setMindMapColor('#8B5CF6')" data-mm-color="#8B5CF6" class="w-4 h-4 rounded-full bg-violet-500 cursor-pointer"></button>
+                                <button onclick="setMindMapColor('#F43F5E')" data-mm-color="#F43F5E" class="w-4 h-4 rounded-full bg-rose-500 cursor-pointer"></button>
+                            </div>
+
+                            <!-- Add Node Actions -->
+                            <button onclick="addMindMapNode(false)" class="w-[116px] justify-center px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs transition cursor-pointer whitespace-nowrap">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                                <span data-i18n="mm_add_node">Add Idea</span>
+                            </button>
+                            <button onclick="addMindMapNode(true)" id="mmAddChildBtn" class="w-[122px] justify-center px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 text-sky-600 dark:text-sky-400 border border-sky-200 dark:border-sky-800 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer whitespace-nowrap">
+                                <i class="fa-solid fa-code-branch text-[10px]"></i>
+                                <span data-i18n="mm_add_child">Add Branch</span>
+                            </button>
+                        </div>
+
+                        <div class="flex items-center gap-2 ml-auto">
+                            <button onclick="undoMindMapStroke()" title="Undo last drawing stroke" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                                <i class="fa-solid fa-rotate-left text-[10px]"></i>
+                                <span data-i18n="mm_undo_draw">Undo</span>
+                            </button>
+                            <button onclick="clearMindMapStrokes()" title="Clear drawings" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-600 dark:text-slate-300 hover:text-rose-600 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                                <i class="fa-solid fa-eraser text-[10px]"></i>
+                                <span data-i18n="mm_clear_draw">Clear Ink</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Interactive Canvas Area -->
+                    <div class="flex-1 overflow-auto p-3 sm:p-5">
+                        <div id="mindMapViewport"
+                            class="relative w-full h-full min-h-[560px] min-w-[900px] rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#0F172A] shadow-xs overflow-hidden select-none"
+                            style="background-image: radial-gradient(rgba(148,163,184,0.28) 1px, transparent 1px); background-size: 20px 20px;">
+                            <!-- SVG Layer: Connections + Freehand Drawings -->
+                            <svg id="mindMapSvgLayer" class="absolute inset-0 w-full h-full pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+                                <g id="mindMapEdgesGroup"></g>
+                                <g id="mindMapStrokesGroup"></g>
+                                <path id="mindMapLiveStroke" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="3" opacity="0.9"></path>
+                            </svg>
+                            <!-- HTML Layer: Draggable Mind Map Nodes -->
+                            <div id="mindMapNodesLayer" class="absolute inset-0 w-full h-full"></div>
+                            <!-- Subtle Hint Pill -->
+                            <div class="absolute bottom-3 left-3 px-3 py-1.5 rounded-xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 pointer-events-none backdrop-blur-xs">
+                                <span data-i18n="mm_hint">Drag nodes to organize • Double-click to edit • Switch to Draw to sketch freely</span>
                             </div>
                         </div>
                     </div>
@@ -1492,6 +1607,9 @@
                 nav_schedule: 'Schedule',
                 nav_gantt: 'Gantt Chart',
                 nav_metrics: 'Insights & Metrics',
+                nav_strategy_ops: 'Strategy & Operations',
+                nav_bmc: 'Business Model Canvas',
+                nav_mindmap: 'Strategy Mind Map',
                 nav_team: 'Team',
                 nav_manage: 'Manage',
                 saved_locally: 'Saved locally',
@@ -1593,6 +1711,20 @@
                 view_gantt_sub: 'Interactive timeline, durations & delivery progress',
                 view_charts_title: 'Insights & Metrics',
                 view_charts_sub: 'Team performance indicators and workload breakdown',
+                view_bmc_title: 'Business Model Canvas',
+                view_bmc_sub: '9-block strategic overview of partners, value, channels & revenue',
+                view_mindmap_title: 'Strategy Mind Map',
+                view_mindmap_sub: 'Visual strategy mapping, connected ideas & freehand sketching',
+                bmc_note_color: 'Card color:',
+                bmc_add_ph: 'Add item...',
+                mm_select: 'Move',
+                mm_draw: 'Draw',
+                mm_connect: 'Connect',
+                mm_add_node: 'Add Idea',
+                mm_add_child: 'Add Branch',
+                mm_undo_draw: 'Undo',
+                mm_clear_draw: 'Clear Ink',
+                mm_hint: 'Drag nodes to organize • Double-click to edit • Switch to Draw to sketch freely',
                 mob_gantt: 'Gantt',
                 gantt_day: 'Day',
                 gantt_week: 'Week',
@@ -1663,6 +1795,9 @@
                 nav_schedule: 'Cronograma',
                 nav_gantt: 'Gráfico de Gantt',
                 nav_metrics: 'Insights & Métricas',
+                nav_strategy_ops: 'Estratégia & Operações',
+                nav_bmc: 'Business Model Canvas',
+                nav_mindmap: 'Mapa Mental Estratégico',
                 nav_team: 'Equipe',
                 nav_manage: 'Gerenciar',
                 saved_locally: 'Salvo localmente',
@@ -1764,6 +1899,20 @@
                 view_gantt_sub: 'Linha do tempo interativa, durações e progresso das entregas',
                 view_charts_title: 'Insights & Métricas',
                 view_charts_sub: 'Indicadores de desempenho da equipe e carga de trabalho',
+                view_bmc_title: 'Business Model Canvas',
+                view_bmc_sub: 'Visão estratégica em 9 blocos de parcerias, valor, canais e receita',
+                view_mindmap_title: 'Mapa Mental Estratégico',
+                view_mindmap_sub: 'Mapeamento visual de estratégia, conexões e desenho livre',
+                bmc_note_color: 'Cor do card:',
+                bmc_add_ph: 'Adicionar item...',
+                mm_select: 'Mover',
+                mm_draw: 'Desenhar',
+                mm_connect: 'Conectar',
+                mm_add_node: 'Nova Ideia',
+                mm_add_child: 'Ramificar',
+                mm_undo_draw: 'Desfazer',
+                mm_clear_draw: 'Limpar Traços',
+                mm_hint: 'Arraste os blocos para organizar • Duplo clique para editar • Use Desenhar para rabiscar livremente',
                 mob_gantt: 'Gantt',
                 gantt_day: 'Dia',
                 gantt_week: 'Semana',
@@ -2279,7 +2428,9 @@
                 board:    { title: 'view_board_title',    subtitle: 'view_board_sub' },
                 calendar: { title: 'view_calendar_title', subtitle: 'view_calendar_sub' },
                 gantt:    { title: 'view_gantt_title',    subtitle: 'view_gantt_sub' },
-                charts:   { title: 'view_charts_title',   subtitle: 'view_charts_sub' }
+                charts:   { title: 'view_charts_title',   subtitle: 'view_charts_sub' },
+                bmc:      { title: 'view_bmc_title',      subtitle: 'view_bmc_sub' },
+                mindmap:  { title: 'view_mindmap_title',  subtitle: 'view_mindmap_sub' }
             };
             const keys = metaKeys[viewName];
             if (keys) {
@@ -2290,7 +2441,7 @@
 
         function switchView(viewName) {
             currentView = viewName;
-            ['projects', 'grid', 'board', 'calendar', 'gantt', 'charts'].forEach(v => {
+            ['projects', 'grid', 'board', 'calendar', 'gantt', 'charts', 'bmc', 'mindmap'].forEach(v => {
                 const viewEl = document.getElementById(`view-${v}`);
                 const pillEl = document.getElementById(`pill-${v}`);
                 const mobBtn = document.getElementById(`mobile-nav-${v}`);
@@ -2331,6 +2482,8 @@
             else if (currentView === 'calendar') renderCalendarView();
             else if (currentView === 'gantt') renderGanttView();
             else if (currentView === 'charts') renderChartsView();
+            else if (currentView === 'bmc') renderBmcView();
+            else if (currentView === 'mindmap') renderMindMapView();
         }
 
         // ============================================================================
@@ -3546,6 +3699,429 @@
                     ${rowsHtml}
                 </div>
             `;
+        }
+
+        // ============================================================================
+        // VIEW 5: BUSINESS MODEL CANVAS (Strategy & Operations)
+        // ============================================================================
+        let bmcActiveColor = 'sky';
+        const BMC_BLOCKS = [
+            { key: 'kp',   en: 'Key Partners',           pt: 'Parcerias-Chave',         icon: 'fa-handshake',         span: 'col-span-2 row-span-2', highlight: false },
+            { key: 'ka',   en: 'Key Activities',         pt: 'Atividades-Chave',        icon: 'fa-gears',             span: 'col-span-2 row-span-1', highlight: false },
+            { key: 'vp',   en: 'Value Propositions',     pt: 'Proposta de Valor',       icon: 'fa-gem',               span: 'col-span-2 row-span-2', highlight: true  },
+            { key: 'cr',   en: 'Customer Relationships', pt: 'Relacionamento',          icon: 'fa-heart',             span: 'col-span-2 row-span-1', highlight: false },
+            { key: 'cs',   en: 'Customer Segments',      pt: 'Segmentos de Clientes',   icon: 'fa-users',             span: 'col-span-2 row-span-2', highlight: false },
+            { key: 'kr',   en: 'Key Resources',          pt: 'Recursos-Chave',          icon: 'fa-cubes',             span: 'col-span-2 row-span-1', highlight: false },
+            { key: 'ch',   en: 'Channels',               pt: 'Canais',                  icon: 'fa-bullhorn',          span: 'col-span-2 row-span-1', highlight: false },
+            { key: 'cost', en: 'Cost Structure',         pt: 'Estrutura de Custos',     icon: 'fa-receipt',           span: 'col-span-5 row-span-1', highlight: false },
+            { key: 'rev',  en: 'Revenue Streams',        pt: 'Fontes de Receita',       icon: 'fa-sack-dollar',       span: 'col-span-5 row-span-1', highlight: false }
+        ];
+
+        const BMC_COLOR_STYLES = {
+            sky:     'bg-sky-50/90 dark:bg-sky-950/40 border-sky-200/80 dark:border-sky-800/70 text-slate-800 dark:text-slate-100',
+            amber:   'bg-amber-50/90 dark:bg-amber-950/35 border-amber-200/80 dark:border-amber-800/70 text-slate-800 dark:text-slate-100',
+            emerald: 'bg-emerald-50/90 dark:bg-emerald-950/35 border-emerald-200/80 dark:border-emerald-800/70 text-slate-800 dark:text-slate-100',
+            violet:  'bg-violet-50/90 dark:bg-violet-950/35 border-violet-200/80 dark:border-violet-800/70 text-slate-800 dark:text-slate-100',
+            rose:    'bg-rose-50/90 dark:bg-rose-950/35 border-rose-200/80 dark:border-rose-800/70 text-slate-800 dark:text-slate-100'
+        };
+
+        function ensureProjectBmc() {
+            if (!plannerData.bmc || typeof plannerData.bmc !== 'object') {
+                plannerData.bmc = {};
+            }
+            BMC_BLOCKS.forEach(b => {
+                if (!Array.isArray(plannerData.bmc[b.key])) plannerData.bmc[b.key] = [];
+            });
+            return plannerData.bmc;
+        }
+
+        function setBmcCardColor(color) {
+            bmcActiveColor = color;
+            document.querySelectorAll('#bmcColorPicker [data-bmc-color]').forEach(btn => {
+                const isSel = btn.getAttribute('data-bmc-color') === color;
+                btn.classList.toggle('ring-2', isSel);
+                btn.classList.toggle('ring-offset-2', isSel);
+                btn.classList.toggle('ring-sky-500', isSel);
+            });
+        }
+
+        function addBmcCard(blockKey) {
+            const input = document.getElementById(`bmc-input-${blockKey}`);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) return;
+            const bmc = ensureProjectBmc();
+            bmc[blockKey].push({ id: 'bmc-' + Date.now(), text, color: bmcActiveColor });
+            input.value = '';
+            saveDataState(currentLang === 'pt' ? 'Card adicionado ao Canvas!' : 'Canvas card added!');
+        }
+
+        function updateBmcCardText(blockKey, cardId, el) {
+            const bmc = ensureProjectBmc();
+            const card = bmc[blockKey].find(c => c.id === cardId);
+            const nextText = (el.textContent || '').trim();
+            if (!card) return;
+            if (!nextText) {
+                deleteBmcCard(blockKey, cardId);
+                return;
+            }
+            if (card.text !== nextText) {
+                card.text = nextText;
+                saveDataState('');
+            }
+        }
+
+        function deleteBmcCard(blockKey, cardId) {
+            const bmc = ensureProjectBmc();
+            bmc[blockKey] = bmc[blockKey].filter(c => c.id !== cardId);
+            saveDataState(currentLang === 'pt' ? 'Card removido.' : 'Card removed.');
+        }
+
+        function renderBmcView() {
+            const container = document.getElementById('bmcGridContainer');
+            const badge = document.getElementById('bmcTotalCardsBadge');
+            if (!container) return;
+            const bmc = ensureProjectBmc();
+
+            let totalCards = 0;
+            container.innerHTML = BMC_BLOCKS.map(block => {
+                const cards = bmc[block.key] || [];
+                totalCards += cards.length;
+                const title = currentLang === 'pt' ? block.pt : block.en;
+                const borderAccent = block.highlight
+                    ? 'border-sky-300/90 dark:border-sky-700/80 bg-gradient-to-b from-sky-50/50 to-white dark:from-sky-950/25 dark:to-[#111827]'
+                    : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]';
+
+                return `
+                    <div class="${block.span} rounded-2xl border ${borderAccent} shadow-xs flex flex-col min-h-[190px] overflow-hidden">
+                        <div class="px-3.5 py-2.5 border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between gap-2 shrink-0">
+                            <span class="flex items-center gap-2 text-xs font-display font-bold ${block.highlight ? 'text-sky-700 dark:text-sky-300' : 'text-slate-800 dark:text-slate-100'} truncate">
+                                <i class="fa-solid ${block.icon} text-sky-500 text-[11px] shrink-0"></i>
+                                <span class="truncate">${escapeHtml(title)}</span>
+                            </span>
+                            <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold shrink-0">${cards.length}</span>
+                        </div>
+                        <div class="flex-1 p-2.5 space-y-2 overflow-y-auto max-h-[260px]">
+                            ${cards.map(c => `
+                                <div class="group relative p-2.5 pr-7 rounded-xl border ${BMC_COLOR_STYLES[c.color] || BMC_COLOR_STYLES.sky} text-[11px] leading-relaxed shadow-2xs">
+                                    <div contenteditable="true" onblur="updateBmcCardText('${block.key}','${c.id}', this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); this.blur();}"
+                                        class="outline-none whitespace-pre-wrap break-words select-text">${escapeHtml(c.text)}</div>
+                                    <button onclick="deleteBmcCard('${block.key}','${c.id}')" title="Remove"
+                                        class="opacity-0 group-hover:opacity-100 absolute top-1.5 right-1.5 w-5 h-5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer">
+                                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="p-2 border-t border-slate-100 dark:border-slate-800/70 bg-slate-50/50 dark:bg-slate-900/40 flex items-center gap-1.5 shrink-0">
+                            <input id="bmc-input-${block.key}" type="text" placeholder="${t('bmc_add_ph')}" onkeydown="if(event.key==='Enter') addBmcCard('${block.key}')"
+                                class="flex-1 min-w-0 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-[11px] text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
+                            <button onclick="addBmcCard('${block.key}')" class="w-7 h-7 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-600 dark:text-sky-400 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0">
+                                <i class="fa-solid fa-plus text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            if (badge) {
+                badge.textContent = currentLang === 'pt' ? `${totalCards} cards` : `${totalCards} cards`;
+            }
+        }
+
+        // ============================================================================
+        // VIEW 6: STRATEGY MIND MAP & FREEHAND DRAWING CANVAS
+        // ============================================================================
+        let mindMapTool = 'select'; // 'select' | 'draw' | 'connect'
+        let mindMapColor = '#0284C7';
+        let mindMapSelectedNodeId = null;
+        let mindMapConnectSourceId = null;
+        let mindMapListenersBound = false;
+        let mmDragState = null;
+        let mmDrawState = null;
+
+        function ensureProjectMindMap() {
+            if (!plannerData.mindMap || typeof plannerData.mindMap !== 'object') {
+                plannerData.mindMap = {
+                    nodes: [
+                        { id: 'mm-root', text: plannerData.planTitle || 'Core Strategy', x: 380, y: 230, color: '#0284C7' }
+                    ],
+                    edges: [],
+                    strokes: []
+                };
+            }
+            if (!Array.isArray(plannerData.mindMap.nodes)) plannerData.mindMap.nodes = [];
+            if (!Array.isArray(plannerData.mindMap.edges)) plannerData.mindMap.edges = [];
+            if (!Array.isArray(plannerData.mindMap.strokes)) plannerData.mindMap.strokes = [];
+            return plannerData.mindMap;
+        }
+
+        function setMindMapTool(tool) {
+            mindMapTool = tool;
+            mindMapConnectSourceId = null;
+            ['select', 'draw', 'connect'].forEach(mode => {
+                const btn = document.getElementById(`mm-tool-${mode}`);
+                if (!btn) return;
+                const wCls = mode === 'connect' ? 'w-[96px]' : 'w-[88px]';
+                btn.className = mode === tool
+                    ? `${wCls} text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs flex items-center justify-center gap-1.5`
+                    : `${wCls} text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 flex items-center justify-center gap-1.5`;
+            });
+            const vp = document.getElementById('mindMapViewport');
+            if (vp) {
+                vp.style.cursor = tool === 'draw' ? 'crosshair' : (tool === 'connect' ? 'alias' : 'default');
+            }
+            renderMindMapView();
+        }
+
+        function setMindMapColor(hex) {
+            mindMapColor = hex;
+            document.querySelectorAll('#mmColorPicker [data-mm-color]').forEach(btn => {
+                const isSel = btn.getAttribute('data-mm-color') === hex;
+                btn.classList.toggle('ring-2', isSel);
+                btn.classList.toggle('ring-offset-1', isSel);
+                btn.classList.toggle('ring-sky-500', isSel);
+            });
+            if (mindMapSelectedNodeId) {
+                const mm = ensureProjectMindMap();
+                const node = mm.nodes.find(n => n.id === mindMapSelectedNodeId);
+                if (node) {
+                    node.color = hex;
+                    saveDataState('');
+                }
+            }
+        }
+
+        function addMindMapNode(asChild = false) {
+            const mm = ensureProjectMindMap();
+            const parent = asChild
+                ? (mm.nodes.find(n => n.id === mindMapSelectedNodeId) || mm.nodes[0])
+                : null;
+            const id = 'mm-' + Date.now();
+            const angle = Math.random() * Math.PI * 2;
+            const x = parent ? Math.max(40, Math.min(760, Math.round(parent.x + Math.cos(angle) * 200))) : 160 + Math.round(Math.random() * 440);
+            const y = parent ? Math.max(40, Math.min(480, Math.round(parent.y + Math.sin(angle) * 140))) : 100 + Math.round(Math.random() * 260);
+            const label = currentLang === 'pt' ? (parent ? 'Nova Ramificação' : 'Nova Ideia') : (parent ? 'New Branch' : 'New Idea');
+
+            mm.nodes.push({ id, text: label, x, y, color: mindMapColor });
+            if (parent) {
+                mm.edges.push({ id: 'e-' + Date.now(), from: parent.id, to: id });
+            }
+            mindMapSelectedNodeId = id;
+            saveDataState('');
+        }
+
+        function deleteMindMapNode(nodeId) {
+            const mm = ensureProjectMindMap();
+            mm.nodes = mm.nodes.filter(n => n.id !== nodeId);
+            mm.edges = mm.edges.filter(e => e.from !== nodeId && e.to !== nodeId);
+            if (mindMapSelectedNodeId === nodeId) mindMapSelectedNodeId = null;
+            if (mindMapConnectSourceId === nodeId) mindMapConnectSourceId = null;
+            saveDataState('');
+        }
+
+        function editMindMapNodeText(nodeId, newText) {
+            const mm = ensureProjectMindMap();
+            const node = mm.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+            const clean = (newText || '').trim();
+            if (clean && clean !== node.text) {
+                node.text = clean;
+                saveDataState('');
+            }
+        }
+
+        function undoMindMapStroke() {
+            const mm = ensureProjectMindMap();
+            if (mm.strokes.length === 0) return;
+            mm.strokes.pop();
+            saveDataState('');
+        }
+
+        function clearMindMapStrokes() {
+            const mm = ensureProjectMindMap();
+            if (mm.strokes.length === 0) return;
+            mm.strokes = [];
+            saveDataState(currentLang === 'pt' ? 'Traços limpos!' : 'Drawings cleared!');
+        }
+
+        function bindMindMapCanvasEvents() {
+            if (mindMapListenersBound) return;
+            mindMapListenersBound = true;
+            const vp = document.getElementById('mindMapViewport');
+            if (!vp) return;
+
+            vp.addEventListener('pointerdown', (e) => {
+                if (mindMapTool !== 'draw') return;
+                if (e.target.closest('[data-mm-node]')) return;
+                const rect = vp.getBoundingClientRect();
+                const x = Math.round(e.clientX - rect.left);
+                const y = Math.round(e.clientY - rect.top);
+                mmDrawState = { points: [[x, y]], color: mindMapColor };
+                const live = document.getElementById('mindMapLiveStroke');
+                if (live) {
+                    live.setAttribute('stroke', mindMapColor);
+                    live.setAttribute('d', `M ${x} ${y}`);
+                }
+            });
+
+            window.addEventListener('pointermove', (e) => {
+                if (mmDragState) {
+                    const vpEl = document.getElementById('mindMapViewport');
+                    if (!vpEl) return;
+                    const rect = vpEl.getBoundingClientRect();
+                    const nx = Math.max(12, Math.min(rect.width - 150, Math.round(e.clientX - rect.left - mmDragState.offsetX)));
+                    const ny = Math.max(12, Math.min(rect.height - 60, Math.round(e.clientY - rect.top - mmDragState.offsetY)));
+                    mmDragState.node.x = nx;
+                    mmDragState.node.y = ny;
+                    mmDragState.moved = true;
+                    const el = document.querySelector(`[data-mm-node="${mmDragState.node.id}"]`);
+                    if (el) {
+                        el.style.left = nx + 'px';
+                        el.style.top = ny + 'px';
+                    }
+                    renderMindMapSvgOnly();
+                } else if (mmDrawState) {
+                    const vpEl = document.getElementById('mindMapViewport');
+                    if (!vpEl) return;
+                    const rect = vpEl.getBoundingClientRect();
+                    const x = Math.round(e.clientX - rect.left);
+                    const y = Math.round(e.clientY - rect.top);
+                    mmDrawState.points.push([x, y]);
+                    const live = document.getElementById('mindMapLiveStroke');
+                    if (live) {
+                        const d = mmDrawState.points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+                        live.setAttribute('d', d);
+                    }
+                }
+            });
+
+            window.addEventListener('pointerup', () => {
+                if (mmDragState) {
+                    const wasMoved = mmDragState.moved;
+                    mmDragState = null;
+                    if (wasMoved) saveDataState('');
+                }
+                if (mmDrawState) {
+                    const live = document.getElementById('mindMapLiveStroke');
+                    if (live) live.setAttribute('d', '');
+                    if (mmDrawState.points.length > 1) {
+                        const mm = ensureProjectMindMap();
+                        const d = mmDrawState.points.map((p, idx) => `${idx === 0 ? 'M' : 'L'} ${p[0]} ${p[1]}`).join(' ');
+                        mm.strokes.push({ id: 's-' + Date.now(), d, color: mmDrawState.color });
+                        mmDrawState = null;
+                        saveDataState('');
+                    } else {
+                        mmDrawState = null;
+                    }
+                }
+            });
+        }
+
+        function handleMindMapNodePointerDown(e, nodeId) {
+            if (e.target.closest('button') || e.target.getAttribute('contenteditable') === 'true') return;
+            e.stopPropagation();
+
+            const mm = ensureProjectMindMap();
+            const node = mm.nodes.find(n => n.id === nodeId);
+            if (!node) return;
+
+            if (mindMapTool === 'connect') {
+                if (!mindMapConnectSourceId) {
+                    mindMapConnectSourceId = nodeId;
+                    mindMapSelectedNodeId = nodeId;
+                    renderMindMapView();
+                } else if (mindMapConnectSourceId !== nodeId) {
+                    const exists = mm.edges.some(ed =>
+                        (ed.from === mindMapConnectSourceId && ed.to === nodeId) ||
+                        (ed.from === nodeId && ed.to === mindMapConnectSourceId)
+                    );
+                    if (!exists) {
+                        mm.edges.push({ id: 'e-' + Date.now(), from: mindMapConnectSourceId, to: nodeId });
+                        saveDataState('');
+                    }
+                    mindMapConnectSourceId = null;
+                    renderMindMapView();
+                } else {
+                    mindMapConnectSourceId = null;
+                    renderMindMapView();
+                }
+                return;
+            }
+
+            if (mindMapTool === 'select') {
+                mindMapSelectedNodeId = nodeId;
+                const vp = document.getElementById('mindMapViewport');
+                if (!vp) return;
+                const rect = vp.getBoundingClientRect();
+                mmDragState = {
+                    node,
+                    offsetX: (e.clientX - rect.left) - node.x,
+                    offsetY: (e.clientY - rect.top) - node.y,
+                    moved: false
+                };
+                renderMindMapNodesSelection();
+            }
+        }
+
+        function renderMindMapNodesSelection() {
+            document.querySelectorAll('[data-mm-node]').forEach(el => {
+                const id = el.getAttribute('data-mm-node');
+                const isSel = id === mindMapSelectedNodeId || id === mindMapConnectSourceId;
+                el.classList.toggle('ring-2', isSel);
+                el.classList.toggle('ring-sky-500', isSel);
+            });
+        }
+
+        function renderMindMapSvgOnly() {
+            const edgesGroup = document.getElementById('mindMapEdgesGroup');
+            const strokesGroup = document.getElementById('mindMapStrokesGroup');
+            if (!edgesGroup || !strokesGroup) return;
+            const mm = ensureProjectMindMap();
+
+            edgesGroup.innerHTML = mm.edges.map(ed => {
+                const fromNode = mm.nodes.find(n => n.id === ed.from);
+                const toNode = mm.nodes.find(n => n.id === ed.to);
+                if (!fromNode || !toNode) return '';
+                const x1 = fromNode.x + 75, y1 = fromNode.y + 24;
+                const x2 = toNode.x + 75, y2 = toNode.y + 24;
+                const cx = (x1 + x2) / 2;
+                return `<path d="M ${x1} ${y1} C ${cx} ${y1}, ${cx} ${y2}, ${x2} ${y2}" fill="none" stroke="${escapeHtml(toNode.color || '#0284C7')}" stroke-width="2.5" stroke-opacity="0.55" />`;
+            }).join('');
+
+            strokesGroup.innerHTML = mm.strokes.map(st =>
+                `<path d="${escapeHtml(st.d)}" fill="none" stroke="${escapeHtml(st.color || '#0284C7')}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.85" />`
+            ).join('');
+        }
+
+        function renderMindMapView() {
+            bindMindMapCanvasEvents();
+            const nodesLayer = document.getElementById('mindMapNodesLayer');
+            if (!nodesLayer) return;
+            const mm = ensureProjectMindMap();
+
+            renderMindMapSvgOnly();
+
+            nodesLayer.innerHTML = mm.nodes.map(node => {
+                const isSel = node.id === mindMapSelectedNodeId || node.id === mindMapConnectSourceId;
+                return `
+                    <div data-mm-node="${node.id}"
+                        onpointerdown="handleMindMapNodePointerDown(event, '${node.id}')"
+                        style="left:${node.x}px; top:${node.y}px; border-left: 4px solid ${escapeHtml(node.color || '#0284C7')};"
+                        class="group absolute min-w-[150px] max-w-[240px] px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-md hover:shadow-lg transition-shadow cursor-grab active:cursor-grabbing ${isSel ? 'ring-2 ring-sky-500' : ''}">
+                        <div class="flex items-center justify-between gap-2">
+                            <span ondblclick="this.setAttribute('contenteditable','true'); this.focus();"
+                                onblur="this.removeAttribute('contenteditable'); editMindMapNodeText('${node.id}', this.textContent);"
+                                onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}"
+                                class="text-xs font-display font-bold text-slate-800 dark:text-slate-100 outline-none break-words cursor-text">${escapeHtml(node.text)}</span>
+                            <button onclick="deleteMindMapNode('${node.id}')" title="Delete node"
+                                class="opacity-0 group-hover:opacity-100 w-5 h-5 rounded-md text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition cursor-pointer shrink-0">
+                                <i class="fa-solid fa-xmark text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
         }
 
         function renderChartsView() {
