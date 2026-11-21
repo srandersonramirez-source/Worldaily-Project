@@ -707,6 +707,57 @@
                         <div id="projectsHubGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             <!-- Generated via JS -->
                         </div>
+
+                        <!-- Global Team Forum & Project Discussions -->
+                        <div id="globalForumSection" class="pt-6 border-t border-slate-200/80 dark:border-slate-800 space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-3">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                                        <i class="fa-regular fa-comments text-sm"></i>
+                                    </div>
+                                    <div>
+                                        <h3 data-i18n="forum_title" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Team Forum &amp; Global Chat</h3>
+                                        <p data-i18n="forum_sub" class="text-[11px] text-slate-500 dark:text-slate-400">Create topic posts, share updates &amp; discuss across projects</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-2">
+                                    <select id="forumFilterProjectSelect" onchange="setForumProjectFilter(this.value)"
+                                        class="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer">
+                                        <option value="ALL">All Topics</option>
+                                    </select>
+                                    <span id="forumPostCountBadge" class="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 text-[11px] font-semibold">0</span>
+                                </div>
+                            </div>
+
+                            <!-- New Forum Post Composer -->
+                            <div class="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-4 shadow-xs space-y-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                    <input id="forumPostTitleInput" type="text" data-i18n-placeholder="forum_title_ph" placeholder="Post title or topic..."
+                                        class="sm:col-span-2 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 transition" />
+                                    <select id="forumPostProjectSelect"
+                                        class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer">
+                                        <option value="">General</option>
+                                    </select>
+                                </div>
+                                <textarea id="forumPostBodyInput" rows="2" data-i18n-placeholder="forum_body_ph" placeholder="Share an update, question, or decision with the team..."
+                                    class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl p-3 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 resize-none transition"></textarea>
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                                        <i class="fa-solid fa-bolt text-sky-500"></i>
+                                        <span data-i18n="forum_realtime_hint">Visible in real time to all team members</span>
+                                    </span>
+                                    <button type="button" onclick="createForumPost()"
+                                        class="w-[136px] justify-center px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-sky-500/20 transition cursor-pointer whitespace-nowrap">
+                                        <i class="fa-regular fa-paper-plane text-[11px]"></i>
+                                        <span data-i18n="forum_publish_btn">Publish Post</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Forum Posts Feed -->
+                            <div id="forumPostsFeed" class="space-y-3"></div>
+                        </div>
                     </div>
                 </section>
 
@@ -1725,6 +1776,16 @@
                 mm_undo_draw: 'Undo',
                 mm_clear_draw: 'Clear Ink',
                 mm_hint: 'Drag nodes to organize • Double-click to edit • Switch to Draw to sketch freely',
+                forum_title: 'Team Forum & Global Chat',
+                forum_sub: 'Create topic posts, share updates & discuss across projects',
+                forum_title_ph: 'Post title or topic...',
+                forum_body_ph: 'Share an update, question, or decision with the team...',
+                forum_realtime_hint: 'Visible in real time to all team members',
+                forum_publish_btn: 'Publish Post',
+                forum_reply_ph: 'Write a comment...',
+                forum_send_btn: 'Send',
+                forum_general: 'General',
+                forum_all_topics: 'All Topics',
                 mob_gantt: 'Gantt',
                 gantt_day: 'Day',
                 gantt_week: 'Week',
@@ -1913,6 +1974,16 @@
                 mm_undo_draw: 'Desfazer',
                 mm_clear_draw: 'Limpar Traços',
                 mm_hint: 'Arraste os blocos para organizar • Duplo clique para editar • Use Desenhar para rabiscar livremente',
+                forum_title: 'Fórum do Time & Chat Global',
+                forum_sub: 'Crie tópicos sobre os projetos, compartilhe novidades e comente em equipe',
+                forum_title_ph: 'Título do post ou assunto...',
+                forum_body_ph: 'Compartilhe uma atualização, dúvida ou decisão com o time...',
+                forum_realtime_hint: 'Visível em tempo real para toda a equipe',
+                forum_publish_btn: 'Publicar Post',
+                forum_reply_ph: 'Escreva um comentário...',
+                forum_send_btn: 'Enviar',
+                forum_general: 'Geral',
+                forum_all_topics: 'Todos os Tópicos',
                 mob_gantt: 'Gantt',
                 gantt_day: 'Dia',
                 gantt_week: 'Semana',
@@ -2672,6 +2743,7 @@
             `;
 
             grid.innerHTML = cardsHtml;
+            renderGlobalForum();
         }
 
         function setProjectModalCategory(cat) {
@@ -4744,6 +4816,218 @@
         }
 
         // ============================================================================
+        // GLOBAL TEAM FORUM & COMMENTS (Real-time Firestore Collection: forum_posts)
+        // ============================================================================
+        let forumPosts = [];
+        let forumProjectFilter = 'ALL';
+
+        function setForumProjectFilter(val) {
+            forumProjectFilter = val || 'ALL';
+            renderGlobalForum();
+        }
+
+        function formatForumTimestamp(iso) {
+            if (!iso) return '';
+            try {
+                const d = new Date(iso);
+                return d.toLocaleString(currentLang === 'pt' ? 'pt-BR' : 'en-US', {
+                    day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit'
+                });
+            } catch (e) { return ''; }
+        }
+
+        async function createForumPost() {
+            if (!fbDb || !fbCurrentUser) return;
+            const titleEl = document.getElementById('forumPostTitleInput');
+            const bodyEl = document.getElementById('forumPostBodyInput');
+            const projEl = document.getElementById('forumPostProjectSelect');
+            const title = (titleEl?.value || '').trim();
+            const body = (bodyEl?.value || '').trim();
+            if (!title && !body) {
+                showToast(currentLang === 'pt' ? 'Escreva um título ou mensagem!' : 'Write a title or message!');
+                return;
+            }
+            const projId = projEl?.value || '';
+            const proj = workspaceStore.projects.find(p => p.id === projId);
+            const postId = 'fp-' + Date.now();
+            const post = {
+                id: postId,
+                title: title || (proj ? proj.planTitle : t('forum_general')),
+                body,
+                projectId: projId,
+                projectName: proj ? proj.planTitle : '',
+                authorUid: fbCurrentUser.uid,
+                authorName: fbCurrentUser.displayName || fbCurrentUser.email || 'Team Member',
+                authorEmail: fbCurrentUser.email || '',
+                authorPhoto: fbCurrentUser.photoURL || '',
+                createdAt: new Date().toISOString(),
+                comments: []
+            };
+            if (titleEl) titleEl.value = '';
+            if (bodyEl) bodyEl.value = '';
+            try {
+                await fbDb.collection('forum_posts').doc(postId).set(post);
+                showToast(currentLang === 'pt' ? 'Post publicado!' : 'Post published!');
+            } catch (err) {
+                console.error('Forum post error:', err);
+                showToast(currentLang === 'pt' ? 'Erro ao publicar post.' : 'Failed to publish post.');
+            }
+        }
+
+        async function deleteForumPost(postId) {
+            if (!fbDb || !fbCurrentUser) return;
+            try {
+                await fbDb.collection('forum_posts').doc(postId).delete();
+                showToast(currentLang === 'pt' ? 'Post removido.' : 'Post deleted.');
+            } catch (err) {
+                console.error('Delete forum post error:', err);
+            }
+        }
+
+        async function addForumComment(postId) {
+            if (!fbDb || !fbCurrentUser) return;
+            const input = document.getElementById(`forum-reply-${postId}`);
+            const text = (input?.value || '').trim();
+            if (!text) return;
+            const comment = {
+                id: 'fc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+                text,
+                authorUid: fbCurrentUser.uid,
+                authorName: fbCurrentUser.displayName || fbCurrentUser.email || 'Team Member',
+                authorPhoto: fbCurrentUser.photoURL || '',
+                createdAt: new Date().toISOString()
+            };
+            input.value = '';
+            try {
+                await fbDb.collection('forum_posts').doc(postId).update({
+                    comments: firebase.firestore.FieldValue.arrayUnion(comment)
+                });
+            } catch (err) {
+                console.error('Add forum comment error:', err);
+                showToast(currentLang === 'pt' ? 'Erro ao enviar comentário.' : 'Failed to send comment.');
+            }
+        }
+
+        async function deleteForumComment(postId, commentId) {
+            if (!fbDb || !fbCurrentUser) return;
+            const post = forumPosts.find(p => p.id === postId);
+            if (!post) return;
+            const updatedComments = (post.comments || []).filter(c => c.id !== commentId);
+            try {
+                await fbDb.collection('forum_posts').doc(postId).update({ comments: updatedComments });
+            } catch (err) {
+                console.error('Delete comment error:', err);
+            }
+        }
+
+        function renderGlobalForum() {
+            const feed = document.getElementById('forumPostsFeed');
+            const projSelect = document.getElementById('forumPostProjectSelect');
+            const filterSelect = document.getElementById('forumFilterProjectSelect');
+            const countBadge = document.getElementById('forumPostCountBadge');
+            if (!feed) return;
+
+            if (projSelect) {
+                const prev = projSelect.value;
+                projSelect.innerHTML = `<option value="">${t('forum_general')}</option>` +
+                    (workspaceStore.projects || []).map(p => `<option value="${p.id}">${escapeHtml(p.planTitle)}</option>`).join('');
+                if (prev && workspaceStore.projects.some(p => p.id === prev)) projSelect.value = prev;
+            }
+            if (filterSelect) {
+                filterSelect.innerHTML = `<option value="ALL">${t('forum_all_topics')}</option><option value="__GENERAL__">${t('forum_general')}</option>` +
+                    (workspaceStore.projects || []).map(p => `<option value="${p.id}">${escapeHtml(p.planTitle)}</option>`).join('');
+                filterSelect.value = forumProjectFilter;
+            }
+
+            const visiblePosts = forumPosts.filter(p => {
+                if (forumProjectFilter === 'ALL') return true;
+                if (forumProjectFilter === '__GENERAL__') return !p.projectId;
+                return p.projectId === forumProjectFilter;
+            });
+
+            if (countBadge) countBadge.textContent = String(visiblePosts.length);
+
+            if (visiblePosts.length === 0) {
+                feed.innerHTML = `
+                    <div class="bg-white dark:bg-[#111827] border border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center">
+                        <i class="fa-regular fa-comments text-2xl text-sky-400 mb-2"></i>
+                        <p class="font-display font-bold text-xs text-slate-700 dark:text-slate-200">${currentLang === 'pt' ? 'Nenhum tópico publicado ainda' : 'No forum posts yet'}</p>
+                        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-1">${currentLang === 'pt' ? 'Crie o primeiro post acima para iniciar uma conversa com o time.' : 'Create the first post above to start a team discussion.'}</p>
+                    </div>`;
+                return;
+            }
+
+            feed.innerHTML = visiblePosts.map(post => {
+                const isAuthor = fbCurrentUser && post.authorUid === fbCurrentUser.uid;
+                const comments = Array.isArray(post.comments) ? post.comments : [];
+                return `
+                    <article class="wd-card p-4 sm:p-5 space-y-3">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 overflow-hidden">
+                                    ${post.authorPhoto
+                                        ? `<img src="${escapeHtml(post.authorPhoto)}" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl" onerror="this.remove();" />`
+                                        : `<i class="fa-regular fa-user text-xs"></i>`}
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="text-xs font-semibold text-slate-800 dark:text-slate-100 truncate">${escapeHtml(post.authorName)}</span>
+                                        <span class="text-[10px] text-slate-400 dark:text-slate-500">${formatForumTimestamp(post.createdAt)}</span>
+                                        ${post.projectName ? `<span class="px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 text-[10px] font-semibold">${escapeHtml(post.projectName)}</span>` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                            ${isAuthor ? `
+                                <button onclick="deleteForumPost('${post.id}')" title="Delete post" class="w-7 h-7 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition cursor-pointer shrink-0">
+                                    <i class="fa-regular fa-trash-can text-xs"></i>
+                                </button>` : ''}
+                        </div>
+
+                        <div class="space-y-1">
+                            <h4 class="font-display font-bold text-sm text-slate-900 dark:text-white">${escapeHtml(post.title)}</h4>
+                            ${post.body ? `<p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed whitespace-pre-wrap break-words">${escapeHtml(post.body)}</p>` : ''}
+                        </div>
+
+                        <!-- Comments Thread -->
+                        <div class="pt-3 border-t border-slate-100 dark:border-slate-800/80 space-y-2.5">
+                            ${comments.length > 0 ? `
+                                <div class="space-y-2 pl-3 border-l-2 border-sky-200 dark:border-sky-900/70">
+                                    ${comments.map(c => {
+                                        const isCommentAuthor = fbCurrentUser && c.authorUid === fbCurrentUser.uid;
+                                        return `
+                                            <div class="flex items-start justify-between gap-2 group bg-slate-50/80 dark:bg-slate-800/40 rounded-xl px-3 py-2">
+                                                <div class="min-w-0">
+                                                    <div class="flex items-center gap-2">
+                                                        <span class="text-[11px] font-semibold text-slate-800 dark:text-slate-100">${escapeHtml(c.authorName)}</span>
+                                                        <span class="text-[10px] text-slate-400">${formatForumTimestamp(c.createdAt)}</span>
+                                                    </div>
+                                                    <p class="text-xs text-slate-600 dark:text-slate-300 mt-0.5 break-words whitespace-pre-wrap">${escapeHtml(c.text)}</p>
+                                                </div>
+                                                ${isCommentAuthor ? `
+                                                    <button onclick="deleteForumComment('${post.id}', '${c.id}')" class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-500 p-1 transition cursor-pointer shrink-0">
+                                                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                                                    </button>` : ''}
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            ` : ''}
+
+                            <div class="flex items-center gap-2">
+                                <input id="forum-reply-${post.id}" type="text" placeholder="${t('forum_reply_ph')}" onkeydown="if(event.key==='Enter') addForumComment('${post.id}')"
+                                    class="flex-1 bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 transition" />
+                                <button type="button" onclick="addForumComment('${post.id}')"
+                                    class="w-[74px] justify-center px-3 py-1.5 rounded-xl bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-600 text-sky-600 dark:text-sky-400 hover:text-white text-[11px] font-semibold flex items-center gap-1 transition cursor-pointer shrink-0">
+                                    <span>${t('forum_send_btn')}</span>
+                                </button>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        // ============================================================================
         // FIREBASE AUTH & REAL-TIME CLOUD FIRESTORE SYNC (CONCURRENT-SAFE)
         // ============================================================================
         const FIREBASE_CONFIG = {
@@ -5059,6 +5343,7 @@
             fbUnsubscribers.forEach(unsub => { try { unsub(); } catch (e) {} });
             fbUnsubscribers = [];
             fbInitialSyncDone = false;
+            forumPosts = [];
         }
 
         function startFirestoreRealtimeListeners() {
@@ -5131,7 +5416,15 @@
                 updateSyncIndicator(currentLang === 'pt' ? 'Sem permissão no Firestore' : 'Firestore permission error', false);
             });
 
-            fbUnsubscribers.push(unsubShared, unsubProjects, unsubTasks);
+            const unsubForum = fbDb.collection('forum_posts').orderBy('createdAt', 'desc').onSnapshot((snap) => {
+                forumPosts = [];
+                snap.forEach(doc => { forumPosts.push({ ...doc.data(), id: doc.id }); });
+                renderGlobalForum();
+            }, (err) => {
+                console.error('Firestore forum listener error:', err);
+            });
+
+            fbUnsubscribers.push(unsubShared, unsubProjects, unsubTasks, unsubForum);
         }
 
         function applyRemoteFirestoreCache() {
