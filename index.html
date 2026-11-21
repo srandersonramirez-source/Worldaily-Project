@@ -478,7 +478,7 @@
             class="absolute md:static inset-y-0 left-0 border-r bg-white dark:bg-[#111827] border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between shrink-0 z-40 md:z-20 shadow-none transition-all duration-200 ease-out overflow-hidden">
             <div id="sidebarExpandedTop" class="p-3 pt-4 space-y-5 w-60 overflow-y-auto overflow-x-hidden">
                 <!-- Active Project / Quick Switcher Card -->
-                <div id="sidebarProjectCard" class="p-1.5 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 transition-colors">
+                <div id="sidebarProjectCard" class="px-1 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60 transition-colors">
                     <div id="sidebarProjectCardHeader" class="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5 px-1.5 transition-opacity">
                         <span id="sidebarProjectCategoryLabel">Active Project</span>
                         <div class="flex items-center gap-1">
@@ -491,7 +491,7 @@
                         </div>
                     </div>
 
-                    <!-- Switcher Button (Icon locked at exact same 24px X-axis as nav icons) -->
+                    <!-- Switcher Button (Icon locked at exact 24px X-axis in both collapsed & expanded states) -->
                     <button id="sidebarProjectSwitchBtn" type="button" onclick="toggleSidebarProjectDropdown()"
                         class="w-full text-left bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 dark:hover:border-sky-500 rounded-xl px-1.5 py-2 flex items-center justify-between gap-2 transition cursor-pointer group">
                         <div class="flex items-center gap-2.5 min-w-0">
