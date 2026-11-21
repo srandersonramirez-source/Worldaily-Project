@@ -1591,33 +1591,6 @@
                         </div>
                     </div>
 
-                    <!-- Gemini AI Integration (Stored securely in Firestore workspaces/integrations) -->
-                    <div class="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 space-y-2.5">
-                        <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
-                                <i class="fa-solid fa-wand-magic-sparkles text-sky-500"></i>
-                                <span data-i18n="ai_config_title">Gemini AI (Cloud Firestore)</span>
-                            </span>
-                            <span id="geminiConfigBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-semibold">Not set</span>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                            <input id="geminiApiKeyInput" type="password" data-i18n-placeholder="ai_key_ph" placeholder="Paste Gemini API Key..."
-                                class="sm:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3 py-1.5 text-[11px] text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
-                            <select id="geminiModelSelect"
-                                class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer">
-                                <option value="gemini-2.5-flash">2.5 Flash (Fast)</option>
-                                <option value="gemini-2.5-pro">2.5 Pro (Deep)</option>
-                            </select>
-                        </div>
-                        <div class="flex items-center justify-between gap-2">
-                            <span data-i18n="ai_key_hint" class="text-[10px] text-slate-400 dark:text-slate-500">Shared securely with authorized team members</span>
-                            <button type="button" onclick="saveGeminiIntegrationToFirestore()" data-i18n="ai_save_key"
-                                class="px-3 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-600 dark:text-sky-400 hover:text-white text-[11px] font-semibold transition cursor-pointer shrink-0">
-                                Save Key
-                            </button>
-                        </div>
-                    </div>
-
                     <div class="grid grid-cols-2 gap-2.5">
                         <button type="button" onclick="syncAllToFirestore(true)"
                             class="py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold shadow-sm shadow-sky-500/20 transition cursor-pointer flex items-center justify-center gap-2">
@@ -4959,43 +4932,7 @@
         let geminiModel = 'gemini-2.5-flash';
         let aiPendingTasks = [];
 
-        function updateGeminiConfigUI() {
-            const keyInput = document.getElementById('geminiApiKeyInput');
-            const modelSel = document.getElementById('geminiModelSelect');
-            const badge = document.getElementById('geminiConfigBadge');
-            if (keyInput && geminiApiKey) keyInput.value = geminiApiKey;
-            if (modelSel) modelSel.value = geminiModel || 'gemini-2.5-flash';
-            if (badge) {
-                if (geminiApiKey) {
-                    badge.textContent = currentLang === 'pt' ? 'Ativa' : 'Active';
-                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 font-semibold';
-                } else {
-                    badge.textContent = currentLang === 'pt' ? 'Não configurada' : 'Not set';
-                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-semibold';
-                }
-            }
-        }
-
-        async function saveGeminiIntegrationToFirestore() {
-            if (!fbDb || !fbCurrentUser) return;
-            const key = (document.getElementById('geminiApiKeyInput')?.value || '').trim();
-            const model = document.getElementById('geminiModelSelect')?.value || 'gemini-2.5-flash';
-            try {
-                await fbDb.collection('workspaces').doc('integrations').set({
-                    geminiApiKey: key,
-                    geminiModel: model,
-                    updatedAt: new Date().toISOString(),
-                    updatedBy: fbCurrentUser.email || fbCurrentUser.uid
-                }, { merge: true });
-                geminiApiKey = key;
-                geminiModel = model;
-                updateGeminiConfigUI();
-                showToast(currentLang === 'pt' ? 'Chave Gemini salva no Firestore!' : 'Gemini key saved to Firestore!');
-            } catch (err) {
-                console.error('Save Gemini integration error:', err);
-                showAuthError(currentLang === 'pt' ? 'Erro ao salvar chave no Firestore.' : 'Failed to save key to Firestore.');
-            }
-        }
+        function updateGeminiConfigUI() {}
 
         function openAiAssistantModal() {
             updateGeminiConfigUI();
@@ -5022,8 +4959,7 @@
 
         async function callGeminiApi(promptText) {
             if (!geminiApiKey) {
-                openAuthModal();
-                showToast(currentLang === 'pt' ? 'Cadastre a Gemini API Key em Sincronização & Conta!' : 'Add your Gemini API Key in Cloud Sync & Account!');
+                showToast(currentLang === 'pt' ? 'Configure workspaces/integrations no Firestore!' : 'Set workspaces/integrations in Firestore!');
                 return null;
             }
             const bodyEl = document.getElementById('aiResponseBody');
