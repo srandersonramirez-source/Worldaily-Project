@@ -2606,7 +2606,7 @@
             }
         }
 
-        function selectProject(projectId, openDefaultView = true) {
+        function selectProject(projectId, openDefaultView = false) {
             const target = workspaceStore.projects.find(p => p.id === projectId);
             if (!target) return;
             workspaceStore.activeProjectId = target.id;
@@ -2614,9 +2614,15 @@
             try {
                 localStorage.setItem(LOCAL_STORAGE_STORE_KEY, JSON.stringify(workspaceStore));
             } catch (e) {}
+            if (typeof forumProjectFilter !== 'undefined') {
+                forumProjectFilter = target.id;
+                const forumPostSelect = document.getElementById('forumPostProjectSelect');
+                if (forumPostSelect) forumPostSelect.value = target.id;
+            }
             renderSidebarProjectSelector();
             renderMemberFilterButtons();
             updateExecutiveKPIs();
+            if (typeof renderGlobalForum === 'function') renderGlobalForum();
             if (openDefaultView) {
                 switchView('grid');
                 showToast(`Switched to "${plannerData.planTitle}"`);
@@ -2867,7 +2873,7 @@
                     : `<div class="text-[11px] text-slate-400 italic py-1">${total > 0 ? t('card_all_done') : t('card_no_tasks')}</div>`;
 
                 return `
-                    <div onclick="selectProject('${p.id}', true)"
+                    <div onclick="selectProject('${p.id}', false)"
                         class="wd-card p-5 flex flex-col justify-between cursor-pointer relative group ${isCurrent ? 'ring-2 ring-sky-500 border-sky-500/50' : ''}">
                         <div>
                             <!-- Top Row: Icon + Badges + Edit/Delete -->
@@ -5890,7 +5896,7 @@
         // GLOBAL TEAM FORUM & COMMENTS (Real-time Firestore Collection: forum_posts)
         // ============================================================================
         let forumPosts = [];
-        let forumProjectFilter = 'ALL';
+        let forumProjectFilter = '';
 
         function setForumProjectFilter(val) {
             forumProjectFilter = val || 'ALL';
@@ -5998,11 +6004,19 @@
             const countBadge = document.getElementById('forumPostCountBadge');
             if (!feed) return;
 
+            if (!forumProjectFilter || (forumProjectFilter !== 'ALL' && forumProjectFilter !== '__GENERAL__' && !(workspaceStore.projects || []).some(p => p.id === forumProjectFilter))) {
+                forumProjectFilter = workspaceStore.activeProjectId || 'ALL';
+            }
+
             if (projSelect) {
                 const prev = projSelect.value;
                 projSelect.innerHTML = `<option value="">${t('forum_general')}</option>` +
                     (workspaceStore.projects || []).map(p => `<option value="${p.id}">${escapeHtml(p.planTitle)}</option>`).join('');
-                if (prev && workspaceStore.projects.some(p => p.id === prev)) projSelect.value = prev;
+                if (forumProjectFilter && forumProjectFilter !== 'ALL' && forumProjectFilter !== '__GENERAL__' && (workspaceStore.projects || []).some(p => p.id === forumProjectFilter)) {
+                    projSelect.value = forumProjectFilter;
+                } else if (prev && workspaceStore.projects.some(p => p.id === prev)) {
+                    projSelect.value = prev;
+                }
             }
             if (filterSelect) {
                 filterSelect.innerHTML = `<option value="ALL">${t('forum_all_topics')}</option><option value="__GENERAL__">${t('forum_general')}</option>` +
