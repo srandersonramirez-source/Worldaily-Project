@@ -849,23 +849,28 @@
                 <!-- ============================================================================ -->
                 <section id="view-calendar" class="h-full w-full flex flex-col lg:flex-row overflow-y-auto lg:overflow-hidden hidden">
                     <div class="flex-1 flex flex-col min-h-[420px] lg:h-full overflow-hidden bg-white dark:bg-[#111827] border-b lg:border-b-0 lg:border-r border-slate-200/80 dark:border-slate-800">
-                        <div class="px-3.5 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between shrink-0">
+                        <div class="px-3.5 sm:px-6 py-2.5 sm:py-3 border-b border-slate-200/80 dark:border-slate-800 flex flex-wrap items-center justify-between gap-2 shrink-0">
                             <div class="flex items-center gap-2 sm:gap-3">
-                                <button onclick="goToTodayCalendar()" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition">
+                                <button onclick="goToTodayCalendar()" class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition cursor-pointer">
                                     <i class="fa-regular fa-calendar-check text-sky-500"></i> <span data-i18n="cal_today">Today</span>
                                 </button>
                                 <div class="flex items-center gap-1">
-                                    <button onclick="changeCalendarMonth(-1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                    <button onclick="changeCalendarPeriod(-1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 cursor-pointer">
                                         <i class="fa-solid fa-chevron-left text-xs"></i>
                                     </button>
-                                    <button onclick="changeCalendarMonth(1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300">
+                                    <button onclick="changeCalendarPeriod(1)" class="w-7 h-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-300 cursor-pointer">
                                         <i class="fa-solid fa-chevron-right text-xs"></i>
                                     </button>
                                 </div>
                                 <h3 id="calendarMonthTitle" class="font-display text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">October 2026</h3>
                             </div>
                             <div class="flex items-center gap-2">
-                                <span data-i18n="cal_drag_hint" class="text-xs text-slate-400 hidden xl:inline mr-1">Drag tasks from the right panel to schedule on a day</span>
+                                <div class="inline-flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60">
+                                    <button type="button" onclick="setCalendarViewMode('day')" id="cal-mode-day" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">Day</button>
+                                    <button type="button" onclick="setCalendarViewMode('week')" id="cal-mode-week" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">Week</button>
+                                    <button type="button" onclick="setCalendarViewMode('month')" id="cal-mode-month" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs">Month</button>
+                                    <button type="button" onclick="setCalendarViewMode('year')" id="cal-mode-year" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">Year</button>
+                                </div>
                                 <button id="gcalQuickSyncBtn" type="button" onclick="syncGoogleCalendarEvents(true)" title="Sync Google Calendar"
                                     class="hidden w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400 items-center justify-center transition cursor-pointer">
                                     <i class="fa-solid fa-arrows-rotate text-xs"></i>
@@ -877,7 +882,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div class="grid grid-cols-7 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-2 shrink-0">
+                        <div id="calendarWeekdaysHeader" class="grid grid-cols-7 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-2 shrink-0">
                             <div data-i18n="day_sun">Sun</div><div data-i18n="day_mon">Mon</div><div data-i18n="day_tue">Tue</div><div data-i18n="day_wed">Wed</div><div data-i18n="day_thu">Thu</div><div data-i18n="day_fri">Fri</div><div data-i18n="day_sat">Sat</div>
                         </div>
                         <div id="calendarGridContainer" class="flex-1 grid grid-cols-7 auto-rows-fr overflow-y-auto"></div>
@@ -2334,8 +2339,10 @@
         let editingTaskId = null;
         let modalTempLabels = [];
         let modalTempChecklist = [];
-        let calendarYear = 2026;
-        let calendarMonth = 9;
+        let calendarCursorDate = new Date();
+        let calendarYear = calendarCursorDate.getFullYear();
+        let calendarMonth = calendarCursorDate.getMonth();
+        let calendarViewMode = 'month'; // 'day' | 'week' | 'month' | 'year'
         let chartStatusInstance = null, chartPriorityInstance = null, chartBucketInstance = null, chartMembersInstance = null;
         let activeUserId = '';
         let currentFilterId = 'ALL';
@@ -3589,73 +3596,297 @@
         }
 
         // ============================================================================
-        // VIEW 3: CALENDAR
+        // VIEW 3: CALENDAR (Day / Week / Month / Year + All-Day vs Timed Events)
         // ============================================================================
-        function renderCalendarView() {
-            const monthNames = t('months');
-            document.getElementById('calendarMonthTitle').textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
-            updateGcalHeaderButton();
-            const grid = document.getElementById('calendarGridContainer');
-            grid.innerHTML = '';
-            const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
-            const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
-            const daysInPrev = new Date(calendarYear, calendarMonth, 0).getDate();
-            const tasks = getFilteredTasks();
-            const monthKey = getGcalMonthCacheKey();
-            const gcalEvents = gcalEventsCache[monthKey] || [];
+        function toDateStrLocal(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
 
-            for (let i = firstDay - 1; i >= 0; i--) {
-                const cell = document.createElement('div');
-                cell.className = "calendar-cell p-2 bg-slate-50/50 dark:bg-slate-900/40 text-slate-300 dark:text-slate-600 text-xs";
-                cell.innerHTML = `<span>${daysInPrev - i}</span>`;
-                grid.appendChild(cell);
+        function updateCalendarModeButtons() {
+            const isPt = currentLang === 'pt';
+            const labels = {
+                day: isPt ? 'Dia' : 'Day',
+                week: isPt ? 'Semana' : 'Week',
+                month: isPt ? 'Mês' : 'Month',
+                year: isPt ? 'Ano' : 'Year'
+            };
+            ['day', 'week', 'month', 'year'].forEach(mode => {
+                const btn = document.getElementById(`cal-mode-${mode}`);
+                if (!btn) return;
+                btn.textContent = labels[mode];
+                if (mode === calendarViewMode) {
+                    btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs';
+                } else {
+                    btn.className = 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
+                }
+            });
+        }
+
+        function setCalendarViewMode(mode) {
+            if (!['day', 'week', 'month', 'year'].includes(mode)) return;
+            calendarViewMode = mode;
+            renderCalendarView();
+        }
+
+        function getCalendarVisibleRange() {
+            if (calendarViewMode === 'day') {
+                const start = new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate(), 0, 0, 0);
+                const end = new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate(), 23, 59, 59);
+                return { start, end, cacheKey: `${plannerData.id || 'default'}::${plannerData.googleCalendarId || 'none'}::D:${toDateStrLocal(start)}` };
             }
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayTasks = tasks.filter(t => t.dueDate === dateStr);
-                const dayGcalEvents = gcalEvents.filter(ev => ev.dateStr === dateStr);
-                const cell = document.createElement('div');
-                cell.className = `calendar-cell p-2 flex flex-col gap-1 bg-white dark:bg-[#111827]`;
-                cell.ondragover = handleDragOver; cell.ondragleave = handleDragLeave;
-                cell.ondrop = (e) => {
-                    e.preventDefault(); cell.classList.remove('drag-over');
-                    const taskId = e.dataTransfer.getData('text/plain');
-                    const task = plannerData.tasks.find(t => t.id === taskId);
-                    if (task) { task.dueDate = dateStr; saveDataState(`Scheduled for ${formatShortDate(dateStr)}!`); }
-                };
-                cell.innerHTML = `
-                    <div class="flex items-center justify-between mb-1">
-                        <span class="text-slate-600 dark:text-slate-300 font-semibold text-xs">${day}</span>
+            if (calendarViewMode === 'week') {
+                const start = new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate() - calendarCursorDate.getDay(), 0, 0, 0);
+                const end = new Date(start.getFullYear(), start.getMonth(), start.getDate() + 6, 23, 59, 59);
+                return { start, end, cacheKey: `${plannerData.id || 'default'}::${plannerData.googleCalendarId || 'none'}::W:${toDateStrLocal(start)}` };
+            }
+            if (calendarViewMode === 'year') {
+                const start = new Date(calendarYear, 0, 1, 0, 0, 0);
+                const end = new Date(calendarYear, 11, 31, 23, 59, 59);
+                return { start, end, cacheKey: `${plannerData.id || 'default'}::${plannerData.googleCalendarId || 'none'}::Y:${calendarYear}` };
+            }
+            const start = new Date(calendarYear, calendarMonth, 1, 0, 0, 0);
+            const end = new Date(calendarYear, calendarMonth + 1, 0, 23, 59, 59);
+            return { start, end, cacheKey: `${plannerData.id || 'default'}::${plannerData.googleCalendarId || 'none'}::M:${calendarYear}-${calendarMonth}` };
+        }
+
+        function getContrastTextColor(hex) {
+            if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return '#ffffff';
+            const clean = hex.slice(1);
+            const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+            const r = parseInt(full.slice(0, 2), 16) || 0;
+            const g = parseInt(full.slice(2, 4), 16) || 0;
+            const b = parseInt(full.slice(4, 6), 16) || 0;
+            const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return lum > 0.65 ? '#0f172a' : '#ffffff';
+        }
+
+        function renderCalendarView() {
+            calendarYear = calendarCursorDate.getFullYear();
+            calendarMonth = calendarCursorDate.getMonth();
+            updateCalendarModeButtons();
+            updateGcalHeaderButton();
+
+            const monthNames = t('months');
+            const titleEl = document.getElementById('calendarMonthTitle');
+            const weekdaysHeader = document.getElementById('calendarWeekdaysHeader');
+            const grid = document.getElementById('calendarGridContainer');
+            const tasks = getFilteredTasks();
+            const range = getCalendarVisibleRange();
+            const gcalEvents = gcalEventsCache[range.cacheKey] || [];
+            const todayStr = toDateStrLocal(new Date());
+
+            if (weekdaysHeader) {
+                weekdaysHeader.classList.toggle('hidden', calendarViewMode !== 'month');
+            }
+
+            if (calendarViewMode === 'month') {
+                titleEl.textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+                grid.className = 'flex-1 grid grid-cols-7 auto-rows-fr overflow-y-auto';
+                grid.innerHTML = '';
+
+                const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
+                const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
+                const daysInPrev = new Date(calendarYear, calendarMonth, 0).getDate();
+
+                for (let i = firstDay - 1; i >= 0; i--) {
+                    const cell = document.createElement('div');
+                    cell.className = "calendar-cell p-2 bg-slate-50/50 dark:bg-slate-900/40 text-slate-300 dark:text-slate-600 text-xs";
+                    cell.innerHTML = `<span>${daysInPrev - i}</span>`;
+                    grid.appendChild(cell);
+                }
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const isToday = dateStr === todayStr;
+                    const dayTasks = tasks.filter(t => t.dueDate === dateStr);
+                    const dayGcalAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === dateStr);
+                    const dayGcalTimed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === dateStr);
+
+                    const cell = document.createElement('div');
+                    cell.className = `calendar-cell p-1.5 sm:p-2 flex flex-col gap-1 bg-white dark:bg-[#111827] ${isToday ? 'ring-1 ring-inset ring-sky-400/60 bg-sky-50/20 dark:bg-sky-950/15' : ''}`;
+                    cell.ondragover = handleDragOver; cell.ondragleave = handleDragLeave;
+                    cell.ondrop = (e) => {
+                        e.preventDefault(); cell.classList.remove('drag-over');
+                        const taskId = e.dataTransfer.getData('text/plain');
+                        const task = plannerData.tasks.find(t => t.id === taskId);
+                        if (task) { task.dueDate = dateStr; saveDataState(`Scheduled for ${formatShortDate(dateStr)}!`); }
+                    };
+                    cell.innerHTML = `
+                        <div class="flex items-center justify-between mb-0.5">
+                            <span class="${isToday ? 'w-5 h-5 rounded-full bg-sky-600 text-white inline-flex items-center justify-center' : 'text-slate-600 dark:text-slate-300'} font-semibold text-xs">${day}</span>
+                        </div>
+                        <div class="space-y-1 overflow-y-auto max-h-28 pr-0.5">
+                            ${dayGcalAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)}" style="background:${escapeHtml(ev.bgColor)};color:${escapeHtml(ev.fgColor)}" class="block px-1.5 py-0.5 rounded text-[10px] font-semibold truncate hover:opacity-90 transition">${escapeHtml(ev.title)}</a>`).join('')}
+                            ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-1.5 py-0.5 rounded text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
+                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel ? ev.timeRangeLabel + ' • ' + ev.title : ev.title)}" class="flex items-center gap-1.5 px-1 py-0.5 rounded text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 truncate transition"><span class="w-2 h-2 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                        </div>
+                    `;
+                    grid.appendChild(cell);
+                }
+            } else if (calendarViewMode === 'week' || calendarViewMode === 'day') {
+                const daysCount = calendarViewMode === 'week' ? 7 : 1;
+                const startDay = calendarViewMode === 'week'
+                    ? new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate() - calendarCursorDate.getDay())
+                    : new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate());
+                const dayCols = Array.from({ length: daysCount }, (_, idx) => new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate() + idx));
+                const shortWeekdays = currentLang === 'pt' ? ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'] : ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
+                if (calendarViewMode === 'week') {
+                    const lastDay = dayCols[6];
+                    titleEl.textContent = startDay.getMonth() === lastDay.getMonth()
+                        ? `${monthNames[startDay.getMonth()]} ${startDay.getFullYear()}`
+                        : `${monthNames[startDay.getMonth()].slice(0, 3)} – ${monthNames[lastDay.getMonth()].slice(0, 3)} ${lastDay.getFullYear()}`;
+                } else {
+                    titleEl.textContent = `${dayCols[0].getDate()} ${monthNames[dayCols[0].getMonth()]} ${dayCols[0].getFullYear()}`;
+                }
+
+                grid.className = 'flex-1 flex flex-col overflow-hidden bg-white dark:bg-[#111827]';
+                const hourHeight = 48;
+                const gridColsClass = daysCount === 7 ? 'grid-cols-7' : 'grid-cols-1';
+                const now = new Date();
+                const nowMinutes = now.getHours() * 60 + now.getMinutes();
+
+                const headerColsHtml = dayCols.map(d => {
+                    const ds = toDateStrLocal(d);
+                    const isToday = ds === todayStr;
+                    return `<div class="py-2 text-center border-l border-slate-200/70 dark:border-slate-800">
+                        <div class="text-[10px] font-semibold uppercase tracking-wider ${isToday ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}">${shortWeekdays[d.getDay()]}</div>
+                        <div class="mt-0.5 inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${isToday ? 'bg-sky-600 text-white' : 'text-slate-700 dark:text-slate-200'}">${d.getDate()}</div>
+                    </div>`;
+                }).join('');
+
+                const allDayColsHtml = dayCols.map(d => {
+                    const ds = toDateStrLocal(d);
+                    const colTasks = tasks.filter(t => t.dueDate === ds);
+                    const colAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === ds);
+                    return `<div class="p-1.5 border-l border-slate-200/70 dark:border-slate-800 space-y-1 min-h-[38px]"
+                        ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
+                        ondrop="event.preventDefault(); this.classList.remove('drag-over'); const tid=event.dataTransfer.getData('text/plain'); const tk=plannerData.tasks.find(x=>x.id===tid); if(tk){tk.dueDate='${ds}'; saveDataState('Scheduled!');}">
+                        ${colAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" style="background:${escapeHtml(ev.bgColor)};color:${escapeHtml(ev.fgColor)}" class="block px-2 py-0.5 rounded text-[11px] font-semibold truncate hover:opacity-90 transition">${escapeHtml(ev.title)}</a>`).join('')}
+                        ${colTasks.map(t => `<div onclick="openTaskModal('${t.id}')" class="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer">${escapeHtml(t.title)}</div>`).join('')}
+                    </div>`;
+                }).join('');
+
+                const hoursLabelHtml = Array.from({ length: 24 }, (_, h) =>
+                    `<div style="height:${hourHeight}px" class="pr-2 text-right text-[10px] text-slate-400 -mt-2 select-none">${String(h).padStart(2, '0')}:00</div>`
+                ).join('');
+
+                const dayTimelinesHtml = dayCols.map(d => {
+                    const ds = toDateStrLocal(d);
+                    const isToday = ds === todayStr;
+                    const timed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === ds).sort((a, b) => a.startMinutes - b.startMinutes);
+                    const hourSlots = Array.from({ length: 24 }, () => `<div style="height:${hourHeight}px" class="border-t border-slate-100 dark:border-slate-800/80"></div>`).join('');
+                    const nowLine = isToday ? `<div style="top:${(nowMinutes / 60) * hourHeight}px" class="absolute left-0 right-0 z-20 pointer-events-none flex items-center"><span class="w-2 h-2 rounded-full bg-rose-500 -ml-1"></span><div class="flex-1 h-[1.5px] bg-rose-500"></div></div>` : '';
+                    const eventBlocks = timed.map((ev, idx) => {
+                        const top = (ev.startMinutes / 60) * hourHeight;
+                        const height = Math.max(20, ((ev.endMinutes - ev.startMinutes) / 60) * hourHeight);
+                        const overlap = timed.slice(0, idx).filter(prev => prev.endMinutes > ev.startMinutes).length;
+                        const leftPct = Math.min(overlap * 14, 42);
+                        return `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener"
+                            style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 2px);right:3px;background:${escapeHtml(ev.bgColor)};color:${escapeHtml(ev.fgColor)}"
+                            class="absolute z-10 rounded-lg px-2 py-1 text-[11px] leading-tight shadow-xs overflow-hidden hover:opacity-95 transition border border-black/5">
+                            <div class="font-semibold truncate">${escapeHtml(ev.title)}</div>
+                            <div class="text-[10px] opacity-90 truncate">${escapeHtml(ev.timeRangeLabel)}</div>
+                        </a>`;
+                    }).join('');
+                    return `<div class="relative border-l border-slate-200/70 dark:border-slate-800" style="height:${24 * hourHeight}px">
+                        ${hourSlots}${nowLine}${eventBlocks}
+                    </div>`;
+                }).join('');
+
+                grid.innerHTML = `
+                    <div class="shrink-0 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+                        <div class="flex">
+                            <div class="w-14 shrink-0"></div>
+                            <div class="flex-1 grid ${gridColsClass}">${headerColsHtml}</div>
+                        </div>
+                        <div class="flex border-t border-slate-200/70 dark:border-slate-800 bg-white dark:bg-[#111827]">
+                            <div class="w-14 shrink-0 px-1.5 py-2 text-[10px] font-semibold text-slate-400 text-right">${currentLang === 'pt' ? 'Dia todo' : 'All day'}</div>
+                            <div class="flex-1 grid ${gridColsClass}">${allDayColsHtml}</div>
+                        </div>
                     </div>
-                    <div class="space-y-1 overflow-y-auto max-h-24">
-                        ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-2 py-1 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
-                        ${dayGcalEvents.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)}" class="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800 truncate hover:bg-emerald-100 dark:hover:bg-emerald-900 transition"><i class="fa-brands fa-google text-[9px] shrink-0"></i><span class="truncate">${ev.timeLabel ? escapeHtml(ev.timeLabel) + ' ' : ''}${escapeHtml(ev.title)}</span></a>`).join('')}
+                    <div id="calendarTimeGridScroll" class="flex-1 overflow-y-auto">
+                        <div class="flex pt-2">
+                            <div class="w-14 shrink-0">${hoursLabelHtml}</div>
+                            <div class="flex-1 grid ${gridColsClass}">${dayTimelinesHtml}</div>
+                        </div>
                     </div>
                 `;
-                grid.appendChild(cell);
+                const scrollEl = document.getElementById('calendarTimeGridScroll');
+                if (scrollEl) scrollEl.scrollTop = 7.5 * hourHeight;
+            } else if (calendarViewMode === 'year') {
+                titleEl.textContent = `${calendarYear}`;
+                grid.className = 'flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 bg-slate-50/40 dark:bg-[#0B0F19]/40';
+                const shortDays = currentLang === 'pt' ? ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                const taskDateSet = new Set(tasks.filter(t => t.dueDate).map(t => t.dueDate));
+                const gcalByDate = {};
+                gcalEvents.forEach(ev => { if (!gcalByDate[ev.dateStr]) gcalByDate[ev.dateStr] = ev.bgColor; });
+
+                grid.innerHTML = Array.from({ length: 12 }, (_, mIdx) => {
+                    const fDay = new Date(calendarYear, mIdx, 1).getDay();
+                    const dInM = new Date(calendarYear, mIdx + 1, 0).getDate();
+                    const blanks = Array.from({ length: fDay }, () => `<div></div>`).join('');
+                    const cells = Array.from({ length: dInM }, (_, dIdx) => {
+                        const dNum = dIdx + 1;
+                        const ds = `${calendarYear}-${String(mIdx + 1).padStart(2, '0')}-${String(dNum).padStart(2, '0')}`;
+                        const isToday = ds === todayStr;
+                        const hasTask = taskDateSet.has(ds);
+                        const evColor = gcalByDate[ds];
+                        return `<button type="button" onclick="calendarCursorDate=new Date(${calendarYear},${mIdx},${dNum}); setCalendarViewMode('day')"
+                            class="relative h-7 rounded-lg text-[11px] font-medium flex flex-col items-center justify-center transition cursor-pointer ${isToday ? 'bg-sky-600 text-white font-bold' : 'text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-slate-800'}">
+                            <span>${dNum}</span>
+                            ${(hasTask || evColor) ? `<span class="w-1 h-1 rounded-full mt-0.5" style="background:${isToday ? '#fff' : (evColor || '#0284C7')}"></span>` : ''}
+                        </button>`;
+                    }).join('');
+                    return `<div class="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
+                        <button type="button" onclick="calendarCursorDate=new Date(${calendarYear},${mIdx},1); setCalendarViewMode('month')"
+                            class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 hover:text-sky-600 dark:hover:text-sky-400 mb-2 cursor-pointer">${monthNames[mIdx]}</button>
+                        <div class="grid grid-cols-7 text-center text-[9px] font-semibold text-slate-400 mb-1">${shortDays.map(s => `<div>${s}</div>`).join('')}</div>
+                        <div class="grid grid-cols-7 gap-0.5">${blanks}${cells}</div>
+                    </div>`;
+                }).join('');
             }
+
             const unscheduled = document.getElementById('unscheduledTasksList');
             unscheduled.innerHTML = '';
             tasks.filter(t => !t.dueDate).forEach(t => unscheduled.appendChild(createPlannerCardElement(t)));
 
-            if (plannerData.googleCalendarId && isGcalTokenValid() && !gcalEventsCache[monthKey]) {
+            if (plannerData.googleCalendarId && isGcalTokenValid() && !gcalEventsCache[range.cacheKey]) {
                 syncGoogleCalendarEvents(false);
             }
         }
 
-        function changeCalendarMonth(delta) {
-            calendarMonth += delta;
-            if (calendarMonth < 0) { calendarMonth = 11; calendarYear--; }
-            else if (calendarMonth > 11) { calendarMonth = 0; calendarYear++; }
+        function changeCalendarPeriod(delta) {
+            const d = calendarCursorDate;
+            if (calendarViewMode === 'day') {
+                calendarCursorDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + delta);
+            } else if (calendarViewMode === 'week') {
+                calendarCursorDate = new Date(d.getFullYear(), d.getMonth(), d.getDate() + delta * 7);
+            } else if (calendarViewMode === 'year') {
+                calendarCursorDate = new Date(d.getFullYear() + delta, d.getMonth(), 1);
+            } else {
+                calendarCursorDate = new Date(d.getFullYear(), d.getMonth() + delta, 1);
+            }
             renderCalendarView();
         }
 
+        function changeCalendarMonth(delta) { changeCalendarPeriod(delta); }
+
         function goToTodayCalendar() {
-            const now = new Date();
-            calendarYear = now.getFullYear();
-            calendarMonth = now.getMonth();
+            calendarCursorDate = new Date();
             renderCalendarView();
         }
+
+        document.addEventListener('keydown', (e) => {
+            if (currentView !== 'calendar') return;
+            const tag = (e.target?.tagName || '').toLowerCase();
+            if (tag === 'input' || tag === 'textarea' || tag === 'select' || e.target?.isContentEditable) return;
+            if (e.metaKey || e.ctrlKey || e.altKey) return;
+            const k = e.key.toLowerCase();
+            if (k === 'd') setCalendarViewMode('day');
+            else if (k === 'w') setCalendarViewMode('week');
+            else if (k === 'm') setCalendarViewMode('month');
+            else if (k === 'y') setCalendarViewMode('year');
+        });
 
         // ============================================================================
         // GOOGLE CALENDAR PER-PROJECT INTEGRATION
@@ -3837,11 +4068,31 @@
             }
         }
 
+        let gcalColorPalette = null;
+
+        async function ensureGoogleColors() {
+            if (gcalColorPalette || !isGcalTokenValid()) return;
+            try {
+                const colors = await gcalFetch('https://www.googleapis.com/calendar/v3/colors');
+                gcalColorPalette = { event: colors.event || {}, calendar: colors.calendar || {} };
+            } catch (err) {
+                console.warn('Could not load Google Calendar colors:', err);
+            }
+        }
+
+        function resolveGoogleEventColors(ev) {
+            const paletteBg = ev.colorId && gcalColorPalette?.event?.[ev.colorId]?.background;
+            const bgColor = paletteBg || plannerData.googleCalendarColor || '#039BE5';
+            const fgColor = getContrastTextColor(bgColor);
+            return { bgColor, fgColor };
+        }
+
         function selectProjectGoogleCalendar(calId) {
             if (!calId) return;
             const cal = gcalCalendarsList.find(c => c.id === calId);
             plannerData.googleCalendarId = calId;
             plannerData.googleCalendarName = cal ? cal.summary : calId;
+            plannerData.googleCalendarColor = cal?.backgroundColor || '#039BE5';
             saveDataState(currentLang === 'pt' ? `Agenda "${plannerData.googleCalendarName}" vinculada!` : `Linked "${plannerData.googleCalendarName}"!`);
             updateGcalModalTexts();
             updateGcalHeaderButton();
@@ -3875,6 +4126,7 @@
         function unlinkProjectGoogleCalendar() {
             delete plannerData.googleCalendarId;
             delete plannerData.googleCalendarName;
+            delete plannerData.googleCalendarColor;
             saveDataState(currentLang === 'pt' ? 'Agenda desvinculada deste projeto.' : 'Calendar unlinked from project.');
             updateGcalModalTexts();
             updateGcalHeaderButton();
@@ -3886,27 +4138,71 @@
                 if (showSuccessToast) openGcalModal();
                 return;
             }
-            const monthStart = new Date(calendarYear, calendarMonth, 1, 0, 0, 0);
-            const monthEnd = new Date(calendarYear, calendarMonth + 1, 0, 23, 59, 59);
-            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(plannerData.googleCalendarId)}/events?timeMin=${encodeURIComponent(monthStart.toISOString())}&timeMax=${encodeURIComponent(monthEnd.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=250`;
+            const range = getCalendarVisibleRange();
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(plannerData.googleCalendarId)}/events?timeMin=${encodeURIComponent(range.start.toISOString())}&timeMax=${encodeURIComponent(range.end.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=500`;
             try {
+                await ensureGoogleColors();
                 const data = await gcalFetch(url);
-                const mapped = (data.items || []).map(ev => {
-                    const startDate = ev.start?.date || (ev.start?.dateTime ? ev.start.dateTime.slice(0, 10) : '');
-                    const timeLabel = ev.start?.dateTime ? ev.start.dateTime.slice(11, 16) : '';
-                    return {
-                        id: ev.id,
-                        title: ev.summary || '(Sem título)',
-                        dateStr: startDate,
-                        timeLabel,
-                        htmlLink: ev.htmlLink || ''
-                    };
-                }).filter(ev => ev.dateStr);
-                gcalEventsCache[getGcalMonthCacheKey()] = mapped;
+                const mapped = [];
+                (data.items || []).forEach(ev => {
+                    const { bgColor, fgColor } = resolveGoogleEventColors(ev);
+                    const isAllDay = Boolean(ev.start?.date && !ev.start?.dateTime);
+                    if (isAllDay) {
+                        const startStr = ev.start.date;
+                        const endStr = ev.end?.date || startStr;
+                        const cur = new Date(`${startStr}T00:00:00`);
+                        const endD = new Date(`${endStr}T00:00:00`);
+                        let guard = 0;
+                        do {
+                            const ds = toDateStrLocal(cur);
+                            mapped.push({
+                                id: ev.id,
+                                title: ev.summary || '(Sem título)',
+                                isAllDay: true,
+                                dateStr: ds,
+                                timeLabel: '',
+                                timeRangeLabel: currentLang === 'pt' ? 'Dia todo' : 'All day',
+                                startMinutes: 0,
+                                endMinutes: 1440,
+                                bgColor,
+                                fgColor,
+                                htmlLink: ev.htmlLink || ''
+                            });
+                            cur.setDate(cur.getDate() + 1);
+                            guard++;
+                        } while (cur < endD && guard < 62);
+                    } else if (ev.start?.dateTime) {
+                        const startDt = new Date(ev.start.dateTime);
+                        const endDt = ev.end?.dateTime ? new Date(ev.end.dateTime) : new Date(startDt.getTime() + 60 * 60 * 1000);
+                        const dateStr = toDateStrLocal(startDt);
+                        const startMinutes = startDt.getHours() * 60 + startDt.getMinutes();
+                        let endMinutes = toDateStrLocal(endDt) === dateStr
+                            ? (endDt.getHours() * 60 + endDt.getMinutes())
+                            : 24 * 60;
+                        if (endMinutes <= startMinutes) endMinutes = Math.min(24 * 60, startMinutes + 30);
+                        const fmt = (d) => `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+                        const timeLabel = fmt(startDt);
+                        const timeRangeLabel = `${fmt(startDt)} – ${fmt(endDt)}`;
+                        mapped.push({
+                            id: ev.id,
+                            title: ev.summary || '(Sem título)',
+                            isAllDay: false,
+                            dateStr,
+                            timeLabel,
+                            timeRangeLabel,
+                            startMinutes,
+                            endMinutes,
+                            bgColor,
+                            fgColor,
+                            htmlLink: ev.htmlLink || ''
+                        });
+                    }
+                });
+                gcalEventsCache[range.cacheKey] = mapped;
                 renderCalendarView();
                 const hint = document.getElementById('gcalSyncStatusHint');
                 if (hint) {
-                    hint.textContent = currentLang === 'pt' ? `${mapped.length} evento(s) no mês` : `${mapped.length} event(s) this month`;
+                    hint.textContent = currentLang === 'pt' ? `${mapped.length} evento(s) no período` : `${mapped.length} event(s) in range`;
                 }
                 if (showSuccessToast) {
                     showToast(currentLang === 'pt' ? `${mapped.length} evento(s) sincronizado(s)!` : `${mapped.length} event(s) synced!`);
