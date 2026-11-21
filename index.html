@@ -414,9 +414,62 @@
         <!-- Backdrop to close sidebar on Mobile (sits below header so logo is never covered) -->
         <div id="mobileSidebarBackdrop" onclick="toggleSidebar()" class="absolute inset-0 bg-slate-950/40 backdrop-blur-[1px] z-30 hidden md:hidden"></div>
 
-        <!-- ISOLATED SIDEBAR PANEL (Project, Views & Team only — without duplicating the logo) -->
+        <!-- ISOLATED SIDEBAR PANEL (Full w-60 when expanded, Firebase-style w-16 mini rail on desktop when collapsed) -->
         <aside id="appSidebar" class="absolute md:static inset-y-0 left-0 w-0 md:w-60 border-r-0 md:border-r bg-white dark:bg-[#111827] border-slate-200/80 dark:border-slate-800/80 flex flex-col justify-between shrink-0 z-40 md:z-20 shadow-2xl md:shadow-none transition-all duration-300 ease-in-out overflow-hidden">
-            <div class="p-4 space-y-5 w-60 overflow-y-auto">
+            <!-- Mini Icon Rail (Visible only on desktop when collapsed) -->
+            <div id="sidebarMiniRail" class="hidden flex-col justify-between items-center py-3 w-16 h-full shrink-0">
+                <div class="flex flex-col items-center gap-1.5 w-full px-2">
+                    <button onclick="switchView('projects')" id="rail-projects" title="Projects &amp; Daily Hub"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-shapes text-sm"></i>
+                    </button>
+
+                    <div class="w-7 border-t border-slate-200/80 dark:border-slate-800 my-1"></div>
+
+                    <button onclick="switchView('grid')" id="rail-grid" title="Executive List"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-list-ul text-sm"></i>
+                    </button>
+                    <button onclick="switchView('board')" id="rail-board" title="Kanban Board"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-table-columns text-sm"></i>
+                    </button>
+                    <button onclick="switchView('calendar')" id="rail-calendar" title="Schedule"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-regular fa-calendar text-sm"></i>
+                    </button>
+                    <button onclick="switchView('gantt')" id="rail-gantt" title="Gantt Chart"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-bars-staggered text-sm"></i>
+                    </button>
+                    <button onclick="switchView('charts')" id="rail-charts" title="Insights &amp; Metrics"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-chart-pie text-sm"></i>
+                    </button>
+
+                    <div class="w-7 border-t border-slate-200/80 dark:border-slate-800 my-1"></div>
+
+                    <button onclick="openMembersModal()" title="Team"
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer">
+                        <i class="fa-solid fa-users text-sm"></i>
+                    </button>
+                </div>
+
+                <div class="flex flex-col items-center gap-2 w-full px-2">
+                    <button onclick="openAuthModal()" title="Account &amp; Cloud Sync"
+                        class="relative w-9 h-9 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center hover:ring-2 hover:ring-sky-400/50 transition cursor-pointer">
+                        <img id="railUserPhoto" src="" alt="" referrerpolicy="no-referrer" class="w-full h-full object-cover rounded-xl hidden" onerror="this.classList.add('hidden'); document.getElementById('railUserIcon').classList.remove('hidden');" />
+                        <i id="railUserIcon" class="fa-regular fa-user text-xs"></i>
+                        <span id="railSyncDot" class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-white dark:ring-[#111827]"></span>
+                    </button>
+                    <button onclick="toggleSidebar()" title="Expand sidebar"
+                        class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 flex items-center justify-center transition cursor-pointer">
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="sidebarExpandedTop" class="p-4 space-y-5 w-60 overflow-y-auto">
                 <!-- Active Project / Quick Switcher Card (Full-title display, no clipping or duplication) -->
                 <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/60">
                     <div class="flex items-center justify-between text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">
@@ -496,7 +549,7 @@
             </div>
 
             <!-- Sidebar Footer: Unified Account & Real-time Sync Card -->
-            <div class="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 w-60 shrink-0">
+            <div id="sidebarExpandedFooter" class="p-3.5 border-t border-slate-200/80 dark:border-slate-800/80 bg-slate-50/50 dark:bg-slate-900/40 w-60 shrink-0">
                 <button onclick="openAuthModal()" id="syncStatusCard" title="Account &amp; Cloud Sync"
                     class="w-full flex items-center justify-between gap-2.5 p-2.5 rounded-xl bg-white dark:bg-slate-800/70 hover:bg-sky-50/60 dark:hover:bg-slate-800 border border-slate-200/80 dark:border-slate-700/70 hover:border-sky-300 dark:hover:border-sky-600 shadow-2xs hover:shadow-xs transition-all cursor-pointer group">
                     <div class="flex items-center gap-2.5 min-w-0">
@@ -1875,18 +1928,36 @@
             const sidebar = document.getElementById('appSidebar');
             const toggleIcon = document.getElementById('sidebarToggleIcon');
             const backdrop = document.getElementById('mobileSidebarBackdrop');
+            const miniRail = document.getElementById('sidebarMiniRail');
+            const expTop = document.getElementById('sidebarExpandedTop');
+            const expFooter = document.getElementById('sidebarExpandedFooter');
             if (!sidebar) return;
 
-            sidebar.classList.remove('w-60', 'md:w-60', 'border-r', 'md:border-r', 'w-0', 'border-r-0');
+            const isDesktop = window.innerWidth >= 768;
+            sidebar.classList.remove('w-60', 'md:w-60', 'w-16', 'md:w-16', 'border-r', 'md:border-r', 'w-0', 'border-r-0');
+
             if (isSidebarCollapsed) {
-                sidebar.classList.add('w-0', 'border-r-0');
+                if (isDesktop) {
+                    sidebar.classList.add('w-16', 'border-r');
+                    if (miniRail) { miniRail.classList.remove('hidden'); miniRail.classList.add('flex'); }
+                    if (expTop) expTop.classList.add('hidden');
+                    if (expFooter) expFooter.classList.add('hidden');
+                } else {
+                    sidebar.classList.add('w-0', 'border-r-0');
+                    if (miniRail) { miniRail.classList.add('hidden'); miniRail.classList.remove('flex'); }
+                    if (expTop) expTop.classList.remove('hidden');
+                    if (expFooter) expFooter.classList.remove('hidden');
+                }
                 if (toggleIcon) toggleIcon.className = 'fa-solid fa-angles-right text-xs';
                 if (backdrop) backdrop.classList.add('hidden');
             } else {
                 sidebar.classList.add('w-60', 'border-r');
+                if (miniRail) { miniRail.classList.add('hidden'); miniRail.classList.remove('flex'); }
+                if (expTop) expTop.classList.remove('hidden');
+                if (expFooter) expFooter.classList.remove('hidden');
                 if (toggleIcon) toggleIcon.className = 'fa-solid fa-angles-left text-xs';
                 if (backdrop) {
-                    if (window.innerWidth < 768) backdrop.classList.remove('hidden');
+                    if (!isDesktop) backdrop.classList.remove('hidden');
                     else backdrop.classList.add('hidden');
                 }
             }
@@ -1984,6 +2055,10 @@
                             ? 'bg-sky-500/10 text-sky-600 dark:text-sky-400'
                             : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
                     }`;
+                }
+                const railDot = document.getElementById('railSyncDot');
+                if (railDot) {
+                    railDot.className = `absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ring-2 ring-white dark:ring-[#111827] ${isOnline ? 'bg-sky-500' : 'bg-amber-500'}`;
                 }
                 label.textContent = text;
             }
@@ -2192,16 +2267,20 @@
                 const viewEl = document.getElementById(`view-${v}`);
                 const pillEl = document.getElementById(`pill-${v}`);
                 const mobBtn = document.getElementById(`mobile-nav-${v}`);
+                const railBtn = document.getElementById(`rail-${v}`);
                 if (viewEl) viewEl.classList.add('hidden');
                 if (pillEl) pillEl.classList.remove('active');
                 if (mobBtn) mobBtn.classList.remove('active');
+                if (railBtn) railBtn.className = 'w-10 h-10 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition cursor-pointer';
             });
             const targetView = document.getElementById(`view-${viewName}`);
             const targetPill = document.getElementById(`pill-${viewName}`);
             const activeMobBtn = document.getElementById(`mobile-nav-${viewName}`);
+            const activeRailBtn = document.getElementById(`rail-${viewName}`);
             if (targetView) targetView.classList.remove('hidden');
             if (targetPill) targetPill.classList.add('active');
             if (activeMobBtn) activeMobBtn.classList.add('active');
+            if (activeRailBtn) activeRailBtn.className = 'w-10 h-10 rounded-xl flex items-center justify-center bg-sky-500/12 text-sky-600 dark:text-sky-400 transition cursor-pointer';
 
             updateViewHeaderMeta(viewName);
             if (window.innerWidth < 768 && !isSidebarCollapsed) {
@@ -3950,6 +4029,8 @@
             const nameEl = document.getElementById('activeUserName');
             const photoEl = document.getElementById('sidebarUserPhoto');
             const iconEl = document.getElementById('syncStatusIcon');
+            const railPhotoEl = document.getElementById('railUserPhoto');
+            const railIconEl = document.getElementById('railUserIcon');
             const member = plannerData.members.find(m => m.id === activeUserId);
             if (nameEl) {
                 if (fbCurrentUser) {
@@ -3958,17 +4039,20 @@
                     nameEl.textContent = currentLang === 'pt' ? 'Entrar na conta' : 'Sign in';
                 }
             }
-            if (photoEl && iconEl) {
+            const applyPhoto = (img, icn) => {
+                if (!img || !icn) return;
                 if (fbCurrentUser && fbCurrentUser.photoURL) {
-                    photoEl.src = fbCurrentUser.photoURL;
-                    photoEl.classList.remove('hidden');
-                    iconEl.classList.add('hidden');
+                    img.src = fbCurrentUser.photoURL;
+                    img.classList.remove('hidden');
+                    icn.classList.add('hidden');
                 } else {
-                    photoEl.src = '';
-                    photoEl.classList.add('hidden');
-                    iconEl.classList.remove('hidden');
+                    img.src = '';
+                    img.classList.add('hidden');
+                    icn.classList.remove('hidden');
                 }
-            }
+            };
+            applyPhoto(photoEl, iconEl);
+            applyPhoto(railPhotoEl, railIconEl);
         }
 
         function openMembersModal() {
