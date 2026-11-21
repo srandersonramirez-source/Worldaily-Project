@@ -2374,6 +2374,7 @@
             }
             localStorage.setItem(LOCAL_STORAGE_THEME_KEY, theme);
             if (currentView === 'charts') renderChartsView();
+            if (currentView === 'calendar') renderCalendarView();
         }
 
         function toggleTheme() {
@@ -3660,6 +3661,23 @@
             return lum > 0.65 ? '#0f172a' : '#ffffff';
         }
 
+        function hexToRgba(hex, alpha = 1) {
+            if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return `rgba(2, 132, 199, ${alpha})`;
+            const clean = hex.slice(1);
+            const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+            const r = parseInt(full.slice(0, 2), 16) || 2;
+            const g = parseInt(full.slice(2, 4), 16) || 132;
+            const b = parseInt(full.slice(4, 6), 16) || 199;
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        function getGcalWorldailyPillStyle(hexColor) {
+            const isDark = document.documentElement.classList.contains('dark');
+            const bgTint = hexToRgba(hexColor, isDark ? 0.22 : 0.13);
+            const borderTint = hexToRgba(hexColor, isDark ? 0.45 : 0.32);
+            return `background-color:${bgTint};border:1px solid ${borderTint};border-left:3px solid ${hexColor};`;
+        }
+
         function renderCalendarView() {
             calendarYear = calendarCursorDate.getFullYear();
             calendarMonth = calendarCursorDate.getMonth();
@@ -3674,6 +3692,7 @@
             const range = getCalendarVisibleRange();
             const gcalEvents = gcalEventsCache[range.cacheKey] || [];
             const todayStr = toDateStrLocal(new Date());
+            const isPt = currentLang === 'pt';
 
             if (weekdaysHeader) {
                 weekdaysHeader.classList.toggle('hidden', calendarViewMode !== 'month');
@@ -3699,10 +3718,12 @@
                     const isToday = dateStr === todayStr;
                     const dayTasks = tasks.filter(t => t.dueDate === dateStr);
                     const dayGcalAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === dateStr);
-                    const dayGcalTimed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === dateStr);
+                    const dayGcalTimed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === dateStr).sort((a, b) => a.startMinutes - b.startMinutes);
+                    const hasAllDayGroup = dayTasks.length > 0 || dayGcalAllDay.length > 0;
+                    const hasTimedGroup = dayGcalTimed.length > 0;
 
                     const cell = document.createElement('div');
-                    cell.className = `calendar-cell p-1.5 sm:p-2 flex flex-col gap-1 bg-white dark:bg-[#111827] ${isToday ? 'ring-1 ring-inset ring-sky-400/60 bg-sky-50/20 dark:bg-sky-950/15' : ''}`;
+                    cell.className = `calendar-cell p-2 flex flex-col gap-1 bg-white dark:bg-[#111827] ${isToday ? 'bg-sky-50/30 dark:bg-sky-950/20' : ''}`;
                     cell.ondragover = handleDragOver; cell.ondragleave = handleDragLeave;
                     cell.ondrop = (e) => {
                         e.preventDefault(); cell.classList.remove('drag-over');
@@ -3711,13 +3732,15 @@
                         if (task) { task.dueDate = dateStr; saveDataState(`Scheduled for ${formatShortDate(dateStr)}!`); }
                     };
                     cell.innerHTML = `
-                        <div class="flex items-center justify-between mb-0.5">
-                            <span class="${isToday ? 'w-5 h-5 rounded-full bg-sky-600 text-white inline-flex items-center justify-center' : 'text-slate-600 dark:text-slate-300'} font-semibold text-xs">${day}</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="${isToday ? 'px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-300 font-semibold'} text-xs">${day}</span>
+                            ${(dayTasks.length + dayGcalAllDay.length + dayGcalTimed.length) > 0 ? `<span class="text-[10px] font-medium text-slate-400">${dayTasks.length + dayGcalAllDay.length + dayGcalTimed.length}</span>` : ''}
                         </div>
                         <div class="space-y-1 overflow-y-auto max-h-28 pr-0.5">
-                            ${dayGcalAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)}" style="background:${escapeHtml(ev.bgColor)};color:${escapeHtml(ev.fgColor)}" class="block px-1.5 py-0.5 rounded text-[10px] font-semibold truncate hover:opacity-90 transition">${escapeHtml(ev.title)}</a>`).join('')}
-                            ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-1.5 py-0.5 rounded text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
-                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel ? ev.timeRangeLabel + ' • ' + ev.title : ev.title)}" class="flex items-center gap-1.5 px-1 py-0.5 rounded text-[11px] font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/80 truncate transition"><span class="w-2 h-2 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                            ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-2 py-1 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
+                            ${dayGcalAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)} (${isPt ? 'Dia todo' : 'All day'})" style="${getGcalWorldailyPillStyle(ev.bgColor)}" class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-90 transition"><i class="fa-regular fa-calendar text-[9px] shrink-0" style="color:${escapeHtml(ev.bgColor)}"></i><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                            ${(hasAllDayGroup && hasTimedGroup) ? `<div class="border-t border-dashed border-slate-200/80 dark:border-slate-800 my-1"></div>` : ''}
+                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel)} • ${escapeHtml(ev.title)}" class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-200 hover:border-sky-300 dark:hover:border-sky-700 truncate transition"><span class="w-2 h-2 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
                         </div>
                     `;
                     grid.appendChild(cell);
@@ -3728,7 +3751,7 @@
                     ? new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate() - calendarCursorDate.getDay())
                     : new Date(calendarCursorDate.getFullYear(), calendarCursorDate.getMonth(), calendarCursorDate.getDate());
                 const dayCols = Array.from({ length: daysCount }, (_, idx) => new Date(startDay.getFullYear(), startDay.getMonth(), startDay.getDate() + idx));
-                const shortWeekdays = currentLang === 'pt' ? ['DOM', 'SEG', 'TER', 'QUA', 'QUI', 'SEX', 'SÁB'] : ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+                const shortWeekdays = isPt ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
                 if (calendarViewMode === 'week') {
                     const lastDay = dayCols[6];
@@ -3740,7 +3763,7 @@
                 }
 
                 grid.className = 'flex-1 flex flex-col overflow-hidden bg-white dark:bg-[#111827]';
-                const hourHeight = 48;
+                const hourHeight = 52;
                 const gridColsClass = daysCount === 7 ? 'grid-cols-7' : 'grid-cols-1';
                 const now = new Date();
                 const nowMinutes = now.getHours() * 60 + now.getMinutes();
@@ -3748,9 +3771,9 @@
                 const headerColsHtml = dayCols.map(d => {
                     const ds = toDateStrLocal(d);
                     const isToday = ds === todayStr;
-                    return `<div class="py-2 text-center border-l border-slate-200/70 dark:border-slate-800">
-                        <div class="text-[10px] font-semibold uppercase tracking-wider ${isToday ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}">${shortWeekdays[d.getDay()]}</div>
-                        <div class="mt-0.5 inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${isToday ? 'bg-sky-600 text-white' : 'text-slate-700 dark:text-slate-200'}">${d.getDate()}</div>
+                    return `<div class="py-2.5 px-2 text-center border-l border-slate-200/80 dark:border-slate-800 flex items-center justify-center gap-1.5">
+                        <span class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider ${isToday ? 'text-sky-600 dark:text-sky-400' : 'text-slate-400'}">${shortWeekdays[d.getDay()]}</span>
+                        <span class="px-2 py-0.5 rounded-lg text-xs font-bold ${isToday ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 ring-1 ring-sky-500/30' : 'text-slate-700 dark:text-slate-200'}">${d.getDate()}</span>
                     </div>`;
                 }).join('');
 
@@ -3758,65 +3781,74 @@
                     const ds = toDateStrLocal(d);
                     const colTasks = tasks.filter(t => t.dueDate === ds);
                     const colAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === ds);
-                    return `<div class="p-1.5 border-l border-slate-200/70 dark:border-slate-800 space-y-1 min-h-[38px]"
+                    const emptyHint = (colTasks.length === 0 && colAllDay.length === 0)
+                        ? `<div class="text-[10px] text-slate-300 dark:text-slate-700 select-none py-0.5">—</div>`
+                        : '';
+                    return `<div class="p-1.5 border-l border-slate-200/80 dark:border-slate-800 space-y-1 min-h-[42px]"
                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
                         ondrop="event.preventDefault(); this.classList.remove('drag-over'); const tid=event.dataTransfer.getData('text/plain'); const tk=plannerData.tasks.find(x=>x.id===tid); if(tk){tk.dueDate='${ds}'; saveDataState('Scheduled!');}">
-                        ${colAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" style="background:${escapeHtml(ev.bgColor)};color:${escapeHtml(ev.fgColor)}" class="block px-2 py-0.5 rounded text-[11px] font-semibold truncate hover:opacity-90 transition">${escapeHtml(ev.title)}</a>`).join('')}
-                        ${colTasks.map(t => `<div onclick="openTaskModal('${t.id}')" class="px-2 py-0.5 rounded text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer">${escapeHtml(t.title)}</div>`).join('')}
+                        ${colTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-2 py-1 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
+                        ${colAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" style="${getGcalWorldailyPillStyle(ev.bgColor)}" class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-90 transition"><i class="fa-regular fa-calendar text-[9px] shrink-0" style="color:${escapeHtml(ev.bgColor)}"></i><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                        ${emptyHint}
                     </div>`;
                 }).join('');
 
                 const hoursLabelHtml = Array.from({ length: 24 }, (_, h) =>
-                    `<div style="height:${hourHeight}px" class="pr-2 text-right text-[10px] text-slate-400 -mt-2 select-none">${String(h).padStart(2, '0')}:00</div>`
+                    `<div style="height:${hourHeight}px" class="pr-2.5 pt-1 text-right text-[10px] font-semibold text-slate-400 dark:text-slate-500 select-none border-t border-transparent">${String(h).padStart(2, '0')}:00</div>`
                 ).join('');
 
                 const dayTimelinesHtml = dayCols.map(d => {
                     const ds = toDateStrLocal(d);
                     const isToday = ds === todayStr;
                     const timed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === ds).sort((a, b) => a.startMinutes - b.startMinutes);
-                    const hourSlots = Array.from({ length: 24 }, () => `<div style="height:${hourHeight}px" class="border-t border-slate-100 dark:border-slate-800/80"></div>`).join('');
-                    const nowLine = isToday ? `<div style="top:${(nowMinutes / 60) * hourHeight}px" class="absolute left-0 right-0 z-20 pointer-events-none flex items-center"><span class="w-2 h-2 rounded-full bg-rose-500 -ml-1"></span><div class="flex-1 h-[1.5px] bg-rose-500"></div></div>` : '';
+                    const hourSlots = Array.from({ length: 24 }, () => `<div style="height:${hourHeight}px" class="border-t border-slate-100 dark:border-slate-800/70"></div>`).join('');
+                    const nowLine = isToday ? `<div style="top:${(nowMinutes / 60) * hourHeight}px" class="absolute left-0 right-0 z-20 pointer-events-none flex items-center"><span class="w-2.5 h-2.5 rounded-full bg-sky-500 ring-4 ring-sky-500/20 -ml-1"></span><div class="flex-1 h-[1.5px] bg-sky-500"></div></div>` : '';
                     const eventBlocks = timed.map((ev, idx) => {
                         const top = (ev.startMinutes / 60) * hourHeight;
-                        const height = Math.max(20, ((ev.endMinutes - ev.startMinutes) / 60) * hourHeight);
+                        const height = Math.max(26, ((ev.endMinutes - ev.startMinutes) / 60) * hourHeight);
                         const overlap = timed.slice(0, idx).filter(prev => prev.endMinutes > ev.startMinutes).length;
                         const leftPct = Math.min(overlap * 14, 42);
                         return `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener"
-                            style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 2px);right:3px;background:${escapeHtml(ev.bgColor)};color:${escapeHtml(ev.fgColor)}"
-                            class="absolute z-10 rounded-lg px-2 py-1 text-[11px] leading-tight shadow-xs overflow-hidden hover:opacity-95 transition border border-black/5">
-                            <div class="font-semibold truncate">${escapeHtml(ev.title)}</div>
-                            <div class="text-[10px] opacity-90 truncate">${escapeHtml(ev.timeRangeLabel)}</div>
+                            style="top:${top}px;height:${height}px;left:calc(${leftPct}% + 3px);right:4px;"
+                            class="absolute z-10 rounded-xl bg-white/95 dark:bg-[#111827]/95 shadow-xs hover:shadow-md overflow-hidden transition group">
+                            <div style="${getGcalWorldailyPillStyle(ev.bgColor)}" class="w-full h-full px-2.5 py-1.5 flex flex-col justify-start overflow-hidden rounded-xl">
+                                <div class="flex items-center gap-1.5 min-w-0">
+                                    <span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span>
+                                    <span class="font-display font-bold text-[11px] text-slate-800 dark:text-slate-100 truncate">${escapeHtml(ev.title)}</span>
+                                </div>
+                                <div class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 truncate mt-0.5">${escapeHtml(ev.timeRangeLabel)}</div>
+                            </div>
                         </a>`;
                     }).join('');
-                    return `<div class="relative border-l border-slate-200/70 dark:border-slate-800" style="height:${24 * hourHeight}px">
+                    return `<div class="relative border-l border-slate-200/80 dark:border-slate-800 ${isToday ? 'bg-sky-50/15 dark:bg-sky-950/10' : ''}" style="height:${24 * hourHeight}px">
                         ${hourSlots}${nowLine}${eventBlocks}
                     </div>`;
                 }).join('');
 
                 grid.innerHTML = `
-                    <div class="shrink-0 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/40">
+                    <div class="shrink-0 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40">
                         <div class="flex">
-                            <div class="w-14 shrink-0"></div>
+                            <div class="w-16 shrink-0 flex items-center justify-end pr-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400">${isPt ? 'Data' : 'Date'}</div>
                             <div class="flex-1 grid ${gridColsClass}">${headerColsHtml}</div>
                         </div>
-                        <div class="flex border-t border-slate-200/70 dark:border-slate-800 bg-white dark:bg-[#111827]">
-                            <div class="w-14 shrink-0 px-1.5 py-2 text-[10px] font-semibold text-slate-400 text-right">${currentLang === 'pt' ? 'Dia todo' : 'All day'}</div>
+                        <div class="flex border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]">
+                            <div class="w-16 shrink-0 px-2 py-2.5 text-[10px] font-semibold uppercase tracking-wider text-slate-400 text-right">${isPt ? 'Dia todo' : 'All day'}</div>
                             <div class="flex-1 grid ${gridColsClass}">${allDayColsHtml}</div>
                         </div>
                     </div>
                     <div id="calendarTimeGridScroll" class="flex-1 overflow-y-auto">
-                        <div class="flex pt-2">
-                            <div class="w-14 shrink-0">${hoursLabelHtml}</div>
+                        <div class="flex">
+                            <div class="w-16 shrink-0 bg-slate-50/40 dark:bg-slate-900/30">${hoursLabelHtml}</div>
                             <div class="flex-1 grid ${gridColsClass}">${dayTimelinesHtml}</div>
                         </div>
                     </div>
                 `;
                 const scrollEl = document.getElementById('calendarTimeGridScroll');
-                if (scrollEl) scrollEl.scrollTop = 7.5 * hourHeight;
+                if (scrollEl) scrollEl.scrollTop = 8 * hourHeight;
             } else if (calendarViewMode === 'year') {
                 titleEl.textContent = `${calendarYear}`;
-                grid.className = 'flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 bg-slate-50/40 dark:bg-[#0B0F19]/40';
-                const shortDays = currentLang === 'pt' ? ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'] : ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                grid.className = 'flex-1 overflow-y-auto p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 bg-slate-50/50 dark:bg-[#0B0F19]';
+                const shortDays = isPt ? ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
                 const taskDateSet = new Set(tasks.filter(t => t.dueDate).map(t => t.dueDate));
                 const gcalByDate = {};
                 gcalEvents.forEach(ev => { if (!gcalByDate[ev.dateStr]) gcalByDate[ev.dateStr] = ev.bgColor; });
@@ -3832,15 +3864,21 @@
                         const hasTask = taskDateSet.has(ds);
                         const evColor = gcalByDate[ds];
                         return `<button type="button" onclick="calendarCursorDate=new Date(${calendarYear},${mIdx},${dNum}); setCalendarViewMode('day')"
-                            class="relative h-7 rounded-lg text-[11px] font-medium flex flex-col items-center justify-center transition cursor-pointer ${isToday ? 'bg-sky-600 text-white font-bold' : 'text-slate-700 dark:text-slate-200 hover:bg-sky-50 dark:hover:bg-slate-800'}">
+                            class="relative h-7 rounded-lg text-[11px] font-medium flex flex-col items-center justify-center transition cursor-pointer ${isToday ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold ring-1 ring-sky-500/30' : 'text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800'}">
                             <span>${dNum}</span>
-                            ${(hasTask || evColor) ? `<span class="w-1 h-1 rounded-full mt-0.5" style="background:${isToday ? '#fff' : (evColor || '#0284C7')}"></span>` : ''}
+                            ${(hasTask || evColor) ? `<span class="w-1.5 h-1.5 rounded-full mt-0.5" style="background:${evColor || '#0284C7'}"></span>` : ''}
                         </button>`;
                     }).join('');
-                    return `<div class="bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3.5 shadow-2xs">
-                        <button type="button" onclick="calendarCursorDate=new Date(${calendarYear},${mIdx},1); setCalendarViewMode('month')"
-                            class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 hover:text-sky-600 dark:hover:text-sky-400 mb-2 cursor-pointer">${monthNames[mIdx]}</button>
-                        <div class="grid grid-cols-7 text-center text-[9px] font-semibold text-slate-400 mb-1">${shortDays.map(s => `<div>${s}</div>`).join('')}</div>
+                    return `<div class="wd-card p-4">
+                        <div class="flex items-center justify-between mb-2.5 pb-2 border-b border-slate-100 dark:border-slate-800">
+                            <button type="button" onclick="calendarCursorDate=new Date(${calendarYear},${mIdx},1); setCalendarViewMode('month')"
+                                class="font-display font-bold text-xs text-slate-800 dark:text-slate-100 hover:text-sky-600 dark:hover:text-sky-400 flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-regular fa-calendar text-sky-500 text-[11px]"></i>
+                                <span>${monthNames[mIdx]}</span>
+                            </button>
+                            <span class="text-[10px] font-semibold text-slate-400">${calendarYear}</span>
+                        </div>
+                        <div class="grid grid-cols-7 text-center text-[9px] font-semibold uppercase text-slate-400 mb-1.5">${shortDays.map(s => `<div>${s.slice(0, 1)}</div>`).join('')}</div>
                         <div class="grid grid-cols-7 gap-0.5">${blanks}${cells}</div>
                     </div>`;
                 }).join('');
