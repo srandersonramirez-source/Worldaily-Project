@@ -864,7 +864,18 @@
                                 </div>
                                 <h3 id="calendarMonthTitle" class="font-display text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-100">October 2026</h3>
                             </div>
-                            <span data-i18n="cal_drag_hint" class="text-xs text-slate-400 hidden sm:inline">Drag tasks from the right panel to schedule on a day</span>
+                            <div class="flex items-center gap-2">
+                                <span data-i18n="cal_drag_hint" class="text-xs text-slate-400 hidden xl:inline mr-1">Drag tasks from the right panel to schedule on a day</span>
+                                <button id="gcalQuickSyncBtn" type="button" onclick="syncGoogleCalendarEvents(true)" title="Sync Google Calendar"
+                                    class="hidden w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-emerald-600 dark:text-emerald-400 items-center justify-center transition cursor-pointer">
+                                    <i class="fa-solid fa-arrows-rotate text-xs"></i>
+                                </button>
+                                <button id="gcalHeaderBtn" type="button" onclick="openGcalModal()"
+                                    class="px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/80 hover:border-sky-400 hover:bg-sky-50/60 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                                    <i class="fa-brands fa-google text-sky-500 text-[11px]"></i>
+                                    <span id="gcalHeaderBtnLabel">Google Agenda</span>
+                                </button>
+                            </div>
                         </div>
                         <div class="grid grid-cols-7 border-b border-slate-200/80 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/40 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-400 py-2 shrink-0">
                             <div data-i18n="day_sun">Sun</div><div data-i18n="day_mon">Mon</div><div data-i18n="day_tue">Tue</div><div data-i18n="day_wed">Wed</div><div data-i18n="day_thu">Thu</div><div data-i18n="day_fri">Fri</div><div data-i18n="day_sat">Sat</div>
@@ -1689,6 +1700,89 @@
                     <i class="fa-regular fa-paper-plane text-[11px]"></i>
                     <span data-i18n="forum_send_btn">Send</span>
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================ -->
+    <!-- GOOGLE CALENDAR PER-PROJECT INTEGRATION MODAL -->
+    <!-- ============================================================================ -->
+    <div id="gcalModal" onclick="if(event.target === this) closeGcalModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden ring-1 ring-slate-200/80 dark:ring-slate-800 flex flex-col">
+            <div class="h-1 w-full bg-gradient-to-r from-emerald-400 via-sky-500 to-cyan-500 shrink-0"></div>
+            <div class="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <i class="fa-regular fa-calendar-days text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 id="gcalModalTitle" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Google Agenda</h3>
+                        <p id="gcalProjectNameBadge" class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">—</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeGcalModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <div class="p-5 sm:p-6 space-y-4 text-xs">
+                <!-- Connection Box -->
+                <div class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between gap-3">
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span id="gcalConnDot" class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span>
+                            <span id="gcalConnStatusText" class="font-semibold text-slate-800 dark:text-slate-100 truncate">Não conectado</span>
+                        </div>
+                        <p id="gcalConnSubText" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Autorize sua conta Google para ler e enviar eventos deste projeto.</p>
+                    </div>
+                    <button id="gcalConnectBtn" type="button" onclick="connectGoogleCalendar()"
+                        class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs transition cursor-pointer shrink-0">
+                        <i class="fa-brands fa-google text-[11px]"></i>
+                        <span id="gcalConnectBtnLabel">Conectar</span>
+                    </button>
+                </div>
+
+                <!-- Per-Project Calendar Picker -->
+                <div id="gcalPickerSection" class="space-y-2.5 hidden">
+                    <div class="flex items-center justify-between gap-2">
+                        <label for="gcalCalendarSelect" id="gcalSelectLabel" class="font-semibold text-slate-700 dark:text-slate-200">Agenda vinculada a este projeto</label>
+                        <button type="button" onclick="createProjectGoogleCalendar()"
+                            class="text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span id="gcalCreateNewLabel">Criar nova agenda</span>
+                        </button>
+                    </div>
+                    <div class="relative flex items-center">
+                        <select id="gcalCalendarSelect" onchange="selectProjectGoogleCalendar(this.value)"
+                            class="w-full h-9 appearance-none pl-3 pr-8 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 cursor-pointer leading-none transition">
+                            <option value="">— Selecione uma agenda —</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 absolute right-3 pointer-events-none"></i>
+                    </div>
+                </div>
+
+                <!-- Sync Actions -->
+                <div id="gcalActionsSection" class="hidden pt-1 space-y-2">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button type="button" onclick="syncGoogleCalendarEvents(true)"
+                            class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer">
+                            <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+                            <span id="gcalSyncNowLabel">Atualizar Eventos</span>
+                        </button>
+                        <button type="button" onclick="pushTasksToGoogleCalendar()"
+                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-sky-400 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                            <i class="fa-solid fa-cloud-arrow-up text-sky-500 text-[11px]"></i>
+                            <span id="gcalPushTasksLabel">Enviar Tarefas Agendadas</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between pt-1">
+                        <span id="gcalSyncStatusHint" class="text-[11px] text-slate-400"></span>
+                        <button type="button" onclick="unlinkProjectGoogleCalendar()"
+                            class="text-[11px] font-medium text-rose-500 hover:text-rose-600 hover:underline cursor-pointer">
+                            <span id="gcalUnlinkLabel">Desvincular agenda</span>
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -3500,12 +3594,15 @@
         function renderCalendarView() {
             const monthNames = t('months');
             document.getElementById('calendarMonthTitle').textContent = `${monthNames[calendarMonth]} ${calendarYear}`;
+            updateGcalHeaderButton();
             const grid = document.getElementById('calendarGridContainer');
             grid.innerHTML = '';
             const firstDay = new Date(calendarYear, calendarMonth, 1).getDay();
             const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
             const daysInPrev = new Date(calendarYear, calendarMonth, 0).getDate();
             const tasks = getFilteredTasks();
+            const monthKey = getGcalMonthCacheKey();
+            const gcalEvents = gcalEventsCache[monthKey] || [];
 
             for (let i = firstDay - 1; i >= 0; i--) {
                 const cell = document.createElement('div');
@@ -3516,6 +3613,7 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 const dayTasks = tasks.filter(t => t.dueDate === dateStr);
+                const dayGcalEvents = gcalEvents.filter(ev => ev.dateStr === dateStr);
                 const cell = document.createElement('div');
                 cell.className = `calendar-cell p-2 flex flex-col gap-1 bg-white dark:bg-[#111827]`;
                 cell.ondragover = handleDragOver; cell.ondragleave = handleDragLeave;
@@ -3531,6 +3629,7 @@
                     </div>
                     <div class="space-y-1 overflow-y-auto max-h-24">
                         ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-2 py-1 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
+                        ${dayGcalEvents.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)}" class="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/70 dark:border-emerald-800 truncate hover:bg-emerald-100 dark:hover:bg-emerald-900 transition"><i class="fa-brands fa-google text-[9px] shrink-0"></i><span class="truncate">${ev.timeLabel ? escapeHtml(ev.timeLabel) + ' ' : ''}${escapeHtml(ev.title)}</span></a>`).join('')}
                     </div>
                 `;
                 grid.appendChild(cell);
@@ -3538,6 +3637,10 @@
             const unscheduled = document.getElementById('unscheduledTasksList');
             unscheduled.innerHTML = '';
             tasks.filter(t => !t.dueDate).forEach(t => unscheduled.appendChild(createPlannerCardElement(t)));
+
+            if (plannerData.googleCalendarId && isGcalTokenValid() && !gcalEventsCache[monthKey]) {
+                syncGoogleCalendarEvents(false);
+            }
         }
 
         function changeCalendarMonth(delta) {
@@ -3547,7 +3650,320 @@
             renderCalendarView();
         }
 
-        function goToTodayCalendar() { calendarYear = 2026; calendarMonth = 9; renderCalendarView(); }
+        function goToTodayCalendar() {
+            const now = new Date();
+            calendarYear = now.getFullYear();
+            calendarMonth = now.getMonth();
+            renderCalendarView();
+        }
+
+        // ============================================================================
+        // GOOGLE CALENDAR PER-PROJECT INTEGRATION
+        // ============================================================================
+        const GCAL_TOKEN_KEY = 'worldaily_gcal_token';
+        const GCAL_TOKEN_TS_KEY = 'worldaily_gcal_token_ts';
+        let gcalAccessToken = sessionStorage.getItem(GCAL_TOKEN_KEY) || '';
+        let gcalTokenTs = Number(sessionStorage.getItem(GCAL_TOKEN_TS_KEY) || 0);
+        let gcalCalendarsList = [];
+        let gcalEventsCache = {};
+
+        function isGcalTokenValid() {
+            return Boolean(gcalAccessToken && gcalTokenTs && (Date.now() - gcalTokenTs) < 50 * 60 * 1000);
+        }
+
+        function getGcalMonthCacheKey() {
+            return `${plannerData.id || 'default'}::${plannerData.googleCalendarId || 'none'}::${calendarYear}-${calendarMonth}`;
+        }
+
+        function setGcalToken(token) {
+            gcalAccessToken = token || '';
+            gcalTokenTs = token ? Date.now() : 0;
+            if (token) {
+                sessionStorage.setItem(GCAL_TOKEN_KEY, token);
+                sessionStorage.setItem(GCAL_TOKEN_TS_KEY, String(gcalTokenTs));
+            } else {
+                sessionStorage.removeItem(GCAL_TOKEN_KEY);
+                sessionStorage.removeItem(GCAL_TOKEN_TS_KEY);
+            }
+        }
+
+        function updateGcalHeaderButton() {
+            const labelEl = document.getElementById('gcalHeaderBtnLabel');
+            const quickBtn = document.getElementById('gcalQuickSyncBtn');
+            const linkedName = plannerData.googleCalendarName || '';
+            if (labelEl) {
+                if (linkedName && isGcalTokenValid()) {
+                    labelEl.textContent = linkedName;
+                } else if (linkedName) {
+                    labelEl.textContent = currentLang === 'pt' ? `${linkedName} (Reconectar)` : `${linkedName} (Reconnect)`;
+                } else {
+                    labelEl.textContent = currentLang === 'pt' ? 'Google Agenda' : 'Google Calendar';
+                }
+            }
+            if (quickBtn) {
+                if (plannerData.googleCalendarId && isGcalTokenValid()) {
+                    quickBtn.classList.remove('hidden');
+                    quickBtn.classList.add('flex');
+                } else {
+                    quickBtn.classList.add('hidden');
+                    quickBtn.classList.remove('flex');
+                }
+            }
+        }
+
+        function updateGcalModalTexts() {
+            const isPt = currentLang === 'pt';
+            const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
+            setTxt('gcalModalTitle', 'Google Agenda por Projeto', 'Google Calendar per Project');
+            setTxt('gcalProjectNameBadge', `Projeto: ${plannerData.planTitle || 'Worldaily'}`, `Project: ${plannerData.planTitle || 'Worldaily'}`);
+            setTxt('gcalSelectLabel', 'Agenda vinculada a este projeto', 'Calendar linked to this project');
+            setTxt('gcalCreateNewLabel', 'Criar nova agenda', 'Create new calendar');
+            setTxt('gcalSyncNowLabel', 'Atualizar Eventos', 'Refresh Events');
+            setTxt('gcalPushTasksLabel', 'Enviar Tarefas Agendadas', 'Push Scheduled Tasks');
+            setTxt('gcalUnlinkLabel', 'Desvincular agenda deste projeto', 'Unlink calendar from project');
+
+            const valid = isGcalTokenValid();
+            const dot = document.getElementById('gcalConnDot');
+            if (dot) {
+                dot.className = `w-2 h-2 rounded-full shrink-0 ${valid ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`;
+            }
+            setTxt('gcalConnStatusText',
+                valid ? 'Conectado ao Google Agenda' : 'Não conectado (ou sessão expirada)',
+                valid ? 'Connected to Google Calendar' : 'Not connected (or session expired)');
+            setTxt('gcalConnSubText',
+                valid ? 'Escolha abaixo qual agenda pertence a este projeto.' : 'Autorize sua conta Google para ler e enviar eventos deste projeto.',
+                valid ? 'Choose below which calendar belongs to this project.' : 'Authorize your Google account to read and push events for this project.');
+            setTxt('gcalConnectBtnLabel',
+                valid ? 'Reconectar' : 'Conectar',
+                valid ? 'Reconnect' : 'Connect');
+
+            const picker = document.getElementById('gcalPickerSection');
+            const actions = document.getElementById('gcalActionsSection');
+            if (picker) picker.classList.toggle('hidden', !valid);
+            if (actions) actions.classList.toggle('hidden', !(valid && plannerData.googleCalendarId));
+        }
+
+        async function openGcalModal() {
+            updateGcalModalTexts();
+            const modal = document.getElementById('gcalModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if (isGcalTokenValid()) {
+                await fetchGoogleCalendars();
+            }
+        }
+
+        function closeGcalModal() {
+            const modal = document.getElementById('gcalModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        async function connectGoogleCalendar() {
+            if (!fbAuth) {
+                showToast(currentLang === 'pt' ? 'Firebase Auth não inicializado.' : 'Firebase Auth not initialized.');
+                return;
+            }
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('https://www.googleapis.com/auth/calendar');
+                provider.setCustomParameters({ prompt: 'consent' });
+                const result = await fbAuth.signInWithPopup(provider);
+                const token = result?.credential?.accessToken || '';
+                if (!token) {
+                    showToast(currentLang === 'pt' ? 'Não foi possível obter o token do Google Agenda.' : 'Could not obtain Google Calendar token.');
+                    return;
+                }
+                setGcalToken(token);
+                updateGcalModalTexts();
+                updateGcalHeaderButton();
+                await fetchGoogleCalendars();
+                if (plannerData.googleCalendarId) {
+                    await syncGoogleCalendarEvents(false);
+                }
+                showToast(currentLang === 'pt' ? 'Google Agenda conectado!' : 'Google Calendar connected!');
+            } catch (err) {
+                console.error('Google Calendar auth error:', err);
+                showToast(err?.message || (currentLang === 'pt' ? 'Erro ao conectar Google Agenda.' : 'Error connecting Google Calendar.'));
+            }
+        }
+
+        async function gcalFetch(url, options = {}) {
+            if (!isGcalTokenValid()) {
+                throw new Error('GCAL_TOKEN_EXPIRED');
+            }
+            const res = await fetch(url, {
+                ...options,
+                headers: {
+                    Authorization: `Bearer ${gcalAccessToken}`,
+                    'Content-Type': 'application/json',
+                    ...(options.headers || {})
+                }
+            });
+            if (res.status === 401) {
+                setGcalToken('');
+                updateGcalHeaderButton();
+                updateGcalModalTexts();
+                throw new Error('GCAL_TOKEN_EXPIRED');
+            }
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data?.error?.message || `Google Calendar API HTTP ${res.status}`);
+            }
+            return data;
+        }
+
+        async function fetchGoogleCalendars() {
+            const select = document.getElementById('gcalCalendarSelect');
+            if (!select) return;
+            try {
+                const data = await gcalFetch('https://www.googleapis.com/calendar/v3/users/me/calendarList');
+                gcalCalendarsList = (data.items || []).filter(c => c.accessRole === 'owner' || c.accessRole === 'writer');
+                select.innerHTML = `<option value="">${currentLang === 'pt' ? '— Selecione uma agenda —' : '— Select a calendar —'}</option>`;
+                gcalCalendarsList.forEach(cal => {
+                    const opt = document.createElement('option');
+                    opt.value = cal.id;
+                    opt.textContent = cal.primary ? `${cal.summary} (Principal)` : cal.summary;
+                    select.appendChild(opt);
+                });
+                if (plannerData.googleCalendarId) {
+                    select.value = plannerData.googleCalendarId;
+                }
+            } catch (err) {
+                console.error('fetchGoogleCalendars error:', err);
+                if (err.message !== 'GCAL_TOKEN_EXPIRED') {
+                    showToast(err.message);
+                }
+            }
+        }
+
+        function selectProjectGoogleCalendar(calId) {
+            if (!calId) return;
+            const cal = gcalCalendarsList.find(c => c.id === calId);
+            plannerData.googleCalendarId = calId;
+            plannerData.googleCalendarName = cal ? cal.summary : calId;
+            saveDataState(currentLang === 'pt' ? `Agenda "${plannerData.googleCalendarName}" vinculada!` : `Linked "${plannerData.googleCalendarName}"!`);
+            updateGcalModalTexts();
+            updateGcalHeaderButton();
+            syncGoogleCalendarEvents(true);
+        }
+
+        async function createProjectGoogleCalendar() {
+            if (!isGcalTokenValid()) {
+                await connectGoogleCalendar();
+                return;
+            }
+            const summary = `Worldaily • ${plannerData.planTitle || 'Project'}`;
+            try {
+                const created = await gcalFetch('https://www.googleapis.com/calendar/v3/calendars', {
+                    method: 'POST',
+                    body: JSON.stringify({ summary })
+                });
+                plannerData.googleCalendarId = created.id;
+                plannerData.googleCalendarName = created.summary;
+                saveDataState(currentLang === 'pt' ? `Agenda "${created.summary}" criada!` : `Calendar "${created.summary}" created!`);
+                await fetchGoogleCalendars();
+                updateGcalModalTexts();
+                updateGcalHeaderButton();
+                await syncGoogleCalendarEvents(true);
+            } catch (err) {
+                console.error('createProjectGoogleCalendar error:', err);
+                showToast(err.message);
+            }
+        }
+
+        function unlinkProjectGoogleCalendar() {
+            delete plannerData.googleCalendarId;
+            delete plannerData.googleCalendarName;
+            saveDataState(currentLang === 'pt' ? 'Agenda desvinculada deste projeto.' : 'Calendar unlinked from project.');
+            updateGcalModalTexts();
+            updateGcalHeaderButton();
+            renderCalendarView();
+        }
+
+        async function syncGoogleCalendarEvents(showSuccessToast = true) {
+            if (!plannerData.googleCalendarId || !isGcalTokenValid()) {
+                if (showSuccessToast) openGcalModal();
+                return;
+            }
+            const monthStart = new Date(calendarYear, calendarMonth, 1, 0, 0, 0);
+            const monthEnd = new Date(calendarYear, calendarMonth + 1, 0, 23, 59, 59);
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(plannerData.googleCalendarId)}/events?timeMin=${encodeURIComponent(monthStart.toISOString())}&timeMax=${encodeURIComponent(monthEnd.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=250`;
+            try {
+                const data = await gcalFetch(url);
+                const mapped = (data.items || []).map(ev => {
+                    const startDate = ev.start?.date || (ev.start?.dateTime ? ev.start.dateTime.slice(0, 10) : '');
+                    const timeLabel = ev.start?.dateTime ? ev.start.dateTime.slice(11, 16) : '';
+                    return {
+                        id: ev.id,
+                        title: ev.summary || '(Sem título)',
+                        dateStr: startDate,
+                        timeLabel,
+                        htmlLink: ev.htmlLink || ''
+                    };
+                }).filter(ev => ev.dateStr);
+                gcalEventsCache[getGcalMonthCacheKey()] = mapped;
+                renderCalendarView();
+                const hint = document.getElementById('gcalSyncStatusHint');
+                if (hint) {
+                    hint.textContent = currentLang === 'pt' ? `${mapped.length} evento(s) no mês` : `${mapped.length} event(s) this month`;
+                }
+                if (showSuccessToast) {
+                    showToast(currentLang === 'pt' ? `${mapped.length} evento(s) sincronizado(s)!` : `${mapped.length} event(s) synced!`);
+                }
+            } catch (err) {
+                console.error('syncGoogleCalendarEvents error:', err);
+                if (err.message === 'GCAL_TOKEN_EXPIRED') {
+                    showToast(currentLang === 'pt' ? 'Sessão do Google Agenda expirou. Reconecte.' : 'Google Calendar session expired. Reconnect.');
+                } else if (showSuccessToast) {
+                    showToast(err.message);
+                }
+            }
+        }
+
+        async function pushTasksToGoogleCalendar() {
+            if (!plannerData.googleCalendarId || !isGcalTokenValid()) {
+                openGcalModal();
+                return;
+            }
+            const scheduled = (plannerData.tasks || []).filter(t => t.dueDate && t.status !== 'Completed');
+            if (scheduled.length === 0) {
+                showToast(currentLang === 'pt' ? 'Nenhuma tarefa pendente com data para enviar.' : 'No scheduled pending tasks to push.');
+                return;
+            }
+            let pushed = 0;
+            try {
+                for (const task of scheduled) {
+                    const endObj = new Date(`${task.dueDate}T00:00:00`);
+                    endObj.setDate(endObj.getDate() + 1);
+                    const endDateStr = `${endObj.getFullYear()}-${String(endObj.getMonth() + 1).padStart(2, '0')}-${String(endObj.getDate()).padStart(2, '0')}`;
+                    const payload = {
+                        summary: `[Worldaily] ${task.title}`,
+                        description: `${plannerData.planTitle || 'Worldaily'} • Status: ${task.status || 'Not Started'} | Priority: ${task.priority || 'Medium'}\n${task.notes || ''}`.trim(),
+                        start: { date: task.dueDate },
+                        end: { date: endDateStr }
+                    };
+                    if (task.gcalEventId) {
+                        await gcalFetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(plannerData.googleCalendarId)}/events/${encodeURIComponent(task.gcalEventId)}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        const created = await gcalFetch(`https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(plannerData.googleCalendarId)}/events`, {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+                        task.gcalEventId = created.id;
+                    }
+                    pushed++;
+                }
+                saveDataState(currentLang === 'pt' ? `${pushed} tarefa(s) enviada(s) ao Google Agenda!` : `${pushed} task(s) pushed to Google Calendar!`);
+                await syncGoogleCalendarEvents(false);
+            } catch (err) {
+                console.error('pushTasksToGoogleCalendar error:', err);
+                showToast(err.message);
+            }
+        }
 
         // ============================================================================
         // VIEW 4: CHARTS (ADAPTS TO LIGHT / DARK MODE)
