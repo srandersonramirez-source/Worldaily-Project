@@ -453,10 +453,10 @@
         <!-- Right: Language, Theme & New Task (never wraps to left under logo) -->
         <div class="order-2 md:order-3 flex items-center gap-1.5 sm:gap-2 ml-auto md:ml-0 shrink-0">
             <!-- Language Selector (EN / PT) -->
-            <div class="relative flex items-center shrink-0" title="Language / Idioma">
+            <div class="relative flex items-center shrink-0 w-[68px]" title="Language / Idioma">
                 <i class="fa-solid fa-globe text-[11px] text-slate-400 dark:text-slate-400 absolute left-2.5 pointer-events-none"></i>
                 <select id="languageSelect" onchange="setLanguage(this.value)"
-                    class="appearance-none h-8 pl-7 pr-6 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 text-[11px] font-semibold outline-none cursor-pointer transition">
+                    class="w-full appearance-none h-8 pl-7 pr-6 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-sky-600 dark:hover:text-sky-400 text-[11px] font-semibold outline-none cursor-pointer transition">
                     <option value="en" class="bg-white dark:bg-slate-900">EN</option>
                     <option value="pt" class="bg-white dark:bg-slate-900">PT</option>
                 </select>
@@ -469,7 +469,7 @@
             </button>
 
             <button onclick="openTaskModal()"
-                class="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white px-3 sm:px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-sky-500/20 transition cursor-pointer shrink-0 whitespace-nowrap">
+                class="bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white px-3 sm:px-3.5 py-1.5 sm:w-[118px] rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 shadow-sm shadow-sky-500/20 transition cursor-pointer shrink-0 whitespace-nowrap">
                 <i class="fa-solid fa-plus text-[11px]"></i>
                 <span data-i18n="new_task">New Task</span>
             </button>
@@ -638,12 +638,12 @@
 
                                 <div class="flex flex-wrap items-center gap-2.5 shrink-0">
                                     <button onclick="openProjectModal('Project')"
-                                        class="px-4 py-2.5 rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-display font-bold text-xs shadow-sm flex items-center gap-2 transition cursor-pointer">
+                                        class="px-4 py-2.5 w-[136px] rounded-xl bg-white text-sky-700 hover:bg-sky-50 font-display font-bold text-xs shadow-sm flex items-center justify-center gap-2 transition cursor-pointer whitespace-nowrap">
                                         <i class="fa-solid fa-plus"></i>
                                         <span data-i18n="hub_new_project">New Project</span>
                                     </button>
                                     <button onclick="openProjectModal('Personal')"
-                                        class="px-4 py-2.5 rounded-xl bg-sky-700/50 hover:bg-sky-700/70 text-white border border-white/25 font-display font-bold text-xs flex items-center gap-2 transition cursor-pointer">
+                                        class="px-4 py-2.5 w-[168px] rounded-xl bg-sky-700/50 hover:bg-sky-700/70 text-white border border-white/25 font-display font-bold text-xs flex items-center justify-center gap-2 transition cursor-pointer whitespace-nowrap">
                                         <i class="fa-regular fa-sun"></i>
                                         <span data-i18n="hub_new_personal">New Personal Plan</span>
                                     </button>
@@ -675,15 +675,15 @@
                         <div class="flex flex-wrap items-center justify-between gap-3">
                             <div class="flex items-center gap-1.5 bg-white dark:bg-[#111827] p-1 rounded-xl border border-slate-200/80 dark:border-slate-800">
                                 <button onclick="setHubCategoryFilter('ALL')" id="hub-filter-ALL"
-                                    class="hub-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-sky-500/10 text-sky-600 dark:text-sky-400">
+                                    class="hub-cat-btn w-[136px] text-center px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-sky-500/10 text-sky-600 dark:text-sky-400 whitespace-nowrap">
                                     <span data-i18n="hub_filter_all">All Workspaces</span>
                                 </button>
                                 <button onclick="setHubCategoryFilter('Project')" id="hub-filter-Project"
-                                    class="hub-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    class="hub-cat-btn w-[98px] text-center px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 whitespace-nowrap">
                                     <i class="fa-solid fa-briefcase mr-1 text-[10px]"></i><span data-i18n="hub_filter_projects">Projects</span>
                                 </button>
                                 <button onclick="setHubCategoryFilter('Personal')" id="hub-filter-Personal"
-                                    class="hub-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200">
+                                    class="hub-cat-btn w-[138px] text-center px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 whitespace-nowrap">
                                     <i class="fa-regular fa-sun mr-1 text-[10px]"></i><span data-i18n="hub_filter_personal">Personal &amp; Daily</span>
                                 </button>
                             </div>
@@ -755,7 +755,7 @@
                             <input id="quickGridTaskInput" type="text" data-i18n-placeholder="quick_add_desktop" placeholder="Quickly add a new task (press Enter)..."
                                 onkeydown="if(event.key==='Enter') handleQuickGridAddTask(this)"
                                 class="flex-1 text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 font-medium bg-transparent outline-none" />
-                            <button onclick="openTaskModal()" class="text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium">
+                            <button onclick="openTaskModal()" class="w-[178px] text-right text-xs text-sky-600 dark:text-sky-400 hover:underline font-medium whitespace-nowrap">
                                 <span data-i18n="open_full_form">Open full form</span> <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
                             </button>
                         </div>
@@ -819,25 +819,25 @@
                         <div class="flex flex-wrap items-center gap-2">
                             <!-- Time Scale Switcher -->
                             <div class="inline-flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60">
-                                <button onclick="setGanttScale('day')" id="gantt-scale-day" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs" data-i18n="gantt_day">Day</button>
-                                <button onclick="setGanttScale('week')" id="gantt-scale-week" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_week">Week</button>
-                                <button onclick="setGanttScale('month')" id="gantt-scale-month" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_month">Month</button>
+                                <button onclick="setGanttScale('day')" id="gantt-scale-day" class="w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs" data-i18n="gantt_day">Day</button>
+                                <button onclick="setGanttScale('week')" id="gantt-scale-week" class="w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_week">Week</button>
+                                <button onclick="setGanttScale('month')" id="gantt-scale-month" class="w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_month">Month</button>
                             </div>
 
                             <!-- Group By Switcher -->
                             <div class="inline-flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-700/60">
-                                <button onclick="setGanttGroupBy('all')" id="gantt-group-all" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs" data-i18n="gantt_group_all">All</button>
-                                <button onclick="setGanttGroupBy('stage')" id="gantt-group-stage" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_group_stage">Stage</button>
-                                <button onclick="setGanttGroupBy('status')" id="gantt-group-status" class="px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_group_status">Status</button>
+                                <button onclick="setGanttGroupBy('all')" id="gantt-group-all" class="w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs" data-i18n="gantt_group_all">All</button>
+                                <button onclick="setGanttGroupBy('stage')" id="gantt-group-stage" class="w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_group_stage">Stage</button>
+                                <button onclick="setGanttGroupBy('status')" id="gantt-group-status" class="w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200" data-i18n="gantt_group_status">Status</button>
                             </div>
                         </div>
 
                         <div class="flex items-center gap-2 ml-auto">
                             <!-- Legend (Desktop) -->
                             <div class="hidden xl:flex items-center gap-3 mr-2 text-[11px] text-slate-500 dark:text-slate-400">
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span data-i18n="status_not_started">Not started</span></span>
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-sky-500"></span><span data-i18n="status_in_progress">In progress</span></span>
-                                <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500"></span><span data-i18n="status_completed">Completed</span></span>
+                                <span class="flex items-center gap-1.5 min-w-[84px]"><span class="w-2 h-2 rounded-full bg-slate-400 shrink-0"></span><span data-i18n="status_not_started">Not started</span></span>
+                                <span class="flex items-center gap-1.5 min-w-[96px]"><span class="w-2 h-2 rounded-full bg-sky-500 shrink-0"></span><span data-i18n="status_in_progress">In progress</span></span>
+                                <span class="flex items-center gap-1.5 min-w-[80px]"><span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span><span data-i18n="status_completed">Completed</span></span>
                             </div>
 
                             <!-- Navigation Controls -->
@@ -845,12 +845,12 @@
                                 <button onclick="shiftGanttRange(-1)" title="Previous" class="w-7 h-7 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer">
                                     <i class="fa-solid fa-chevron-left text-[10px]"></i>
                                 </button>
-                                <button onclick="scrollGanttToToday()" class="px-2.5 h-7 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-[11px] font-semibold text-sky-600 dark:text-sky-400 transition cursor-pointer" data-i18n="gantt_today">Today</button>
+                                <button onclick="scrollGanttToToday()" class="w-[54px] text-center h-7 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-[11px] font-semibold text-sky-600 dark:text-sky-400 transition cursor-pointer" data-i18n="gantt_today">Today</button>
                                 <button onclick="shiftGanttRange(1)" title="Next" class="w-7 h-7 rounded-lg hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 flex items-center justify-center transition cursor-pointer">
                                     <i class="fa-solid fa-chevron-right text-[10px]"></i>
                                 </button>
                             </div>
-                            <span id="ganttRangeLabel" class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 min-w-[100px] text-right hidden sm:inline"></span>
+                            <span id="ganttRangeLabel" class="text-[11px] font-semibold text-slate-600 dark:text-slate-300 w-[124px] text-right hidden sm:inline"></span>
                         </div>
                     </div>
 
@@ -1215,11 +1215,11 @@
                 </span>
                 <div class="flex items-center gap-2 ml-auto">
                     <button type="button" onclick="closeTaskModal()" data-i18n="cancel_btn"
-                        class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
+                        class="w-[96px] text-center px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer whitespace-nowrap">
                         Cancel
                     </button>
                     <button type="button" onclick="saveTaskFromModal()"
-                        class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white text-xs font-semibold shadow-sm shadow-sky-500/25 flex items-center gap-1.5 transition cursor-pointer">
+                        class="w-[132px] justify-center px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white text-xs font-semibold shadow-sm shadow-sky-500/25 flex items-center gap-1.5 transition cursor-pointer whitespace-nowrap">
                         <i class="fa-solid fa-check text-[11px]"></i>
                         <span data-i18n="save_task_btn">Save Task</span>
                     </button>
@@ -1295,8 +1295,8 @@
             </div>
 
             <div class="px-6 py-3.5 bg-slate-50/80 dark:bg-slate-900/70 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-end gap-2">
-                <button type="button" onclick="closeProjectModal()" data-i18n="cancel_btn" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">Cancel</button>
-                <button type="button" onclick="saveProjectFromModal()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white text-xs font-semibold shadow-sm shadow-sky-500/25 flex items-center gap-1.5 transition cursor-pointer">
+                <button type="button" onclick="closeProjectModal()" data-i18n="cancel_btn" class="w-[96px] text-center px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer whitespace-nowrap">Cancel</button>
+                <button type="button" onclick="saveProjectFromModal()" class="w-[144px] justify-center px-5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-white text-xs font-semibold shadow-sm shadow-sky-500/25 flex items-center gap-1.5 transition cursor-pointer whitespace-nowrap">
                     <i class="fa-solid fa-check text-[11px]"></i>
                     <span data-i18n="save_workspace_btn">Save Workspace</span>
                 </button>
@@ -2338,13 +2338,15 @@
         // ============================================================================
         function setHubCategoryFilter(cat) {
             hubCategoryFilter = cat;
+            const widths = { ALL: 'w-[136px]', Project: 'w-[98px]', Personal: 'w-[138px]' };
             ['ALL', 'Project', 'Personal'].forEach(c => {
                 const btn = document.getElementById(`hub-filter-${c}`);
                 if (!btn) return;
+                const wCls = widths[c] || '';
                 if (c === cat) {
-                    btn.className = 'hub-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-sky-500/10 text-sky-600 dark:text-sky-400';
+                    btn.className = `hub-cat-btn ${wCls} text-center px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer bg-sky-500/10 text-sky-600 dark:text-sky-400 whitespace-nowrap`;
                 } else {
-                    btn.className = 'hub-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
+                    btn.className = `hub-cat-btn ${wCls} text-center px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 whitespace-nowrap`;
                 }
             });
             renderProjectsHubView();
@@ -3237,8 +3239,8 @@
                 const btn = document.getElementById(`gantt-scale-${s}`);
                 if (!btn) return;
                 btn.className = s === scale
-                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs'
-                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
+                    ? 'w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs'
+                    : 'w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
             });
             renderGanttView();
         }
@@ -3249,8 +3251,8 @@
                 const btn = document.getElementById(`gantt-group-${g}`);
                 if (!btn) return;
                 btn.className = g === groupBy
-                    ? 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs'
-                    : 'px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
+                    ? 'w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-2xs'
+                    : 'w-[68px] text-center px-2.5 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200';
             });
             renderGanttView();
         }
