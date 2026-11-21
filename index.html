@@ -1626,9 +1626,21 @@
                         <p id="aiActiveProjectBadge" class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">—</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeAiAssistantModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
-                    <i class="fa-solid fa-xmark text-base"></i>
-                </button>
+                <div class="flex items-center gap-2 shrink-0">
+                    <div class="relative flex items-center">
+                        <select id="aiModelSelect" onchange="changeGeminiModel(this.value)" aria-label="Gemini Model"
+                            class="appearance-none h-8 pl-3 pr-7 bg-slate-50 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl text-[11px] font-semibold text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer leading-none transition">
+                            <option value="gemini-2.5-flash">2.5 Flash (Fast)</option>
+                            <option value="gemini-2.5-pro">2.5 Pro (Deep)</option>
+                            <option value="gemini-2.5-flash-lite">2.5 Flash-Lite</option>
+                            <option value="gemini-2.0-flash">2.0 Flash</option>
+                        </select>
+                        <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2.5 pointer-events-none"></i>
+                    </div>
+                    <button type="button" onclick="closeAiAssistantModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
+                </div>
             </div>
 
             <!-- Quick Actions -->
@@ -4932,7 +4944,38 @@
         let geminiModel = 'gemini-2.5-flash';
         let aiPendingTasks = [];
 
-        function updateGeminiConfigUI() {}
+        function updateGeminiConfigUI() {
+            const select = document.getElementById('aiModelSelect');
+            if (select) {
+                const hasOption = Array.from(select.options).some(opt => opt.value === geminiModel);
+                if (!hasOption && geminiModel) {
+                    const opt = document.createElement('option');
+                    opt.value = geminiModel;
+                    opt.textContent = geminiModel;
+                    select.appendChild(opt);
+                }
+                select.value = geminiModel;
+            }
+            const badge = document.getElementById('aiActiveProjectBadge');
+            if (badge) badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${geminiModel}`;
+        }
+
+        async function changeGeminiModel(model) {
+            const nextModel = (model || '').trim() || 'gemini-2.5-flash';
+            geminiModel = nextModel;
+            updateGeminiConfigUI();
+            if (typeof fbDb !== 'undefined' && fbDb && typeof fbUser !== 'undefined' && fbUser) {
+                try {
+                    await fbDb.collection('workspaces').doc('integrations').set({ geminiModel: nextModel }, { merge: true });
+                    showToast(currentLang === 'pt' ? `Modelo alterado para ${nextModel}` : `Model switched to ${nextModel}`);
+                } catch (err) {
+                    console.error('Error saving geminiModel:', err);
+                    showToast(currentLang === 'pt' ? `Modelo ativo: ${nextModel}` : `Active model: ${nextModel}`);
+                }
+            } else {
+                showToast(currentLang === 'pt' ? `Modelo ativo: ${nextModel}` : `Active model: ${nextModel}`);
+            }
+        }
 
         function openAiAssistantModal() {
             updateGeminiConfigUI();
