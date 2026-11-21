@@ -463,6 +463,11 @@
                 <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 absolute right-2 pointer-events-none"></i>
             </div>
 
+            <button onclick="openAiAssistantModal()" id="aiHeaderBtn" title="Gemini AI Assistant"
+                class="w-8 h-8 rounded-xl bg-sky-500/10 dark:bg-sky-500/15 text-sky-600 dark:text-sky-400 hover:bg-sky-500 hover:text-white flex items-center justify-center transition cursor-pointer shrink-0">
+                <i class="fa-solid fa-wand-magic-sparkles text-xs"></i>
+            </button>
+
             <button onclick="toggleTheme()" id="themeToggleBtn" title="Toggle Light / Dark Mode"
                 class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-sky-50 dark:hover:bg-slate-700 hover:text-sky-600 dark:hover:text-sky-400 flex items-center justify-center transition cursor-pointer shrink-0">
                 <i id="themeToggleIcon" class="fa-regular fa-moon text-xs"></i>
@@ -1586,6 +1591,33 @@
                         </div>
                     </div>
 
+                    <!-- Gemini AI Integration (Stored securely in Firestore workspaces/integrations) -->
+                    <div class="p-3.5 rounded-2xl bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/70 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[11px] font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+                                <i class="fa-solid fa-wand-magic-sparkles text-sky-500"></i>
+                                <span data-i18n="ai_config_title">Gemini AI (Cloud Firestore)</span>
+                            </span>
+                            <span id="geminiConfigBadge" class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-semibold">Not set</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <input id="geminiApiKeyInput" type="password" data-i18n-placeholder="ai_key_ph" placeholder="Paste Gemini API Key..."
+                                class="sm:col-span-2 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3 py-1.5 text-[11px] text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500" />
+                            <select id="geminiModelSelect"
+                                class="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer">
+                                <option value="gemini-2.5-flash">2.5 Flash (Fast)</option>
+                                <option value="gemini-2.5-pro">2.5 Pro (Deep)</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span data-i18n="ai_key_hint" class="text-[10px] text-slate-400 dark:text-slate-500">Shared securely with authorized team members</span>
+                            <button type="button" onclick="saveGeminiIntegrationToFirestore()" data-i18n="ai_save_key"
+                                class="px-3 py-1 rounded-lg bg-sky-500/10 hover:bg-sky-500 text-sky-600 dark:text-sky-400 hover:text-white text-[11px] font-semibold transition cursor-pointer shrink-0">
+                                Save Key
+                            </button>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-2.5">
                         <button type="button" onclick="syncAllToFirestore(true)"
                             class="py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 active:bg-sky-700 text-white font-semibold shadow-sm shadow-sky-500/20 transition cursor-pointer flex items-center justify-center gap-2">
@@ -1601,6 +1633,78 @@
                 </div>
 
                 <p id="authErrorMsg" class="hidden text-[11px] text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl px-3 py-2"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================================ -->
+    <!-- GEMINI AI ASSISTANT MODAL -->
+    <!-- ============================================================================ -->
+    <div id="aiAssistantModal" onclick="if(event.target === this) closeAiAssistantModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col ring-1 ring-slate-200/80 dark:ring-slate-800 overflow-hidden">
+            <div class="h-1 w-full bg-gradient-to-r from-sky-400 via-sky-500 to-cyan-500 shrink-0"></div>
+            <div class="px-5 sm:px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-wand-magic-sparkles text-sm"></i>
+                    </div>
+                    <div>
+                        <h3 data-i18n="ai_modal_title" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Worldaily Gemini AI</h3>
+                        <p id="aiActiveProjectBadge" class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">—</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeAiAssistantModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="px-5 sm:px-6 py-3 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2 shrink-0">
+                <button type="button" onclick="runAiQuickAction('analyze')"
+                    class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-chart-line text-sky-500 text-[10px]"></i>
+                    <span data-i18n="ai_act_analyze">Analyze Project</span>
+                </button>
+                <button type="button" onclick="runAiQuickAction('tasks')"
+                    class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-list-check text-sky-500 text-[10px]"></i>
+                    <span data-i18n="ai_act_tasks">Generate Tasks</span>
+                </button>
+                <button type="button" onclick="runAiQuickAction('strategy')"
+                    class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                    <i class="fa-solid fa-lightbulb text-amber-500 text-[10px]"></i>
+                    <span data-i18n="ai_act_strategy">Strategy &amp; BMC Ideas</span>
+                </button>
+            </div>
+
+            <!-- AI Response Output Area -->
+            <div id="aiResponseBody" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3 text-xs text-slate-700 dark:text-slate-200 leading-relaxed min-h-[220px]">
+                <div class="text-center py-8 text-slate-400 dark:text-slate-500 space-y-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-2xl text-sky-400"></i>
+                    <p class="font-display font-bold text-slate-700 dark:text-slate-200" data-i18n="ai_empty_title">Ask Gemini about your project</p>
+                    <p class="text-[11px] max-w-sm mx-auto" data-i18n="ai_empty_sub">Use a quick action above or type a prompt below to analyze tasks, generate checklists, or brainstorm strategy.</p>
+                </div>
+            </div>
+
+            <!-- Generated Tasks Action Strip (Shown when AI returns structured tasks) -->
+            <div id="aiGeneratedTasksBar" class="hidden px-5 sm:px-6 py-2.5 bg-sky-50/80 dark:bg-sky-950/30 border-t border-sky-200/70 dark:border-sky-900/60 flex items-center justify-between gap-2 shrink-0">
+                <span id="aiGeneratedTasksCount" class="text-[11px] font-semibold text-sky-700 dark:text-sky-300">0 tasks ready</span>
+                <button type="button" onclick="importAiGeneratedTasks()"
+                    class="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
+                    <i class="fa-solid fa-plus text-[10px]"></i>
+                    <span data-i18n="ai_import_tasks">Add to Project</span>
+                </button>
+            </div>
+
+            <!-- Prompt Input Bar -->
+            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-900/60 flex items-center gap-2 shrink-0">
+                <input id="aiCustomPromptInput" type="text" data-i18n-placeholder="ai_prompt_ph" placeholder="Ask Gemini anything or describe a goal..." onkeydown="if(event.key==='Enter') askAiCustomPrompt()"
+                    class="flex-1 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 transition" />
+                <button type="button" onclick="askAiCustomPrompt()" id="aiSendBtn"
+                    class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-1.5 shadow-sm shadow-sky-500/20 transition cursor-pointer shrink-0">
+                    <i class="fa-regular fa-paper-plane text-[11px]"></i>
+                    <span data-i18n="forum_send_btn">Send</span>
+                </button>
             </div>
         </div>
     </div>
@@ -1795,6 +1899,18 @@
                 forum_send_btn: 'Send',
                 forum_general: 'General',
                 forum_all_topics: 'All Topics',
+                ai_config_title: 'Gemini AI (Cloud Firestore)',
+                ai_key_ph: 'Paste Gemini API Key...',
+                ai_key_hint: 'Shared securely with authorized team members',
+                ai_save_key: 'Save Key',
+                ai_modal_title: 'Worldaily Gemini AI',
+                ai_act_analyze: 'Analyze Project',
+                ai_act_tasks: 'Generate Tasks',
+                ai_act_strategy: 'Strategy & BMC Ideas',
+                ai_empty_title: 'Ask Gemini about your project',
+                ai_empty_sub: 'Use a quick action above or type a prompt below to analyze tasks, generate checklists, or brainstorm strategy.',
+                ai_import_tasks: 'Add to Project',
+                ai_prompt_ph: 'Ask Gemini anything or describe a goal...',
                 mob_gantt: 'Gantt',
                 gantt_day: 'Day',
                 gantt_week: 'Week',
@@ -1993,6 +2109,18 @@
                 forum_send_btn: 'Enviar',
                 forum_general: 'Geral',
                 forum_all_topics: 'Todos os Tópicos',
+                ai_config_title: 'Gemini AI (Cloud Firestore)',
+                ai_key_ph: 'Cole a Gemini API Key...',
+                ai_key_hint: 'Compartilhada com segurança apenas com o time autorizado',
+                ai_save_key: 'Salvar Chave',
+                ai_modal_title: 'Worldaily Gemini AI',
+                ai_act_analyze: 'Analisar Projeto',
+                ai_act_tasks: 'Gerar Tarefas',
+                ai_act_strategy: 'Ideias Estratégicas',
+                ai_empty_title: 'Pergunte ao Gemini sobre o projeto',
+                ai_empty_sub: 'Use um atalho acima ou escreva abaixo para analisar tarefas, gerar checklists ou criar ideias de estratégia.',
+                ai_import_tasks: 'Adicionar ao Projeto',
+                ai_prompt_ph: 'Pergunte algo ao Gemini ou descreva um objetivo...',
                 mob_gantt: 'Gantt',
                 gantt_day: 'Dia',
                 gantt_week: 'Semana',
@@ -4825,6 +4953,212 @@
         }
 
         // ============================================================================
+        // GEMINI AI ASSISTANT (API Key stored securely in Firestore workspaces/integrations)
+        // ============================================================================
+        let geminiApiKey = '';
+        let geminiModel = 'gemini-2.5-flash';
+        let aiPendingTasks = [];
+
+        function updateGeminiConfigUI() {
+            const keyInput = document.getElementById('geminiApiKeyInput');
+            const modelSel = document.getElementById('geminiModelSelect');
+            const badge = document.getElementById('geminiConfigBadge');
+            if (keyInput && geminiApiKey) keyInput.value = geminiApiKey;
+            if (modelSel) modelSel.value = geminiModel || 'gemini-2.5-flash';
+            if (badge) {
+                if (geminiApiKey) {
+                    badge.textContent = currentLang === 'pt' ? 'Ativa' : 'Active';
+                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-sky-500/15 text-sky-600 dark:text-sky-400 font-semibold';
+                } else {
+                    badge.textContent = currentLang === 'pt' ? 'Não configurada' : 'Not set';
+                    badge.className = 'text-[10px] px-2 py-0.5 rounded-full bg-slate-200/70 dark:bg-slate-700 text-slate-500 dark:text-slate-400 font-semibold';
+                }
+            }
+        }
+
+        async function saveGeminiIntegrationToFirestore() {
+            if (!fbDb || !fbCurrentUser) return;
+            const key = (document.getElementById('geminiApiKeyInput')?.value || '').trim();
+            const model = document.getElementById('geminiModelSelect')?.value || 'gemini-2.5-flash';
+            try {
+                await fbDb.collection('workspaces').doc('integrations').set({
+                    geminiApiKey: key,
+                    geminiModel: model,
+                    updatedAt: new Date().toISOString(),
+                    updatedBy: fbCurrentUser.email || fbCurrentUser.uid
+                }, { merge: true });
+                geminiApiKey = key;
+                geminiModel = model;
+                updateGeminiConfigUI();
+                showToast(currentLang === 'pt' ? 'Chave Gemini salva no Firestore!' : 'Gemini key saved to Firestore!');
+            } catch (err) {
+                console.error('Save Gemini integration error:', err);
+                showAuthError(currentLang === 'pt' ? 'Erro ao salvar chave no Firestore.' : 'Failed to save key to Firestore.');
+            }
+        }
+
+        function openAiAssistantModal() {
+            updateGeminiConfigUI();
+            const badge = document.getElementById('aiActiveProjectBadge');
+            if (badge) badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${geminiModel}`;
+            const modal = document.getElementById('aiAssistantModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeAiAssistantModal() {
+            const modal = document.getElementById('aiAssistantModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function buildProjectContextForAi() {
+            const stages = (plannerData.buckets || []).map(b => `${b.name} (${b.id})`).join(', ');
+            const tasksSummary = (plannerData.tasks || []).slice(0, 40).map(t =>
+                `- [${t.status} | ${t.priority}] ${t.title}${t.dueDate ? ' (Due: ' + t.dueDate + ')' : ''}`
+            ).join('\n');
+            return `Project: ${plannerData.planTitle}\nDescription: ${plannerData.description || ''}\nStages: ${stages}\nTasks (${(plannerData.tasks || []).length}):\n${tasksSummary || 'No tasks yet.'}`;
+        }
+
+        async function callGeminiApi(promptText) {
+            if (!geminiApiKey) {
+                openAuthModal();
+                showToast(currentLang === 'pt' ? 'Cadastre a Gemini API Key em Sincronização & Conta!' : 'Add your Gemini API Key in Cloud Sync & Account!');
+                return null;
+            }
+            const bodyEl = document.getElementById('aiResponseBody');
+            const tasksBar = document.getElementById('aiGeneratedTasksBar');
+            if (tasksBar) tasksBar.classList.add('hidden');
+            aiPendingTasks = [];
+
+            if (bodyEl) {
+                bodyEl.innerHTML = `
+                    <div class="flex items-center justify-center gap-2.5 py-12 text-slate-500 dark:text-slate-400">
+                        <i class="fa-solid fa-circle-notch fa-spin text-sky-500 text-base"></i>
+                        <span>${currentLang === 'pt' ? 'Gemini analisando...' : 'Gemini is thinking...'}</span>
+                    </div>`;
+            }
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent?key=${encodeURIComponent(geminiApiKey)}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptText }] }]
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok) {
+                    const errMsg = data?.error?.message || `HTTP ${res.status}`;
+                    throw new Error(errMsg);
+                }
+                const text = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('\n') || '';
+                return text;
+            } catch (err) {
+                if (bodyEl) {
+                    bodyEl.innerHTML = `
+                        <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 space-y-1">
+                            <p class="font-bold">${currentLang === 'pt' ? 'Erro na API do Gemini' : 'Gemini API Error'}</p>
+                            <p class="text-[11px] break-words">${escapeHtml(err.message)}</p>
+                        </div>`;
+                }
+                return null;
+            }
+        }
+
+        function renderAiMarkdownText(rawText) {
+            const bodyEl = document.getElementById('aiResponseBody');
+            if (!bodyEl) return;
+            const formatted = escapeHtml(rawText)
+                .replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-900 dark:text-white">$1</strong>')
+                .replace(/^### (.+)$/gm, '<h4 class="font-display font-bold text-sm text-sky-600 dark:text-sky-400 pt-2">$1</h4>')
+                .replace(/^## (.+)$/gm, '<h3 class="font-display font-bold text-sm text-slate-900 dark:text-white pt-2">$1</h3>');
+            bodyEl.innerHTML = `<div class="whitespace-pre-wrap break-words space-y-1">${formatted}</div>`;
+        }
+
+        async function runAiQuickAction(mode) {
+            const langNote = currentLang === 'pt' ? 'Responda em Português.' : 'Respond in English.';
+            const ctx = buildProjectContextForAi();
+
+            if (mode === 'analyze') {
+                const prompt = `${langNote}\nAnalyze this project concisely with: 1) Current status summary, 2) Main bottlenecks/risks, 3) Top 3 recommended next actions.\n\n${ctx}`;
+                const reply = await callGeminiApi(prompt);
+                if (reply) renderAiMarkdownText(reply);
+            } else if (mode === 'strategy') {
+                const prompt = `${langNote}\nSuggest concrete strategic ideas for this project across: Value Proposition, Key Channels, and Revenue/Growth opportunities.\n\n${ctx}`;
+                const reply = await callGeminiApi(prompt);
+                if (reply) renderAiMarkdownText(reply);
+            } else if (mode === 'tasks') {
+                const goalInput = (document.getElementById('aiCustomPromptInput')?.value || '').trim();
+                const focus = goalInput || plannerData.planTitle || 'Next milestone';
+                const prompt = `Return ONLY a valid JSON array (no markdown fences) of 5 actionable tasks for "${focus}". Each item must have: {"title": string, "priority": "Low"|"Medium"|"Important"|"Urgent", "checklist": [string, string]}. Language for titles/checklist: ${currentLang === 'pt' ? 'Portuguese' : 'English'}.\n\nContext:\n${ctx}`;
+                const reply = await callGeminiApi(prompt);
+                if (!reply) return;
+                try {
+                    const cleanJson = reply.replace(/```json/gi, '').replace(/```/g, '').trim();
+                    const parsed = JSON.parse(cleanJson);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        aiPendingTasks = parsed;
+                        const tasksBar = document.getElementById('aiGeneratedTasksBar');
+                        const countEl = document.getElementById('aiGeneratedTasksCount');
+                        if (tasksBar) tasksBar.classList.remove('hidden');
+                        if (countEl) {
+                            countEl.textContent = currentLang === 'pt'
+                                ? `${parsed.length} tarefas prontas para importar`
+                                : `${parsed.length} tasks ready to import`;
+                        }
+                        const preview = parsed.map((t, i) => `**${i + 1}. ${t.title}** (${t.priority || 'Medium'})\n` + (t.checklist || []).map(c => `   • ${c}`).join('\n')).join('\n\n');
+                        renderAiMarkdownText(preview);
+                        return;
+                    }
+                } catch (e) {}
+                renderAiMarkdownText(reply);
+            }
+        }
+
+        function importAiGeneratedTasks() {
+            if (!aiPendingTasks.length) return;
+            const defaultBucket = plannerData.buckets[0]?.id || 'b-backlog';
+            aiPendingTasks.forEach((item, idx) => {
+                plannerData.tasks.push({
+                    id: 't-ai-' + Date.now() + '-' + idx,
+                    title: (item.title || 'AI Task').trim(),
+                    assignedTo: activeUserId || '',
+                    startDate: '',
+                    finishDate: '',
+                    dueDate: '',
+                    bucketId: defaultBucket,
+                    status: 'Not started',
+                    priority: ['Low', 'Medium', 'Important', 'Urgent'].includes(item.priority) ? item.priority : 'Medium',
+                    labels: [],
+                    goals: '',
+                    notes: '',
+                    checklist: (item.checklist || []).map((txt, ci) => ({
+                        id: 'c-ai-' + Date.now() + '-' + idx + '-' + ci,
+                        text: String(txt),
+                        done: false
+                    }))
+                });
+            });
+            const count = aiPendingTasks.length;
+            aiPendingTasks = [];
+            document.getElementById('aiGeneratedTasksBar')?.classList.add('hidden');
+            saveDataState(currentLang === 'pt' ? `${count} tarefas adicionadas!` : `${count} tasks added!`);
+            closeAiAssistantModal();
+        }
+
+        async function askAiCustomPrompt() {
+            const input = document.getElementById('aiCustomPromptInput');
+            const q = (input?.value || '').trim();
+            if (!q) return;
+            const langNote = currentLang === 'pt' ? 'Responda em Português.' : 'Respond in English.';
+            const prompt = `${langNote}\nUser question: ${q}\n\nProject context:\n${buildProjectContextForAi()}`;
+            const reply = await callGeminiApi(prompt);
+            if (reply) renderAiMarkdownText(reply);
+        }
+
+        // ============================================================================
         // GLOBAL TEAM FORUM & COMMENTS (Real-time Firestore Collection: forum_posts)
         // ============================================================================
         let forumPosts = [];
@@ -5353,6 +5687,8 @@
             fbUnsubscribers = [];
             fbInitialSyncDone = false;
             forumPosts = [];
+            geminiApiKey = '';
+            updateGeminiConfigUI();
         }
 
         function startFirestoreRealtimeListeners() {
@@ -5433,7 +5769,20 @@
                 console.error('Firestore forum listener error:', err);
             });
 
-            fbUnsubscribers.push(unsubShared, unsubProjects, unsubTasks, unsubForum);
+            const unsubIntegrations = fbDb.collection('workspaces').doc('integrations').onSnapshot((doc) => {
+                if (doc.exists) {
+                    const d = doc.data();
+                    geminiApiKey = (d.geminiApiKey || '').trim();
+                    geminiModel = (d.geminiModel || 'gemini-2.5-flash').trim();
+                } else {
+                    geminiApiKey = '';
+                }
+                updateGeminiConfigUI();
+            }, (err) => {
+                console.error('Firestore integrations listener error:', err);
+            });
+
+            fbUnsubscribers.push(unsubShared, unsubProjects, unsubTasks, unsubForum, unsubIntegrations);
         }
 
         function applyRemoteFirestoreCache() {
