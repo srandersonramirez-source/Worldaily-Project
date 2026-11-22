@@ -2009,10 +2009,9 @@
         </div>
     </div>
 
-    <!-- Toast -->
-    <div id="toastNotification" class="fixed bottom-5 right-5 bg-slate-900 dark:bg-sky-600 text-white px-4 py-3 rounded-xl shadow-lg text-xs font-medium flex items-center gap-2.5 z-50 opacity-0 pointer-events-none transition-opacity duration-200">
-        <i class="fa-solid fa-circle-check text-emerald-400 dark:text-white text-sm"></i>
-        <span id="toastMessageText">Changes saved!</span>
+    <!-- Toast (Disabled per user preference: silent auto-save & updates) -->
+    <div id="toastNotification" class="hidden">
+        <span id="toastMessageText"></span>
     </div>
 
     <!-- Floating Draggable Living Neon Gemini Orb -->
@@ -2779,7 +2778,7 @@
             }
         }
 
-        function saveDataState(msg = 'Changes saved!') {
+        function saveDataState() {
             plannerData.lastUpdated = new Date().toISOString();
             workspaceStore.members = plannerData.members;
             try {
@@ -2793,7 +2792,6 @@
             renderCurrentView();
             debouncedSaveToGitHub();
             debouncedSyncToFirestore();
-            if (msg) showToast(msg);
         }
 
         function updatePlanTitle(newTitle) {
@@ -2874,10 +2872,8 @@
             if (typeof renderGlobalForum === 'function') renderGlobalForum();
             if (openDefaultView) {
                 switchView('grid');
-                showToast(`Switched to "${plannerData.planTitle}"`);
             } else {
                 renderCurrentView();
-                showToast(`Active workspace: "${plannerData.planTitle}"`);
             }
         }
 
@@ -5934,11 +5930,8 @@
             return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
         }
 
-        function showToast(msg) {
-            const toast = document.getElementById('toastNotification');
-            document.getElementById('toastMessageText').textContent = msg;
-            toast.classList.remove('opacity-0', 'pointer-events-none');
-            setTimeout(() => toast.classList.add('opacity-0', 'pointer-events-none'), 2600);
+        function showToast() {
+            // Silent: toast popup notifications disabled so saving/updating never shows corner popups
         }
 
         // ============================================================================
