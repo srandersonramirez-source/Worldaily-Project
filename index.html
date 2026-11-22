@@ -396,6 +396,60 @@
         html.dark .gemini-fab-sparkle {
             filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.75));
         }
+
+        /* Living Organism Gemini Chat Modal (Morphs from Floating Orb) */
+        @keyframes geminiAmbientBreath {
+            0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+            50%      { transform: translate(12px, -10px) scale(1.12); opacity: 0.7; }
+        }
+        #aiAssistantModal {
+            opacity: 0;
+            transition: opacity 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        #aiAssistantModal.is-open {
+            opacity: 1;
+        }
+        .gemini-modal-shell {
+            position: relative;
+            transform: scale(0.72) translateY(20px);
+            opacity: 0;
+            transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.24s ease;
+            will-change: transform, opacity;
+        }
+        #aiAssistantModal.is-open .gemini-modal-shell {
+            transform: scale(1) translateY(0);
+            opacity: 1;
+        }
+        .gemini-modal-aura {
+            position: absolute;
+            inset: -8px;
+            border-radius: 1.35rem;
+            background: linear-gradient(125deg, #0ea5e9, #38bdf8, #6366f1, #a855f7, #06b6d4, #0ea5e9);
+            background-size: 300% 300%;
+            filter: blur(18px);
+            opacity: 0.32;
+            animation: geminiNeonFlow 7s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+        html.dark .gemini-modal-aura {
+            opacity: 0.48;
+        }
+        .gemini-modal-frame {
+            position: relative;
+            z-index: 1;
+            padding: 1.5px;
+            background: linear-gradient(125deg, #38bdf8, #6366f1, #a855f7, #22d3ee, #38bdf8);
+            background-size: 300% 300%;
+            animation: geminiNeonFlow 7s ease-in-out infinite;
+        }
+        .gemini-ambient-orb {
+            position: absolute;
+            border-radius: 9999px;
+            filter: blur(42px);
+            pointer-events: none;
+            animation: geminiAmbientBreath 8s ease-in-out infinite;
+        }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden">
@@ -1714,14 +1768,18 @@
     <!-- ============================================================================ -->
     <!-- GEMINI AI ASSISTANT MODAL (Worldaily × Google Gemini) -->
     <!-- ============================================================================ -->
-    <div id="aiAssistantModal" onclick="if(event.target === this) closeAiAssistantModal()" class="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-gradient-to-r from-sky-400 via-indigo-500 to-cyan-400 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92dvh] sm:max-h-[88vh] flex flex-col overflow-hidden">
-            <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
-                <!-- Premium Gemini Header -->
-                <div class="px-5 sm:px-6 py-3.5 border-b border-slate-100 dark:border-slate-800/90 flex items-center justify-between gap-3 shrink-0 bg-gradient-to-r from-sky-50/60 via-white to-indigo-50/40 dark:from-sky-950/20 dark:via-[#111827] dark:to-indigo-950/20">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500/15 via-indigo-500/15 to-cyan-500/15 border border-sky-400/25 flex items-center justify-center shrink-0 shadow-2xs">
-                            <svg class="w-4.5 h-4.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <div id="aiAssistantModal" onclick="if(event.target === this) closeAiAssistantModal()" class="fixed inset-0 bg-slate-950/55 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
+        <div id="aiModalShell" class="gemini-modal-shell w-full max-w-3xl max-h-[92dvh] sm:max-h-[88vh] flex flex-col">
+            <div class="gemini-modal-aura hidden sm:block"></div>
+            <div class="gemini-modal-frame rounded-t-3xl sm:rounded-2xl shadow-2xl w-full flex-1 flex flex-col overflow-hidden">
+                <div class="relative bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md w-full flex-1 flex flex-col overflow-hidden rounded-t-[22px] sm:rounded-[14px]">
+                    <div class="gemini-ambient-orb w-52 h-52 -top-16 -right-12 bg-sky-400/20 dark:bg-sky-500/15"></div>
+                    <div class="gemini-ambient-orb w-44 h-44 -bottom-14 -left-10 bg-indigo-400/15 dark:bg-indigo-500/15" style="animation-delay: -4s;"></div>
+                    <!-- Premium Gemini Header -->
+                    <div class="relative z-10 px-5 sm:px-6 py-3.5 border-b border-slate-100/90 dark:border-slate-800/90 flex items-center justify-between gap-3 shrink-0 bg-gradient-to-r from-sky-50/70 via-white/80 to-indigo-50/50 dark:from-sky-950/25 dark:via-[#111827]/90 dark:to-indigo-950/25">
+                        <div class="flex items-center gap-3 min-w-0">
+                            <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500/15 via-indigo-500/15 to-cyan-500/15 border border-sky-400/30 flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4.5 h-4.5 gemini-fab-sparkle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <linearGradient id="geminiSparkleGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
                                         <stop offset="0%" stop-color="#38BDF8"/>
@@ -1843,6 +1901,7 @@
                             <span data-i18n="forum_send_btn">Send</span>
                         </button>
                     </div>
+                </div>
                 </div>
             </div>
         </div>
@@ -5920,6 +5979,19 @@
             renderAiChatStream();
         }
 
+        function updateAiModalOriginFromFab() {
+            const shell = document.getElementById('aiModalShell');
+            const fab = document.getElementById('geminiFloatingFab');
+            if (!shell || !fab) return;
+            const fabRect = fab.getBoundingClientRect();
+            const shellRect = shell.getBoundingClientRect();
+            if (shellRect.width > 0 && shellRect.height > 0) {
+                const ox = (fabRect.left + fabRect.width / 2) - shellRect.left;
+                const oy = (fabRect.top + fabRect.height / 2) - shellRect.top;
+                shell.style.transformOrigin = `${ox}px ${oy}px`;
+            }
+        }
+
         function openAiAssistantModal() {
             updateGeminiConfigUI();
             const isPt = currentLang === 'pt';
@@ -5940,12 +6012,24 @@
             const modal = document.getElementById('aiAssistantModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            updateAiModalOriginFromFab();
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modal.classList.add('is-open');
+                });
+            });
         }
 
         function closeAiAssistantModal() {
             const modal = document.getElementById('aiAssistantModal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
+            updateAiModalOriginFromFab();
+            modal.classList.remove('is-open');
+            setTimeout(() => {
+                if (!modal.classList.contains('is-open')) {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }
+            }, 260);
         }
 
         function buildProjectContextForAi() {
