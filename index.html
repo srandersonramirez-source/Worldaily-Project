@@ -1923,15 +1923,15 @@
     <!-- GOOGLE CALENDAR PER-PROJECT INTEGRATION MODAL -->
     <!-- ============================================================================ -->
     <div id="gcalModal" onclick="if(event.target === this) closeGcalModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-gradient-to-r from-emerald-400 via-sky-500 to-cyan-500 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+        <div class="bg-gradient-to-r from-sky-400 via-sky-500 to-cyan-500 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col">
             <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
-            <div class="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
+            <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
-                        <i class="fa-regular fa-calendar-days text-sm"></i>
+                    <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
+                        <i class="fa-brands fa-google text-sm"></i>
                     </div>
                     <div>
-                        <h3 id="gcalModalTitle" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Google Agenda</h3>
+                        <h3 id="gcalModalTitle" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Google Calendar</h3>
                         <p id="gcalProjectNameBadge" class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">—</p>
                     </div>
                 </div>
@@ -1940,64 +1940,23 @@
                 </button>
             </div>
 
-            <div class="p-5 sm:p-6 space-y-4 text-xs">
-                <!-- Connection Box -->
-                <div class="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/50 border border-slate-200/70 dark:border-slate-700/70 flex items-center justify-between gap-3">
-                    <div class="min-w-0">
-                        <div class="flex items-center gap-2">
-                            <span id="gcalConnDot" class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 shrink-0"></span>
-                            <span id="gcalConnStatusText" class="font-semibold text-slate-800 dark:text-slate-100 truncate">Não conectado</span>
-                        </div>
-                        <p id="gcalConnSubText" class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Autorize sua conta Google para ler e enviar eventos deste projeto.</p>
-                    </div>
-                    <button id="gcalConnectBtn" type="button" onclick="connectGoogleCalendar()"
-                        class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-semibold flex items-center gap-1.5 shadow-2xs transition cursor-pointer shrink-0">
-                        <i class="fa-brands fa-google text-[11px]"></i>
-                        <span id="gcalConnectBtnLabel">Conectar</span>
-                    </button>
-                </div>
-
-                <!-- Per-Project Calendar Picker -->
-                <div id="gcalPickerSection" class="space-y-2.5 hidden">
-                    <div class="flex items-center justify-between gap-2">
-                        <label for="gcalCalendarSelect" id="gcalSelectLabel" class="font-semibold text-slate-700 dark:text-slate-200">Agenda vinculada a este projeto</label>
-                        <button type="button" onclick="createProjectGoogleCalendar()"
-                            class="text-[11px] font-semibold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1 cursor-pointer">
-                            <i class="fa-solid fa-plus text-[10px]"></i>
-                            <span id="gcalCreateNewLabel">Criar nova agenda</span>
-                        </button>
-                    </div>
+            <div class="p-5 space-y-3.5 text-xs">
+                <div id="gcalPickerSection" class="space-y-1.5">
+                    <label for="gcalCalendarSelect" id="gcalSelectLabel" class="font-semibold text-slate-700 dark:text-slate-200 block">Calendar</label>
                     <div class="relative flex items-center">
                         <select id="gcalCalendarSelect" onchange="selectProjectGoogleCalendar(this.value)"
-                            class="w-full h-9 appearance-none pl-3 pr-8 bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 cursor-pointer leading-none transition">
-                            <option value="">— Selecione uma agenda —</option>
+                            class="w-full h-9 appearance-none pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 cursor-pointer leading-none transition">
+                            <option value="">— Select calendar —</option>
                         </select>
                         <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 absolute right-3 pointer-events-none"></i>
                     </div>
                 </div>
 
-                <!-- Sync Actions -->
-                <div id="gcalActionsSection" class="hidden pt-1 space-y-2">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        <button type="button" onclick="syncGoogleCalendarEvents(true)"
-                            class="px-3.5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition cursor-pointer">
-                            <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
-                            <span id="gcalSyncNowLabel">Atualizar Eventos</span>
-                        </button>
-                        <button type="button" onclick="pushTasksToGoogleCalendar()"
-                            class="px-3.5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-sky-400 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer">
-                            <i class="fa-solid fa-cloud-arrow-up text-sky-500 text-[11px]"></i>
-                            <span id="gcalPushTasksLabel">Enviar Tarefas Agendadas</span>
-                        </button>
-                    </div>
-                    <div class="flex items-center justify-between pt-1">
-                        <span id="gcalSyncStatusHint" class="text-[11px] text-slate-400"></span>
-                        <button type="button" onclick="unlinkProjectGoogleCalendar()"
-                            class="text-[11px] font-medium text-rose-500 hover:text-rose-600 hover:underline cursor-pointer">
-                            <span id="gcalUnlinkLabel">Desvincular agenda</span>
-                        </button>
-                    </div>
-                </div>
+                <button type="button" onclick="handleGcalSimpleSync()"
+                    class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm shadow-sky-500/20 transition cursor-pointer">
+                    <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+                    <span id="gcalSyncNowLabel">Sync</span>
+                </button>
             </div>
             </div>
         </div>
@@ -4276,44 +4235,34 @@
         function updateGcalModalTexts() {
             const isPt = currentLang === 'pt';
             const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
-            setTxt('gcalModalTitle', 'Google Agenda por Projeto', 'Google Calendar per Project');
-            setTxt('gcalProjectNameBadge', `Projeto: ${plannerData.planTitle || 'Worldaily'}`, `Project: ${plannerData.planTitle || 'Worldaily'}`);
-            setTxt('gcalSelectLabel', 'Agenda vinculada a este projeto', 'Calendar linked to this project');
-            setTxt('gcalCreateNewLabel', 'Criar nova agenda', 'Create new calendar');
-            setTxt('gcalSyncNowLabel', 'Atualizar Eventos', 'Refresh Events');
-            setTxt('gcalPushTasksLabel', 'Enviar Tarefas Agendadas', 'Push Scheduled Tasks');
-            setTxt('gcalUnlinkLabel', 'Desvincular agenda deste projeto', 'Unlink calendar from project');
+            setTxt('gcalModalTitle', 'Google Agenda', 'Google Calendar');
+            setTxt('gcalProjectNameBadge', plannerData.planTitle || 'Worldaily', plannerData.planTitle || 'Worldaily');
+            setTxt('gcalSelectLabel', 'Agenda do projeto', 'Project calendar');
+            setTxt('gcalSyncNowLabel', 'Sincronizar', 'Sync');
+        }
 
-            const valid = isGcalSessionValid();
-            const dot = document.getElementById('gcalConnDot');
-            if (dot) {
-                dot.className = `w-2 h-2 rounded-full shrink-0 ${valid ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`;
+        async function handleGcalSimpleSync() {
+            if (!isGcalTokenValid()) {
+                const ok = await connectGoogleCalendar(false);
+                if (!ok) return;
             }
-            setTxt('gcalConnStatusText',
-                valid ? 'Sincronizado (Sessão 24h ativa)' : 'Não conectado (ou sessão de 24h expirada)',
-                valid ? 'Synced (24h session active)' : 'Not connected (or 24h session expired)');
-            setTxt('gcalConnSubText',
-                valid ? 'Seus eventos permanecem sincronizados por 24h junto com seu login.' : 'Autorize sua conta Google para sincronizar eventos por 24h.',
-                valid ? 'Your events stay synced for 24h along with your login.' : 'Authorize your Google account to sync events for 24h.');
-            setTxt('gcalConnectBtnLabel',
-                valid ? 'Atualizar Token' : 'Conectar',
-                valid ? 'Refresh Token' : 'Connect');
-
-            const picker = document.getElementById('gcalPickerSection');
-            const actions = document.getElementById('gcalActionsSection');
-            if (picker) picker.classList.toggle('hidden', !valid);
-            if (actions) actions.classList.toggle('hidden', !(valid && plannerData.googleCalendarId));
+            if (!plannerData.googleCalendarId && gcalCalendarsList.length > 0) {
+                const primary = gcalCalendarsList.find(c => c.primary) || gcalCalendarsList[0];
+                if (primary) selectProjectGoogleCalendar(primary.id);
+            } else if (plannerData.googleCalendarId) {
+                await syncGoogleCalendarEvents(true);
+            }
+            closeGcalModal();
         }
 
         async function openGcalModal() {
             updateGcalModalTexts();
+            populateGcalCalendarSelect();
             const modal = document.getElementById('gcalModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             if (isGcalTokenValid()) {
                 await fetchGoogleCalendars();
-            } else if (gcalCalendarsList.length > 0) {
-                populateGcalCalendarSelect();
             }
         }
 
@@ -4407,6 +4356,13 @@
                 select.appendChild(opt);
             });
             if (plannerData.googleCalendarId) {
+                const hasOpt = Array.from(select.options).some(o => o.value === plannerData.googleCalendarId);
+                if (!hasOpt) {
+                    const opt = document.createElement('option');
+                    opt.value = plannerData.googleCalendarId;
+                    opt.textContent = plannerData.googleCalendarName || plannerData.googleCalendarId;
+                    select.appendChild(opt);
+                }
                 select.value = plannerData.googleCalendarId;
             }
         }
