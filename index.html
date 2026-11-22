@@ -3932,7 +3932,7 @@
             const grid = document.getElementById('calendarGridContainer');
             const tasks = getFilteredTasks();
             const range = getCalendarVisibleRange();
-            const gcalEvents = gcalEventsCache[range.cacheKey] || [];
+            const gcalEvents = getGcalEventsForActiveProject(range.cacheKey);
             const todayStr = toDateStrLocal(new Date());
             const isPt = currentLang === 'pt';
 
@@ -4189,13 +4189,21 @@
                 const raw = localStorage.getItem(GCAL_CACHE_STORAGE_KEY);
                 if (!raw) return;
                 const parsed = JSON.parse(raw);
-                if (parsed && parsed.ts && (Date.now() - parsed.ts) < GCAL_SESSION_MAX_AGE_MS) {
+                if (parsed) {
                     gcalEventsCache = parsed.events || {};
                     gcalCalendarsList = parsed.calendars || [];
                     gcalColorPalette = parsed.colors || null;
                 }
             } catch (e) {}
         })();
+
+        function getGcalEventsForActiveProject(fallbackKey) {
+            const calId = plannerData?.googleCalendarId;
+            if (!calId) return [];
+            const master = gcalEventsCache[`CAL::${calId}`];
+            if (Array.isArray(master) && master.length > 0) return master;
+            return gcalEventsCache[fallbackKey] || [];
+        }
 
         function saveGcalPersistentCache() {
             try {
@@ -4215,8 +4223,9 @@
         function isGcalSessionValid() {
             return Boolean(
                 isGcalTokenValid() ||
-                (gcalSessionTs && (Date.now() - gcalSessionTs) < GCAL_SESSION_MAX_AGE_MS) ||
-                (plannerData?.googleCalendarId && Object.keys(gcalEventsCache).length > 0)
+                gcalSessionTs > 0 ||
+                plannerData?.googleCalendarId ||
+                Object.keys(gcalEventsCache).length > 0
             );
         }
 
@@ -4246,18 +4255,15 @@
             const labelEl = document.getElementById('gcalHeaderBtnLabel');
             const quickBtn = document.getElementById('gcalQuickSyncBtn');
             const linkedName = plannerData.googleCalendarName || '';
-            const sessionActive = isGcalSessionValid();
             if (labelEl) {
-                if (linkedName && sessionActive) {
+                if (linkedName) {
                     labelEl.textContent = linkedName;
-                } else if (linkedName) {
-                    labelEl.textContent = currentLang === 'pt' ? `${linkedName} (Reconectar)` : `${linkedName} (Reconnect)`;
                 } else {
                     labelEl.textContent = currentLang === 'pt' ? 'Google Agenda' : 'Google Calendar';
                 }
             }
             if (quickBtn) {
-                if (plannerData.googleCalendarId && sessionActive) {
+                if (plannerData.googleCalendarId) {
                     quickBtn.classList.remove('hidden');
                     quickBtn.classList.add('flex');
                 } else {
@@ -4482,8 +4488,9 @@
             renderCalendarView();
         }
 
-        async function syncGoogleCalendarEvents(showSuccessToast = true) {
-            if (!plannerData.googleCalendarId) {
+        async function syncGoogleCalendarEvents(showSuccessToast = true, customCalendarId = null) {
+            const targetCalId = customCalendarId || plannerData.googleCalendarId;
+            if (!targetCalId) {
                 if (showSuccessToast) openGcalModal();
                 return;
             }
@@ -4491,7 +4498,10 @@
                 return;
             }
             const range = getCalendarVisibleRange();
-            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(plannerData.googleCalendarId)}/events?timeMin=${encodeURIComponent(range.start.toISOString())}&timeMax=${encodeURIComponent(range.end.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=500`;
+            // Always fetch a wide 12-month window around the current view so Day/Week/Month/Year work forever without manual sync
+            const wideStart = new Date(calendarYear, calendarMonth - 4, 1, 0, 0, 0);
+            const wideEnd = new Date(calendarYear, calendarMonth + 8, 0, 23, 59, 59);
+            const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(targetCalId)}/events?timeMin=${encodeURIComponent(wideStart.toISOString())}&timeMax=${encodeURIComponent(wideEnd.toISOString())}&singleEvents=true&orderBy=startTime&maxResults=1500`;
             try {
                 await ensureGoogleColors();
                 const data = await gcalFetch(url, {}, showSuccessToast);
@@ -4550,6 +4560,7 @@
                         });
                     }
                 });
+                gcalEventsCache[`CAL::${targetCalId}`] = mapped;
                 gcalEventsCache[range.cacheKey] = mapped;
                 gcalSessionTs = Date.now();
                 try { localStorage.setItem(GCAL_SESSION_TS_KEY, String(gcalSessionTs)); } catch (e) {}
@@ -7442,6 +7453,32 @@ IMPORTANT:
             }
         }
 
+        async function autoSyncGoogleCalendarsInBackground() {
+            if (!isGcalTokenValid()) return;
+            try {
+                await ensureGoogleColors();
+                await fetchGoogleCalendars();
+                const primaryCal = gcalCalendarsList.find(c => c.primary) || gcalCalendarsList[0];
+                if (primaryCal && !plannerData.googleCalendarId) {
+                    plannerData.googleCalendarId = primaryCal.id;
+                    plannerData.googleCalendarName = primaryCal.summary;
+                    plannerData.googleCalendarColor = primaryCal.backgroundColor || '#039BE5';
+                    saveDataState('');
+                }
+                const uniqueCalIds = new Set();
+                if (plannerData.googleCalendarId) uniqueCalIds.add(plannerData.googleCalendarId);
+                (workspaceStore.projects || []).forEach(p => {
+                    if (p.googleCalendarId) uniqueCalIds.add(p.googleCalendarId);
+                });
+                for (const cid of uniqueCalIds) {
+                    await syncGoogleCalendarEvents(false, cid);
+                }
+                updateGcalHeaderButton();
+            } catch (e) {
+                console.warn('Background Google Calendar sync warning:', e);
+            }
+        }
+
         async function signInWithGoogle() {
             if (!fbAuth) return;
             clearAuthError();
@@ -7452,6 +7489,7 @@ IMPORTANT:
                 const token = result?.credential?.accessToken || '';
                 if (token && typeof setGcalToken === 'function') {
                     setGcalToken(token);
+                    setTimeout(() => autoSyncGoogleCalendarsInBackground(), 600);
                 }
                 recordLoginTimestamp();
                 closeAuthModal();
@@ -7558,6 +7596,10 @@ IMPORTANT:
                 }
                 applyRemoteFirestoreCache();
                 hideBootOverlay();
+                if (!window.__wdGcalAutoSyncedOnBoot && typeof isGcalTokenValid === 'function' && isGcalTokenValid()) {
+                    window.__wdGcalAutoSyncedOnBoot = true;
+                    setTimeout(() => autoSyncGoogleCalendarsInBackground(), 400);
+                }
             };
 
             const unsubShared = fbDb.collection('workspaces').doc('shared').onSnapshot((doc) => {
