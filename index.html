@@ -1644,6 +1644,12 @@
                         <button type="button" onclick="setProjectModalIcon('fa-Bullseye')" data-icon="fa-bullseye" class="proj-icon-btn w-9 h-9 rounded-xl border flex items-center justify-center text-sm transition cursor-pointer"><i class="fa-solid fa-bullseye"></i></button>
                     </div>
                 </div>
+
+                <!-- Enabled Views / Tabs Selector -->
+                <div>
+                    <label id="projectModalViewsLabel" class="block text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 mb-1.5">Enabled Views &amp; Tabs</label>
+                    <div id="projectModalViewsGrid" class="grid grid-cols-2 gap-1.5"></div>
+                </div>
             </div>
 
             <div class="px-6 py-3.5 bg-slate-50/80 dark:bg-slate-900/70 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-end gap-2">
@@ -2821,6 +2827,9 @@
                     `;
                 }).join('');
             }
+            if (typeof applyActiveProjectEnabledViews === 'function') {
+                applyActiveProjectEnabledViews();
+            }
         }
 
         function selectProject(projectId, openDefaultView = false) {
@@ -3157,14 +3166,14 @@
                                     <i class="fa-solid fa-arrow-right text-[10px]"></i>
                                 </span>
                                 <div class="flex items-center gap-1.5" onclick="event.stopPropagation()">
-                                    <button onclick="selectProject('${p.id}', false); switchView('board');" title="${t('nav_board')}"
+                                    ${(!Array.isArray(p.enabledViews) || p.enabledViews.includes('board')) ? `<button onclick="selectProject('${p.id}', false); switchView('board');" title="${t('nav_board')}"
                                         class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/60 text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-600 transition">
                                         ${t('mob_kanban')}
-                                    </button>
-                                    <button onclick="selectProject('${p.id}', false); switchView('calendar');" title="${t('nav_schedule')}"
+                                    </button>` : ''}
+                                    ${(!Array.isArray(p.enabledViews) || p.enabledViews.includes('calendar')) ? `<button onclick="selectProject('${p.id}', false); switchView('calendar');" title="${t('nav_schedule')}"
                                         class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/60 text-[10px] font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-600 transition">
                                         ${t('mob_schedule')}
-                                    </button>
+                                    </button>` : ''}
                                 </div>
                             </div>
                         </div>
@@ -3190,7 +3199,86 @@
             renderGlobalForum();
         }
 
-        function setProjectModalCategory(cat) {
+        const CONFIGURABLE_PROJECT_VIEWS = [
+            { id: 'grid',     icon: 'fa-solid fa-list-ul',           i18nKey: 'nav_list' },
+            { id: 'board',    icon: 'fa-solid fa-table-columns',     i18nKey: 'nav_board' },
+            { id: 'calendar', icon: 'fa-regular fa-calendar',        i18nKey: 'nav_schedule' },
+            { id: 'gantt',    icon: 'fa-solid fa-bars-staggered',    i18nKey: 'nav_gantt' },
+            { id: 'charts',   icon: 'fa-solid fa-chart-pie',         i18nKey: 'nav_metrics' },
+            { id: 'bmc',      icon: 'fa-solid fa-table-cells-large', i18nKey: 'nav_bmc' },
+            { id: 'mindmap',  icon: 'fa-solid fa-diagram-project',   i18nKey: 'nav_mindmap' }
+        ];
+        const ALL_PROJECT_VIEW_IDS = CONFIGURABLE_PROJECT_VIEWS.map(v => v.id);
+        let projectModalSelectedViews = [...ALL_PROJECT_VIEW_IDS];
+
+        function getProjectEnabledViews(proj) {
+            if (proj && Array.isArray(proj.enabledViews) && proj.enabledViews.length > 0) {
+                return proj.enabledViews;
+            }
+            return ALL_PROJECT_VIEW_IDS;
+        }
+
+        function applyActiveProjectEnabledViews() {
+            const enabled = getProjectEnabledViews(plannerData);
+            CONFIGURABLE_PROJECT_VIEWS.forEach(v => {
+                const isOn = enabled.includes(v.id);
+                const pill = document.getElementById(`pill-${v.id}`);
+                if (pill) pill.classList.toggle('hidden', !isOn);
+                const mob = document.getElementById(`mobile-nav-${v.id}`);
+                if (mob) mob.classList.toggle('hidden', !isOn);
+            });
+            const planLabel = document.querySelector('[data-i18n="nav_active_views"]');
+            if (planLabel) {
+                const anyPlan = ['grid', 'board', 'calendar', 'gantt', 'charts'].some(id => enabled.includes(id));
+                planLabel.classList.toggle('hidden', !anyPlan);
+            }
+            const stratLabel = document.querySelector('[data-i18n="nav_strategy_ops"]');
+            if (stratLabel) {
+                const anyStrat = ['bmc', 'mindmap'].some(id => enabled.includes(id));
+                stratLabel.classList.toggle('hidden', !anyStrat);
+            }
+            if (currentView && currentView !== 'projects' && !enabled.includes(currentView)) {
+                switchView(enabled[0] || 'projects');
+            }
+        }
+
+        function renderProjectModalViewsSelector() {
+            const container = document.getElementById('projectModalViewsGrid');
+            const labelEl = document.getElementById('projectModalViewsLabel');
+            if (labelEl) {
+                labelEl.textContent = currentLang === 'pt' ? 'Abas e Visualizações Ativas' : 'Enabled Views & Tabs';
+            }
+            if (!container) return;
+            container.innerHTML = CONFIGURABLE_PROJECT_VIEWS.map(v => {
+                const isOn = projectModalSelectedViews.includes(v.id);
+                return `
+                    <button type="button" onclick="toggleProjectModalView('${v.id}')"
+                        class="px-2.5 py-2 rounded-xl border text-left text-[11px] font-semibold flex items-center justify-between gap-2 transition cursor-pointer ${
+                            isOn
+                                ? 'bg-sky-500/10 border-sky-400/70 text-sky-700 dark:text-sky-300'
+                                : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700/80 text-slate-400 dark:text-slate-500 hover:border-slate-300'
+                        }">
+                        <span class="flex items-center gap-2 min-w-0">
+                            <i class="${v.icon} text-xs shrink-0 ${isOn ? 'text-sky-500' : 'text-slate-400'}"></i>
+                            <span class="truncate">${escapeHtml(t(v.i18nKey))}</span>
+                        </span>
+                        <i class="fa-solid ${isOn ? 'fa-circle-check text-sky-500' : 'fa-circle text-slate-200 dark:text-slate-700'} text-xs shrink-0"></i>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function toggleProjectModalView(viewId) {
+            if (projectModalSelectedViews.includes(viewId)) {
+                if (projectModalSelectedViews.length <= 1) return; // keep at least 1 tab active
+                projectModalSelectedViews = projectModalSelectedViews.filter(id => id !== viewId);
+            } else {
+                projectModalSelectedViews.push(viewId);
+            }
+            renderProjectModalViewsSelector();
+        }
+
+        function setProjectModalCategory(cat, applyDefaultViews = false) {
             document.getElementById('projectModalCategory').value = cat;
             document.querySelectorAll('.proj-cat-btn').forEach(btn => {
                 const isSelected = btn.getAttribute('data-cat') === cat;
@@ -3200,6 +3288,12 @@
                         : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
                 }`;
             });
+            if (applyDefaultViews || !editingProjectId) {
+                projectModalSelectedViews = cat === 'Personal'
+                    ? ['grid', 'board', 'calendar', 'charts', 'mindmap']
+                    : [...ALL_PROJECT_VIEW_IDS];
+                renderProjectModalViewsSelector();
+            }
         }
 
         function setProjectModalIcon(iconName) {
@@ -3220,17 +3314,19 @@
             if (projectId) {
                 const proj = workspaceStore.projects.find(p => p.id === projectId);
                 if (!proj) return;
-                if (heading) heading.innerHTML = `<i class="fa-solid fa-pen-to-square text-sky-500"></i><span>Edit Workspace</span>`;
+                if (heading) heading.innerHTML = `<i class="fa-solid fa-pen-to-square text-sky-500"></i><span>${currentLang === 'pt' ? 'Editar Projeto / Plano' : 'Edit Workspace'}</span>`;
                 document.getElementById('projectModalTitle').value = proj.planTitle || '';
                 document.getElementById('projectModalDesc').value = proj.description || '';
-                setProjectModalCategory(proj.category || 'Project');
+                projectModalSelectedViews = [...getProjectEnabledViews(proj)];
+                setProjectModalCategory(proj.category || 'Project', false);
                 setProjectModalIcon(proj.icon || 'fa-layer-group');
+                renderProjectModalViewsSelector();
             } else {
                 const cat = presetCategory || 'Project';
-                if (heading) heading.innerHTML = `<i class="fa-solid fa-layer-group text-sky-500"></i><span>Create New Workspace</span>`;
+                if (heading) heading.innerHTML = `<i class="fa-solid fa-layer-group text-sky-500"></i><span>${currentLang === 'pt' ? 'Criar Novo Projeto / Plano' : 'Create New Workspace'}</span>`;
                 document.getElementById('projectModalTitle').value = '';
                 document.getElementById('projectModalDesc').value = '';
-                setProjectModalCategory(cat);
+                setProjectModalCategory(cat, true);
                 setProjectModalIcon(cat === 'Personal' ? 'fa-sun' : 'fa-briefcase');
             }
             const modal = document.getElementById('projectModal');
@@ -3255,6 +3351,7 @@
             const category = document.getElementById('projectModalCategory').value || 'Project';
             const description = document.getElementById('projectModalDesc').value.trim();
             const icon = document.getElementById('projectModalIcon').value || 'fa-layer-group';
+            const enabledViews = projectModalSelectedViews.length > 0 ? [...projectModalSelectedViews] : [...ALL_PROJECT_VIEW_IDS];
 
             if (editingProjectId) {
                 const proj = workspaceStore.projects.find(p => p.id === editingProjectId);
@@ -3263,8 +3360,10 @@
                     proj.category = category;
                     proj.description = description;
                     proj.icon = icon;
+                    proj.enabledViews = enabledViews;
                 }
                 closeProjectModal();
+                applyActiveProjectEnabledViews();
                 saveDataState('Workspace updated!');
             } else {
                 const defaultBuckets = category === 'Personal'
@@ -3288,6 +3387,7 @@
                     category,
                     description: description || (category === 'Personal' ? 'Personal daily routine and habit tracker.' : 'Project deliverables, milestones and team workflow.'),
                     icon,
+                    enabledViews,
                     lastUpdated: new Date().toISOString(),
                     buckets: defaultBuckets,
                     members: workspaceStore.members,
@@ -3298,6 +3398,7 @@
                 workspaceStore.activeProjectId = newProj.id;
                 bindActiveProjectReference();
                 closeProjectModal();
+                applyActiveProjectEnabledViews();
                 saveDataState(`Created "${title}"!`);
             }
         }
