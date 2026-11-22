@@ -3892,13 +3892,102 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
+        function blendHexWithBase(hexColor, ratio = 0.20) {
+            const isDark = document.documentElement.classList.contains('dark');
+            const base = isDark ? [17, 24, 39] : [255, 255, 255];
+            const clean = (hexColor && hexColor.startsWith('#')) ? hexColor.slice(1) : '0284C7';
+            const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean;
+            const r = parseInt(full.slice(0, 2), 16) || 2;
+            const g = parseInt(full.slice(2, 4), 16) || 132;
+            const b = parseInt(full.slice(4, 6), 16) || 199;
+            const mix = (c, bg) => Math.round(bg + (c - bg) * ratio);
+            return `rgb(${mix(r, base[0])}, ${mix(g, base[1])}, ${mix(b, base[2])})`;
+        }
+
         function getGcalWorldailyPillStyle(hexColor, slimRibbon = false, continuesLeft = false, continuesRight = false) {
             const isDark = document.documentElement.classList.contains('dark');
-            const bgTint = hexToRgba(hexColor, slimRibbon ? (isDark ? 0.30 : 0.18) : (isDark ? 0.22 : 0.13));
-            const borderTint = hexToRgba(hexColor, isDark ? 0.50 : 0.36);
+            const bgSolid = blendHexWithBase(hexColor, slimRibbon ? (isDark ? 0.34 : 0.22) : (isDark ? 0.26 : 0.16));
+            const borderSolid = blendHexWithBase(hexColor, isDark ? 0.55 : 0.40);
             const leftBar = (!continuesLeft) ? `border-left:3px solid ${hexColor};` : `border-left:0;`;
-            const rightBorder = continuesRight ? `border-right:0;` : '';
-            return `background-color:${bgTint};border-top:1px solid ${borderTint};border-bottom:1px solid ${borderTint};border-right:1px solid ${borderTint};${leftBar}${rightBorder}`;
+            const rightBorder = continuesRight ? `border-right:0;` : `border-right:1px solid ${borderSolid};`;
+            return `background-color:${bgSolid};border-top:1px solid ${borderSolid};border-bottom:1px solid ${borderSolid};${leftBar}${rightBorder}`;
+        }
+
+        function buildAllDayTrackLayout(allDayEvents) {
+            const byKey = {};
+            (allDayEvents || []).forEach(ev => {
+                if (!ev.isAllDay) return;
+                const key = ev.id || `${ev.title}::${ev.bgColor}`;
+                if (!byKey[key]) {
+                    byKey[key] = { key, ev, dates: new Set(), minDate: ev.dateStr, maxDate: ev.dateStr };
+                }
+                byKey[key].dates.add(ev.dateStr);
+                if (ev.dateStr < byKey[key].minDate) byKey[key].minDate = ev.dateStr;
+                if (ev.dateStr > byKey[key].maxDate) byKey[key].maxDate = ev.dateStr;
+            });
+
+            // Sort by earliest start date first, then longest duration, then title so tracks never swap mid-span
+            const groups = Object.values(byKey).sort((a, b) => {
+                if (a.minDate !== b.minDate) return a.minDate.localeCompare(b.minDate);
+                if (b.dates.size !== a.dates.size) return b.dates.size - a.dates.size;
+                return String(a.ev.title).localeCompare(String(b.ev.title));
+            });
+
+            // Assign each event to the lowest vertical track index that has no date collision
+            const tracks = []; // Array of Sets of occupied dateStrs
+            const trackByKey = {};
+            groups.forEach(g => {
+                let assigned = -1;
+                for (let tIdx = 0; tIdx < tracks.length; tIdx++) {
+                    let conflict = false;
+                    for (const ds of g.dates) {
+                        if (tracks[tIdx].has(ds)) { conflict = true; break; }
+                    }
+                    if (!conflict) { assigned = tIdx; break; }
+                }
+                if (assigned === -1) {
+                    assigned = tracks.length;
+                    tracks.push(new Set());
+                }
+                for (const ds of g.dates) tracks[assigned].add(ds);
+                trackByKey[g.key] = assigned;
+            });
+
+            return { byKey, trackByKey, trackCount: tracks.length };
+        }
+
+        function renderAllDayRibbonsForDate(dateStr, prevDateStr, nextDateStr, colIdx, maxColIdx, dayAllDayEvents, layout, padPx, isPt) {
+            if (!dayAllDayEvents || dayAllDayEvents.length === 0) return '';
+            const evByTrack = {};
+            let maxTrackToday = -1;
+            dayAllDayEvents.forEach(ev => {
+                const key = ev.id || `${ev.title}::${ev.bgColor}`;
+                const tIdx = layout.trackByKey[key] ?? 0;
+                evByTrack[tIdx] = { ev, group: layout.byKey[key] };
+                if (tIdx > maxTrackToday) maxTrackToday = tIdx;
+            });
+
+            const rows = [];
+            for (let tIdx = 0; tIdx <= maxTrackToday; tIdx++) {
+                const slot = evByTrack[tIdx];
+                if (!slot) {
+                    // Spacer preserves vertical track alignment when a top-track event ended earlier in the week
+                    rows.push(`<div class="h-[18px] shrink-0"></div>`);
+                    continue;
+                }
+                const { ev, group } = slot;
+                const dateSet = group?.dates;
+                const hasPrev = Boolean(dateSet && dateSet.has(prevDateStr));
+                const hasNext = Boolean(dateSet && dateSet.has(nextDateStr));
+                const continuesLeft = hasPrev && colIdx > 0;
+                const continuesRight = hasNext && colIdx < maxColIdx;
+                const showLabel = !continuesLeft;
+                const mlStyle = continuesLeft ? `margin-left:-${padPx}px;` : '';
+                const mrStyle = continuesRight ? `margin-right:-${padPx + 1}px;position:relative;z-index:10;` : '';
+                const radiusCls = `${continuesLeft ? 'rounded-l-none pl-2' : 'rounded-l pl-1.5'} ${continuesRight ? 'rounded-r-none pr-2' : 'rounded-r pr-1.5'}`;
+                rows.push(`<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)} (${isPt ? 'Dia todo' : 'All day'})" style="${getGcalWorldailyPillStyle(ev.bgColor, true, continuesLeft, continuesRight)}${mlStyle}${mrStyle}" class="flex items-center h-[18px] leading-[18px] text-[10px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-95 transition shrink-0 ${radiusCls}">${showLabel ? `<span class="truncate">${escapeHtml(ev.title)}</span>` : `<span>&nbsp;</span>`}</a>`);
+            }
+            return rows.join('');
         }
 
         function renderCalendarView() {
@@ -3930,12 +4019,7 @@
                 const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
                 const daysInPrev = new Date(calendarYear, calendarMonth, 0).getDate();
 
-                const allDayDatesByEvent = {};
-                gcalEvents.filter(ev => ev.isAllDay).forEach(ev => {
-                    const key = ev.id || `${ev.title}::${ev.bgColor}`;
-                    if (!allDayDatesByEvent[key]) allDayDatesByEvent[key] = new Set();
-                    allDayDatesByEvent[key].add(ev.dateStr);
-                });
+                const allDayLayout = buildAllDayTrackLayout(gcalEvents.filter(ev => ev.isAllDay));
 
                 for (let i = firstDay - 1; i >= 0; i--) {
                     const cell = document.createElement('div');
@@ -3950,19 +4034,11 @@
                     const colIdx = (firstDay + day - 1) % 7;
                     const isToday = dateStr === todayStr;
                     const dayTasks = tasks.filter(t => t.dueDate === dateStr);
-                    const dayGcalAllDay = gcalEvents
-                        .filter(ev => ev.isAllDay && ev.dateStr === dateStr)
-                        .sort((a, b) => {
-                            const ka = a.id || `${a.title}::${a.bgColor}`;
-                            const kb = b.id || `${b.title}::${b.bgColor}`;
-                            const sa = (allDayDatesByEvent[ka]?.size || 1) > 1 ? 0 : 1;
-                            const sb = (allDayDatesByEvent[kb]?.size || 1) > 1 ? 0 : 1;
-                            return sa !== sb ? sa - sb : String(a.title).localeCompare(String(b.title));
-                        });
+                    const dayGcalAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === dateStr);
                     const dayGcalTimed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === dateStr).sort((a, b) => a.startMinutes - b.startMinutes);
 
                     const cell = document.createElement('div');
-                    cell.className = `calendar-cell p-1.5 sm:p-2 flex flex-col bg-white dark:bg-[#111827] ${isToday ? 'bg-sky-50/30 dark:bg-sky-950/20' : ''}`;
+                    cell.className = `calendar-cell p-2 flex flex-col bg-white dark:bg-[#111827] ${isToday ? 'bg-sky-50/30 dark:bg-sky-950/20' : ''}`;
                     cell.ondragover = handleDragOver; cell.ondragleave = handleDragLeave;
                     cell.ondrop = (e) => {
                         e.preventDefault(); cell.classList.remove('drag-over');
@@ -3971,20 +4047,7 @@
                         if (task) { task.dueDate = dateStr; saveDataState(`Scheduled for ${formatShortDate(dateStr)}!`); }
                     };
 
-                    const allDayRibbonsHtml = dayGcalAllDay.map(ev => {
-                        const key = ev.id || `${ev.title}::${ev.bgColor}`;
-                        const dateSet = allDayDatesByEvent[key];
-                        const hasPrev = Boolean(dateSet && dateSet.has(prevDateStr));
-                        const hasNext = Boolean(dateSet && dateSet.has(nextDateStr));
-                        const continuesLeft = hasPrev && colIdx > 0;
-                        const continuesRight = hasNext && colIdx < 6;
-                        const showLabel = !hasPrev || colIdx === 0;
-                        const spanClasses = [
-                            continuesLeft ? '-ml-1.5 sm:-ml-2 pl-2 rounded-l-none' : 'rounded-l',
-                            continuesRight ? '-mr-1.5 sm:-mr-2 pr-2 rounded-r-none' : 'rounded-r'
-                        ].join(' ');
-                        return `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)} (${isPt ? 'Dia todo' : 'All day'})" style="${getGcalWorldailyPillStyle(ev.bgColor, true, continuesLeft, continuesRight)}" class="flex items-center gap-1 px-1.5 h-[18px] leading-[18px] text-[10px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-90 transition ${spanClasses}">${showLabel ? `<span class="truncate">${escapeHtml(ev.title)}</span>` : `<span class="truncate opacity-65">${escapeHtml(ev.title)}</span>`}</a>`;
-                    }).join('');
+                    const allDayRibbonsHtml = renderAllDayRibbonsForDate(dateStr, prevDateStr, nextDateStr, colIdx, 6, dayGcalAllDay, allDayLayout, 8, isPt);
 
                     cell.innerHTML = `
                         <div class="flex items-center justify-between mb-1 shrink-0">
@@ -3994,7 +4057,7 @@
                         <div class="flex-1 min-h-0 flex flex-col gap-0.5">
                             ${allDayRibbonsHtml}
                             ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-1.5 py-0.5 rounded text-[10.5px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
-                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel)} • ${escapeHtml(ev.title)}" class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-medium bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-200 hover:border-sky-300 dark:hover:border-sky-700 truncate transition"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[9.5px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel)} • ${escapeHtml(ev.title)}" style="${getGcalWorldailyPillStyle(ev.bgColor)}" class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-medium text-slate-800 dark:text-slate-100 hover:opacity-90 truncate transition"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[9.5px] font-bold text-slate-600 dark:text-slate-300 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
                         </div>
                     `;
                     grid.appendChild(cell);
@@ -4031,18 +4094,22 @@
                     </div>`;
                 }).join('');
 
-                const allDayColsHtml = dayCols.map(d => {
+                const weekAllDayLayout = buildAllDayTrackLayout(gcalEvents.filter(ev => ev.isAllDay));
+                const allDayColsHtml = dayCols.map((d, colIdx) => {
                     const ds = toDateStrLocal(d);
+                    const prevDs = toDateStrLocal(new Date(d.getFullYear(), d.getMonth(), d.getDate() - 1));
+                    const nextDs = toDateStrLocal(new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1));
                     const colTasks = tasks.filter(t => t.dueDate === ds);
                     const colAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === ds);
-                    const emptyHint = (colTasks.length === 0 && colAllDay.length === 0)
+                    const ribbonsHtml = renderAllDayRibbonsForDate(ds, prevDs, nextDs, colIdx, daysCount - 1, colAllDay, weekAllDayLayout, 6, isPt);
+                    const emptyHint = (colTasks.length === 0 && !ribbonsHtml)
                         ? `<div class="text-[10px] text-slate-300 dark:text-slate-700 select-none py-0.5">—</div>`
                         : '';
-                    return `<div class="p-1.5 border-l border-slate-200/80 dark:border-slate-800 space-y-1 min-h-[42px]"
+                    return `<div class="p-1.5 border-l border-slate-200/80 dark:border-slate-800 flex flex-col gap-0.5 min-h-[38px]"
                         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"
                         ondrop="event.preventDefault(); this.classList.remove('drag-over'); const tid=event.dataTransfer.getData('text/plain'); const tk=plannerData.tasks.find(x=>x.id===tid); if(tk){tk.dueDate='${ds}'; saveDataState('Scheduled!');}">
-                        ${colTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-2 py-1 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
-                        ${colAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" style="${getGcalWorldailyPillStyle(ev.bgColor)}" class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-90 transition"><i class="fa-regular fa-calendar text-[9px] shrink-0" style="color:${escapeHtml(ev.bgColor)}"></i><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                        ${ribbonsHtml}
+                        ${colTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-1.5 py-0.5 rounded text-[10.5px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
                         ${emptyHint}
                     </div>`;
                 }).join('');
