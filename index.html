@@ -1046,8 +1046,8 @@
                     </div>
 
                     <!-- 9-Block Osterwalder Canvas Grid -->
-                    <div class="flex-1 overflow-auto p-3 sm:p-5">
-                        <div id="bmcGridContainer" class="min-w-[960px] lg:min-w-0 max-w-[1600px] mx-auto grid grid-cols-10 gap-2.5 sm:gap-3 auto-rows-fr">
+                    <div class="flex-1 overflow-auto p-3 sm:p-4 lg:p-5">
+                        <div id="bmcGridContainer" class="w-full h-full min-w-[960px] lg:min-w-0 min-h-[640px] grid grid-cols-10 lg:grid-rows-[minmax(220px,1fr)_minmax(220px,1fr)_minmax(200px,0.85fr)] gap-3 sm:gap-3.5">
                             <!-- Populated via JS -->
                         </div>
                     </div>
@@ -4751,7 +4751,7 @@
                     : 'border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111827]';
 
                 return `
-                    <div class="${block.span} rounded-2xl border ${borderAccent} shadow-xs flex flex-col min-h-[190px] overflow-hidden">
+                    <div class="${block.span} rounded-2xl border ${borderAccent} shadow-xs flex flex-col min-h-[210px] h-full overflow-hidden">
                         <div class="px-3.5 py-2.5 border-b border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between gap-2 shrink-0">
                             <span class="flex items-center gap-2 text-xs font-display font-bold ${block.highlight ? 'text-sky-700 dark:text-sky-300' : 'text-slate-800 dark:text-slate-100'} truncate">
                                 <i class="fa-solid ${block.icon} text-sky-500 text-[11px] shrink-0"></i>
@@ -4759,7 +4759,7 @@
                             </span>
                             <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold shrink-0">${cards.length}</span>
                         </div>
-                        <div class="flex-1 p-2.5 space-y-2 overflow-y-auto max-h-[260px]">
+                        <div class="flex-1 p-3 space-y-2 overflow-y-auto">
                             ${cards.map(c => `
                                 <div class="group relative p-2.5 pr-7 rounded-xl border ${BMC_COLOR_STYLES[c.color] || BMC_COLOR_STYLES.sky} text-[11px] leading-relaxed shadow-2xs">
                                     <div contenteditable="true" onblur="updateBmcCardText('${block.key}','${c.id}', this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); this.blur();}"
