@@ -450,6 +450,20 @@
             pointer-events: none;
             animation: geminiAmbientBreath 8s ease-in-out infinite;
         }
+
+        /* Gemini Live Assisted-Mode Ghost Cursor & Element Highlight */
+        #geminiGhostCursor {
+            position: fixed;
+            z-index: 95;
+            pointer-events: none;
+            transition: left 0.45s cubic-bezier(0.22, 1, 0.36, 1), top 0.45s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.2s ease, transform 0.2s ease;
+        }
+        .gemini-target-highlight {
+            outline: 2px solid #38bdf8 !important;
+            outline-offset: 2px;
+            box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.22), 0 0 22px rgba(99, 102, 241, 0.32) !important;
+            transition: box-shadow 0.25s ease, outline-color 0.25s ease;
+        }
     </style>
 </head>
 <body class="h-[100dvh] flex flex-col overflow-hidden">
@@ -1768,18 +1782,18 @@
     <!-- ============================================================================ -->
     <!-- GEMINI AI ASSISTANT MODAL (Worldaily × Google Gemini) -->
     <!-- ============================================================================ -->
-    <div id="aiAssistantModal" onclick="if(event.target === this) closeAiAssistantModal()" class="fixed inset-0 bg-slate-950/55 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div id="aiModalShell" class="gemini-modal-shell w-full max-w-3xl max-h-[92dvh] sm:max-h-[88vh] flex flex-col">
-            <div class="gemini-modal-aura hidden sm:block"></div>
-            <div class="gemini-modal-frame rounded-t-3xl sm:rounded-2xl shadow-2xl w-full flex-1 flex flex-col overflow-hidden">
-                <div class="relative bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md w-full flex-1 flex flex-col overflow-hidden rounded-t-[22px] sm:rounded-[14px]">
-                    <div class="gemini-ambient-orb w-52 h-52 -top-16 -right-12 bg-sky-400/20 dark:bg-sky-500/15"></div>
-                    <div class="gemini-ambient-orb w-44 h-44 -bottom-14 -left-10 bg-indigo-400/15 dark:bg-indigo-500/15" style="animation-delay: -4s;"></div>
+    <div id="aiAssistantModal" class="fixed z-50 hidden w-[calc(100vw-20px)] sm:w-[420px] h-[min(78dvh,600px)] flex-col pointer-events-auto">
+        <div id="aiModalShell" class="gemini-modal-shell w-full h-full flex flex-col">
+            <div class="gemini-modal-aura"></div>
+            <div class="gemini-modal-frame rounded-2xl shadow-2xl w-full flex-1 flex flex-col overflow-hidden">
+                <div class="relative bg-white/95 dark:bg-[#111827]/95 backdrop-blur-md w-full flex-1 flex flex-col overflow-hidden rounded-[14px]">
+                    <div class="gemini-ambient-orb w-44 h-44 -top-14 -right-10 bg-sky-400/20 dark:bg-sky-500/15"></div>
+                    <div class="gemini-ambient-orb w-40 h-40 -bottom-12 -left-10 bg-indigo-400/15 dark:bg-indigo-500/15" style="animation-delay: -4s;"></div>
                     <!-- Premium Gemini Header -->
-                    <div class="relative z-10 px-5 sm:px-6 py-3.5 border-b border-slate-100/90 dark:border-slate-800/90 flex items-center justify-between gap-3 shrink-0 bg-gradient-to-r from-sky-50/70 via-white/80 to-indigo-50/50 dark:from-sky-950/25 dark:via-[#111827]/90 dark:to-indigo-950/25">
-                        <div class="flex items-center gap-3 min-w-0">
-                            <div class="w-9 h-9 rounded-2xl bg-gradient-to-br from-sky-500/15 via-indigo-500/15 to-cyan-500/15 border border-sky-400/30 flex items-center justify-center shrink-0 shadow-2xs">
-                                <svg class="w-4.5 h-4.5 gemini-fab-sparkle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <div class="relative z-10 px-4 py-3 border-b border-slate-100/90 dark:border-slate-800/90 flex items-center justify-between gap-2 shrink-0 bg-gradient-to-r from-sky-50/70 via-white/80 to-indigo-50/50 dark:from-sky-950/25 dark:via-[#111827]/90 dark:to-indigo-950/25">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-500/15 via-indigo-500/15 to-cyan-500/15 border border-sky-400/30 flex items-center justify-center shrink-0 shadow-2xs">
+                                <svg class="w-4 h-4 gemini-fab-sparkle" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <defs>
                                     <linearGradient id="geminiSparkleGrad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
                                         <stop offset="0%" stop-color="#38BDF8"/>
@@ -1791,29 +1805,33 @@
                             </svg>
                         </div>
                         <div class="min-w-0">
-                            <div class="flex items-center gap-2">
-                                <h3 data-i18n="ai_modal_title" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight truncate">Worldaily Gemini</h3>
-                                <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-gradient-to-r from-sky-500/15 to-indigo-500/15 text-sky-600 dark:text-sky-400 border border-sky-400/20 shrink-0">AI</span>
+                            <div class="flex items-center gap-1.5">
+                                <h3 data-i18n="ai_modal_title" class="font-display font-bold text-xs text-slate-900 dark:text-white leading-tight truncate">Worldaily Gemini</h3>
                             </div>
-                            <p id="aiActiveProjectBadge" class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 truncate">—</p>
+                            <p id="aiActiveProjectBadge" class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 truncate">—</p>
                         </div>
                     </div>
-                    <div class="flex items-center gap-1.5 shrink-0">
+                    <div class="flex items-center gap-1 shrink-0">
+                        <button type="button" id="aiAssistedModeBtn" onclick="toggleAiAssistedMode()" title="Modo Assistido: Gemini navega e preenche ao vivo"
+                            class="h-7 px-2 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border transition cursor-pointer bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-400/40">
+                            <span id="aiAssistedDot" class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
+                            <span id="aiAssistedLabel">Assistido</span>
+                        </button>
                         <div class="relative flex items-center">
                             <select id="aiModelSelect" onchange="changeGeminiModel(this.value)" aria-label="Gemini Model"
-                                class="appearance-none h-8 pl-3 pr-7 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-xl text-[11px] font-semibold text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer leading-none transition shadow-2xs">
-                                <option value="gemini-3.8-flash">3.8 Flash (Fast)</option>
-                                <option value="gemini-3.5-flash-lite">3.5 Flash-Lite</option>
-                                <option value="gemini-3.1-pro-preview">3.1 Pro (Deep)</option>
+                                class="appearance-none h-7 pl-2 pr-5 bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 rounded-lg text-[10px] font-semibold text-slate-700 dark:text-slate-200 outline-none focus:border-sky-500 cursor-pointer leading-none transition shadow-2xs">
+                                <option value="gemini-3.8-flash">3.8 Flash</option>
+                                <option value="gemini-3.5-flash-lite">3.5 Lite</option>
+                                <option value="gemini-3.1-pro-preview">3.1 Pro</option>
                             </select>
-                            <i class="fa-solid fa-chevron-down text-[9px] text-slate-400 absolute right-2.5 pointer-events-none"></i>
+                            <i class="fa-solid fa-chevron-down text-[8px] text-slate-400 absolute right-1.5 pointer-events-none"></i>
                         </div>
                         <button type="button" onclick="clearAiChat()" title="New chat"
-                            class="w-8 h-8 rounded-xl text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
-                            <i class="fa-solid fa-rotate-right text-xs"></i>
+                            class="w-7 h-7 rounded-lg text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                            <i class="fa-solid fa-rotate-right text-[11px]"></i>
                         </button>
-                        <button type="button" onclick="closeAiAssistantModal()" class="w-8 h-8 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
-                            <i class="fa-solid fa-xmark text-base"></i>
+                        <button type="button" onclick="closeAiAssistantModal()" class="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition cursor-pointer">
+                            <i class="fa-solid fa-xmark text-sm"></i>
                         </button>
                     </div>
                 </div>
@@ -2017,6 +2035,16 @@
         <span class="pointer-events-none opacity-0 group-hover:opacity-100 group-[.is-dragging]:opacity-0 transition-opacity duration-150 absolute right-full mr-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/90 dark:bg-slate-800/95 text-white text-[11px] font-semibold whitespace-nowrap shadow-lg border border-white/10">
             Worldaily Gemini ✦
         </span>
+    </div>
+
+    <!-- Gemini Live Ghost Cursor (Assisted Mode) -->
+    <div id="geminiGhostCursor" class="hidden items-center gap-1.5" style="left: 50%; top: 50%;">
+        <div class="w-7 h-7 rounded-full bg-white dark:bg-slate-900 border-2 border-sky-400 shadow-lg shadow-sky-500/40 flex items-center justify-center">
+            <svg class="w-3.5 h-3.5 gemini-fab-sparkle" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2C12.35 7.4 16.6 11.65 22 12C16.6 12.35 12.35 16.6 12 22C11.65 16.6 7.4 12.35 2 12C7.4 11.65 11.65 7.4 12 2Z" fill="url(#geminiOrbSparkleGrad)"/>
+            </svg>
+        </div>
+        <span id="geminiGhostLabel" class="px-2.5 py-1 rounded-xl bg-slate-900/95 dark:bg-sky-600 text-white text-[11px] font-semibold shadow-lg whitespace-nowrap border border-sky-400/30">Gemini</span>
     </div>
 
     <script>
@@ -5979,6 +6007,61 @@
             renderAiChatStream();
         }
 
+        let aiAssistedMode = true;
+
+        function toggleAiAssistedMode() {
+            aiAssistedMode = !aiAssistedMode;
+            const btn = document.getElementById('aiAssistedModeBtn');
+            const dot = document.getElementById('aiAssistedDot');
+            const lbl = document.getElementById('aiAssistedLabel');
+            const isPt = currentLang === 'pt';
+            if (lbl) lbl.textContent = isPt ? 'Assistido' : 'Assisted';
+            if (btn) {
+                btn.className = aiAssistedMode
+                    ? 'h-7 px-2 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border transition cursor-pointer bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-400/40'
+                    : 'h-7 px-2 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 border transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+            }
+            if (dot) {
+                dot.className = aiAssistedMode
+                    ? 'w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse'
+                    : 'w-1.5 h-1.5 rounded-full bg-slate-400';
+            }
+            showToast(aiAssistedMode
+                ? (isPt ? 'Modo Assistido ativado: Gemini navega e preenche ao vivo!' : 'Assisted Mode ON: Gemini navigates & fills live!')
+                : (isPt ? 'Modo Assistido pausado (somente chat).' : 'Assisted Mode paused (chat only).'));
+        }
+
+        function positionAiPopupNearFab() {
+            const modal = document.getElementById('aiAssistantModal');
+            const fab = document.getElementById('geminiFloatingFab');
+            if (!modal || !fab) return;
+            const margin = 12;
+            const gap = 14;
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const fabRect = fab.getBoundingClientRect();
+            const popW = Math.min(420, vw - margin * 2);
+            const popH = Math.min(600, Math.round(vh * 0.78));
+
+            let left;
+            if (fabRect.left > vw / 2) {
+                left = fabRect.left - popW - gap;
+                if (left < margin) left = Math.max(margin, fabRect.right - popW);
+            } else {
+                left = fabRect.right + gap;
+                if (left + popW > vw - margin) left = Math.max(margin, fabRect.left);
+            }
+            let top = fabRect.bottom - popH;
+            if (top < margin) top = Math.min(vh - popH - margin, fabRect.top);
+            left = Math.max(margin, Math.min(vw - popW - margin, left));
+            top = Math.max(margin, Math.min(vh - popH - margin, top));
+
+            modal.style.left = `${left}px`;
+            modal.style.top = `${top}px`;
+            modal.style.right = 'auto';
+            modal.style.bottom = 'auto';
+        }
+
         function updateAiModalOriginFromFab() {
             const shell = document.getElementById('aiModalShell');
             const fab = document.getElementById('geminiFloatingFab');
@@ -5999,9 +6082,10 @@
             const mmCount = (plannerData.mindMap?.nodes || []).length;
             const badge = document.getElementById('aiActiveProjectBadge');
             if (badge) {
-                badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${(plannerData.tasks || []).length} ${isPt ? 'tarefas' : 'tasks'} • ${bmcCount} BMC • ${mmCount} Mind Map • ${geminiModel}`;
+                badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${(plannerData.tasks || []).length} ${isPt ? 'tarefas' : 'tasks'} • ${bmcCount} BMC • ${mmCount} Mind Map`;
             }
             const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
+            setTxt('aiAssistedLabel', 'Assistido', 'Assisted');
             setTxt('aiBtnBmcLabel', 'Ideias BMC', 'BMC Cards');
             setTxt('aiBtnMindMapLabel', 'Mapa Mental', 'Mind Map');
             setTxt('aiBtnScheduleLabel', 'Prazos & Agenda', 'Deadlines');
@@ -6012,6 +6096,7 @@
             const modal = document.getElementById('aiAssistantModal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            positionAiPopupNearFab();
             updateAiModalOriginFromFab();
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
@@ -6247,7 +6332,17 @@
             renderAiChatStream(true);
 
             try {
-                const systemCtx = `You are Worldaily Gemini, an integrated AI strategist inside the Worldaily project management workspace. You have live access to the user's Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}`;
+                const assistedGuide = aiAssistedMode ? `\n\nASSISTED CO-PILOT MODE IS ON:
+When the user asks you to create, fill, update, organize, or navigate anywhere in Worldaily, include a \`\`\`worldaily-actions\`\`\` JSON array block at the end of your reply (after a brief 1-2 line summary). Supported actions:
+- {"type":"switch_view","view":"projects"|"grid"|"board"|"calendar"|"gantt"|"charts"|"bmc"|"mindmap","label":"short status"}
+- {"type":"select_project","projectName":"exact or partial project name","label":"short status"}
+- {"type":"create_task","title":"...","priority":"Low"|"Medium"|"Important"|"Urgent","status":"Not started"|"In progress"|"Completed","dueDate":"YYYY-MM-DD optional","notes":"...","checklist":["..."],"label":"short status"}
+- {"type":"update_task","titleMatch":"partial title","status":"...","priority":"...","dueDate":"YYYY-MM-DD","notes":"...","label":"short status"}
+- {"type":"add_bmc_card","block":"keyPartners"|"keyActivities"|"keyResources"|"valuePropositions"|"customerRelationships"|"channels"|"customerSegments"|"costStructure"|"revenueStreams","text":"...","color":"sky"|"amber"|"emerald"|"violet"|"rose","label":"short status"}
+- {"type":"add_mindmap_node","text":"short node title","color":"#0284C7"|"#10B981"|"#F59E0B"|"#8B5CF6","label":"short status"}
+- {"type":"create_forum_post","title":"...","body":"...","label":"short status"}
+Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navigate.` : '';
+                const systemCtx = `You are Worldaily Gemini, an integrated AI strategist inside the Worldaily project management workspace. You have live access to the user's Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
                 const contents = [];
                 if (includeHistory) {
                     hist.slice(-10, -1).filter(m => !m.isError).forEach(m => {
@@ -6446,16 +6541,206 @@
             saveDataState(currentLang === 'pt' ? `${count} nós adicionados ao Mapa Mental!` : `${count} nodes added to Mind Map!`);
         }
 
+        function sleepMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        async function moveGeminiGhostCursorTo(targetEl, labelText) {
+            const cursor = document.getElementById('geminiGhostCursor');
+            const lbl = document.getElementById('geminiGhostLabel');
+            if (!cursor) return;
+            if (lbl) lbl.textContent = labelText || 'Gemini';
+            cursor.classList.remove('hidden');
+            cursor.classList.add('flex');
+
+            let tx = window.innerWidth * 0.45;
+            let ty = window.innerHeight * 0.45;
+            if (targetEl && typeof targetEl.getBoundingClientRect === 'function') {
+                const r = targetEl.getBoundingClientRect();
+                if (r.width > 0 && r.height > 0) {
+                    tx = Math.min(window.innerWidth - 160, Math.max(16, r.left + r.width * 0.5));
+                    ty = Math.min(window.innerHeight - 44, Math.max(16, r.top + r.height * 0.5));
+                }
+                targetEl.classList.add('gemini-target-highlight');
+                setTimeout(() => targetEl.classList.remove('gemini-target-highlight'), 1100);
+            }
+            cursor.style.left = `${tx}px`;
+            cursor.style.top = `${ty}px`;
+            await sleepMs(520);
+        }
+
+        function hideGeminiGhostCursor() {
+            const cursor = document.getElementById('geminiGhostCursor');
+            if (!cursor) return;
+            cursor.classList.add('hidden');
+            cursor.classList.remove('flex');
+        }
+
+        async function executeGeminiAssistedActions(actions) {
+            if (!Array.isArray(actions) || actions.length === 0) return;
+            const isPt = currentLang === 'pt';
+            let changedData = false;
+
+            try {
+                for (const act of actions) {
+                    const label = act.label || act.type;
+                    if (act.type === 'switch_view' && act.view) {
+                        const navBtn = document.getElementById(`pill-${act.view}`);
+                        await moveGeminiGhostCursorTo(navBtn, `✦ ${label}`);
+                        switchView(act.view);
+                        await sleepMs(380);
+                    } else if (act.type === 'select_project' && act.projectName) {
+                        const needle = String(act.projectName).toLowerCase();
+                        const proj = (workspaceStore.projects || []).find(p => (p.planTitle || '').toLowerCase().includes(needle));
+                        if (proj) {
+                            await moveGeminiGhostCursorTo(document.getElementById('sidebarProjectSwitchBtn'), `✦ ${label}`);
+                            selectProject(proj.id, false);
+                            await sleepMs(350);
+                        }
+                    } else if (act.type === 'create_task' && act.title) {
+                        if (currentView !== 'grid' && currentView !== 'board' && currentView !== 'calendar') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-board'), isPt ? '✦ Abrindo Kanban...' : '✦ Opening Kanban...');
+                            switchView('board');
+                            await sleepMs(350);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
+                        const defaultBucket = plannerData.buckets[0]?.id || 'b-backlog';
+                        plannerData.tasks.push({
+                            id: 't-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
+                            title: String(act.title).trim(),
+                            assignedTo: activeUserId || '',
+                            startDate: '',
+                            finishDate: '',
+                            dueDate: act.dueDate || '',
+                            bucketId: defaultBucket,
+                            status: ['Not started', 'In progress', 'Completed'].includes(act.status) ? act.status : 'Not started',
+                            priority: ['Low', 'Medium', 'Important', 'Urgent'].includes(act.priority) ? act.priority : 'Medium',
+                            labels: [],
+                            goals: '',
+                            notes: act.notes ? String(act.notes) : '',
+                            checklist: Array.isArray(act.checklist) ? act.checklist.map((c, ci) => ({
+                                id: 'c-ai-' + Date.now() + '-' + ci,
+                                text: String(c),
+                                done: false
+                            })) : []
+                        });
+                        changedData = true;
+                        renderCurrentView();
+                        await sleepMs(320);
+                    } else if (act.type === 'update_task' && act.titleMatch) {
+                        const needle = String(act.titleMatch).toLowerCase();
+                        const task = (plannerData.tasks || []).find(t => (t.title || '').toLowerCase().includes(needle));
+                        if (task) {
+                            await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
+                            if (act.status && ['Not started', 'In progress', 'Completed'].includes(act.status)) task.status = act.status;
+                            if (act.priority && ['Low', 'Medium', 'Important', 'Urgent'].includes(act.priority)) task.priority = act.priority;
+                            if (act.dueDate !== undefined) task.dueDate = act.dueDate;
+                            if (act.notes !== undefined) task.notes = act.notes;
+                            changedData = true;
+                            renderCurrentView();
+                            await sleepMs(300);
+                        }
+                    } else if (act.type === 'add_bmc_card' && act.block && act.text) {
+                        if (currentView !== 'bmc') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-bmc'), isPt ? '✦ Abrindo Canvas...' : '✦ Opening Canvas...');
+                            switchView('bmc');
+                            await sleepMs(380);
+                        }
+                        const bmc = ensureProjectBmc();
+                        if (bmc[act.block]) {
+                            const inp = document.getElementById(`bmc-input-${act.block}`);
+                            if (inp) {
+                                inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                await moveGeminiGhostCursorTo(inp, `✦ ${label}`);
+                                inp.value = String(act.text);
+                                await sleepMs(220);
+                                inp.value = '';
+                            }
+                            bmc[act.block].push({
+                                id: 'bmc-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
+                                text: String(act.text).trim(),
+                                color: ['sky', 'amber', 'emerald', 'violet', 'rose'].includes(act.color) ? act.color : 'sky'
+                            });
+                            changedData = true;
+                            renderBmcView();
+                            await sleepMs(260);
+                        }
+                    } else if (act.type === 'add_mindmap_node' && act.text) {
+                        if (currentView !== 'mindmap') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
+                            switchView('mindmap');
+                            await sleepMs(380);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
+                        const mm = ensureProjectMindMap();
+                        const rootNode = mm.nodes[0];
+                        const angle = (mm.nodes.length * 0.95) % (Math.PI * 2);
+                        const nid = 'mm-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5);
+                        mm.nodes.push({
+                            id: nid,
+                            text: String(act.text).trim(),
+                            x: Math.round((rootNode ? rootNode.x : 380) + Math.cos(angle) * 210),
+                            y: Math.round((rootNode ? rootNode.y : 230) + Math.sin(angle) * 145),
+                            color: act.color || '#0284C7'
+                        });
+                        if (rootNode) mm.edges.push({ id: 'me-ai-' + Date.now(), from: rootNode.id, to: nid });
+                        changedData = true;
+                        renderMindMapView();
+                        await sleepMs(280);
+                    } else if (act.type === 'create_forum_post' && (act.title || act.body)) {
+                        if (currentView !== 'projects') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-projects'), isPt ? '✦ Abrindo Fórum...' : '✦ Opening Forum...');
+                            switchView('projects');
+                            await sleepMs(380);
+                        }
+                        const titleEl = document.getElementById('forumPostTitleInput');
+                        const bodyEl = document.getElementById('forumPostBodyInput');
+                        await moveGeminiGhostCursorTo(titleEl || document.getElementById('view-projects'), `✦ ${label}`);
+                        if (titleEl) titleEl.value = String(act.title || '');
+                        if (bodyEl) bodyEl.value = String(act.body || '');
+                        await sleepMs(280);
+                        if (typeof createForumPost === 'function' && fbDb && fbCurrentUser) {
+                            await createForumPost();
+                        }
+                    }
+                }
+                if (changedData) {
+                    saveDataState(isPt ? '✦ Gemini concluiu as ações!' : '✦ Gemini finished actions!');
+                }
+            } finally {
+                hideGeminiGhostCursor();
+            }
+        }
+
         async function askAiCustomPrompt() {
             const input = document.getElementById('aiCustomPromptInput');
             const q = (input?.value || '').trim();
             if (!q) return;
             input.value = '';
-            const langNote = currentLang === 'pt' ? 'Responda em Português.' : 'Respond in English.';
+            const isPt = currentLang === 'pt';
+            const langNote = isPt ? 'Responda em Português.' : 'Respond in English.';
             const reply = await callGeminiApi(q, `${langNote}\n${q}`);
-            if (reply) {
-                getActiveAiChatHistory().push({ role: 'model', text: reply, model: geminiModel });
-                renderAiChatStream(false);
+            if (!reply) return;
+
+            let displayReply = reply;
+            let parsedActions = [];
+            const actionMatch = reply.match(/```worldaily-actions\s*([\s\S]*?)```/i);
+            if (actionMatch && aiAssistedMode) {
+                try {
+                    const candidate = JSON.parse(actionMatch[1].trim());
+                    if (Array.isArray(candidate)) parsedActions = candidate;
+                } catch (e) {}
+                displayReply = reply.replace(/```worldaily-actions[\s\S]*?```/gi, '').trim();
+            }
+
+            if (parsedActions.length > 0) {
+                const stepsSummary = parsedActions.map(a => `- **✓** ${a.label || a.type}`).join('\n');
+                displayReply = `${displayReply ? displayReply + '\n\n' : ''}**${isPt ? 'Ações executadas ao vivo:' : 'Live actions executed:'}**\n${stepsSummary}`;
+            }
+
+            getActiveAiChatHistory().push({ role: 'model', text: displayReply || (isPt ? 'Feito!' : 'Done!'), model: geminiModel });
+            renderAiChatStream(false);
+
+            if (parsedActions.length > 0) {
+                await executeGeminiAssistedActions(parsedActions);
             }
         }
 
@@ -7364,6 +7649,10 @@
                     fab.style.bottom = 'auto';
                     fab.style.left = `${p.left}px`;
                     fab.style.top = `${p.top}px`;
+                    const modal = document.getElementById('aiAssistantModal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        positionAiPopupNearFab();
+                    }
                 }
             });
 
@@ -7376,7 +7665,12 @@
                     const rect = fab.getBoundingClientRect();
                     try { localStorage.setItem(POS_KEY, JSON.stringify({ left: rect.left, top: rect.top })); } catch (err) {}
                 } else {
-                    openAiAssistantModal();
+                    const modal = document.getElementById('aiAssistantModal');
+                    if (modal && !modal.classList.contains('hidden')) {
+                        closeAiAssistantModal();
+                    } else {
+                        openAiAssistantModal();
+                    }
                 }
             };
 
@@ -7389,6 +7683,10 @@
                     const p = clampFabPos(rect.left, rect.top);
                     fab.style.left = `${p.left}px`;
                     fab.style.top = `${p.top}px`;
+                }
+                const modal = document.getElementById('aiAssistantModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    positionAiPopupNearFab();
                 }
             });
         })();
