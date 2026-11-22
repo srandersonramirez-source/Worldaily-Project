@@ -1164,10 +1164,8 @@
     <!-- WORLDAILY TASK INSPECTOR MODAL (Modern SaaS Slide-Over / Workspace Card) -->
     <!-- ============================================================================ -->
     <div id="taskModal" onclick="if(event.target === this) closeTaskModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] flex flex-col ring-1 ring-slate-200/80 dark:ring-slate-800 overflow-hidden">
-
-            <!-- Top Accent Line (Flush with rounded top, no thin white gap) -->
-            <div class="h-1 w-full bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 shrink-0"></div>
+        <div class="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[94dvh] sm:max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
 
             <!-- Modal Top Bar (Breadcrumb + Quick Actions — seamless into title) -->
             <div class="px-5 sm:px-6 pt-4 pb-2 flex items-center justify-between gap-3 shrink-0">
@@ -1421,6 +1419,7 @@
                     </button>
                 </div>
             </div>
+            </div>
         </div>
     </div>
 
@@ -1428,8 +1427,8 @@
     <!-- PROJECT / PERSONAL PLAN MODAL (Create or Edit Workspace) -->
     <!-- ============================================================================ -->
     <div id="projectModal" onclick="if(event.target === this) closeProjectModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-800 overflow-hidden">
-            <div class="h-1 w-full bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600"></div>
+        <div class="bg-gradient-to-r from-sky-400 via-sky-500 to-sky-600 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                 <h3 id="projectModalHeading" class="font-display font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
                     <i class="fa-solid fa-layer-group text-sky-500"></i>
@@ -1496,6 +1495,7 @@
                     <i class="fa-solid fa-check text-[11px]"></i>
                     <span data-i18n="save_workspace_btn">Save Workspace</span>
                 </button>
+            </div>
             </div>
         </div>
     </div>
@@ -1630,8 +1630,8 @@
     <!-- GEMINI AI ASSISTANT MODAL -->
     <!-- ============================================================================ -->
     <div id="aiAssistantModal" onclick="if(event.target === this) closeAiAssistantModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col ring-1 ring-slate-200/80 dark:ring-slate-800 overflow-hidden">
-            <div class="h-1 w-full bg-gradient-to-r from-sky-400 via-sky-500 to-cyan-500 shrink-0"></div>
+        <div class="bg-gradient-to-r from-sky-400 via-sky-500 to-cyan-500 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
             <div class="px-5 sm:px-6 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3 shrink-0">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
@@ -1706,6 +1706,7 @@
                     <span data-i18n="forum_send_btn">Send</span>
                 </button>
             </div>
+            </div>
         </div>
     </div>
 
@@ -1713,8 +1714,8 @@
     <!-- GOOGLE CALENDAR PER-PROJECT INTEGRATION MODAL -->
     <!-- ============================================================================ -->
     <div id="gcalModal" onclick="if(event.target === this) closeGcalModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white dark:bg-[#111827] rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden ring-1 ring-slate-200/80 dark:ring-slate-800 flex flex-col">
-            <div class="h-1 w-full bg-gradient-to-r from-emerald-400 via-sky-500 to-cyan-500 shrink-0"></div>
+        <div class="bg-gradient-to-r from-emerald-400 via-sky-500 to-cyan-500 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
             <div class="px-5 sm:px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
@@ -1788,6 +1789,7 @@
                         </button>
                     </div>
                 </div>
+            </div>
             </div>
         </div>
     </div>
@@ -5416,7 +5418,7 @@
                 const isSelected = modalTempLabels.includes(lbl.id);
                 return `
                     <div style="background:${lbl.bg};color:${lbl.text}"
-                        class="group inline-flex items-center rounded-full text-[11px] font-semibold transition ${isSelected ? 'ring-2 ring-sky-500 shadow-2xs scale-[1.02]' : 'opacity-75 hover:opacity-100'}">
+                        class="group inline-flex items-center rounded-full text-[11px] font-semibold transition ${isSelected ? 'ring-2 ring-inset ring-sky-500 shadow-2xs scale-[1.02]' : 'opacity-75 hover:opacity-100'}">
                         <button type="button" onclick="toggleModalLabel('${lbl.id}')"
                             class="pl-2.5 pr-1.5 py-1 flex items-center gap-1.5 cursor-pointer">
                             ${isSelected ? '<i class="fa-solid fa-check text-[9px]"></i>' : '<span class="w-1.5 h-1.5 rounded-full bg-current opacity-60"></span>'}
