@@ -1782,7 +1782,7 @@
     <!-- ============================================================================ -->
     <!-- GEMINI AI ASSISTANT MODAL (Worldaily × Google Gemini) -->
     <!-- ============================================================================ -->
-    <div id="aiAssistantModal" class="fixed z-50 hidden w-[calc(100vw-20px)] sm:w-[420px] h-[min(78dvh,600px)] flex-col pointer-events-auto">
+    <div id="aiAssistantModal" class="fixed z-50 hidden w-[calc(100vw-20px)] sm:w-[448px] h-[min(78dvh,600px)] flex-col pointer-events-auto">
         <div id="aiModalShell" class="gemini-modal-shell w-full h-full flex flex-col">
             <div class="gemini-modal-aura"></div>
             <div class="gemini-modal-frame rounded-2xl shadow-2xl w-full flex-1 flex flex-col overflow-hidden">
@@ -1806,9 +1806,9 @@
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
-                                <h3 data-i18n="ai_modal_title" class="font-display font-bold text-xs text-slate-900 dark:text-white leading-tight truncate">Worldaily Gemini</h3>
+                                <h3 data-i18n="ai_modal_title" class="font-display font-bold text-xs text-slate-900 dark:text-white leading-tight whitespace-nowrap">Worldaily Gemini</h3>
                             </div>
-                            <p id="aiActiveProjectBadge" class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 truncate">—</p>
+                            <p id="aiActiveProjectBadge" class="text-[10px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5 whitespace-nowrap">—</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
@@ -1837,29 +1837,29 @@
                 </div>
 
                 <!-- Integrated Workspace Quick Actions -->
-                <div class="px-5 sm:px-6 py-2.5 bg-slate-50/80 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800/80 flex items-center gap-1.5 overflow-x-auto shrink-0">
+                <div class="px-4 py-2 bg-slate-50/80 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 shrink-0">
                     <button type="button" onclick="runAiQuickAction('analyze')"
-                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-solid fa-chart-line text-sky-500 text-[10px]"></i>
                         <span data-i18n="ai_act_analyze">Analyze Project</span>
                     </button>
                     <button type="button" onclick="runAiQuickAction('tasks')"
-                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-solid fa-list-check text-sky-500 text-[10px]"></i>
                         <span data-i18n="ai_act_tasks">Generate Tasks</span>
                     </button>
                     <button type="button" onclick="runAiQuickAction('bmc')"
-                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-solid fa-table-cells-large text-indigo-500 text-[10px]"></i>
                         <span id="aiBtnBmcLabel">BMC Cards</span>
                     </button>
                     <button type="button" onclick="runAiQuickAction('mindmap')"
-                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-solid fa-diagram-project text-emerald-500 text-[10px]"></i>
                         <span id="aiBtnMindMapLabel">Mind Map</span>
                     </button>
                     <button type="button" onclick="runAiQuickAction('schedule')"
-                        class="px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-regular fa-calendar-check text-amber-500 text-[10px]"></i>
                         <span id="aiBtnScheduleLabel">Deadlines</span>
                     </button>
@@ -6036,11 +6036,11 @@
             const fab = document.getElementById('geminiFloatingFab');
             if (!modal || !fab) return;
             const margin = 12;
-            const gap = 14;
+            const gap = 26;
             const vw = window.innerWidth;
             const vh = window.innerHeight;
             const fabRect = fab.getBoundingClientRect();
-            const popW = Math.min(420, vw - margin * 2);
+            const popW = Math.min(448, vw - margin * 2);
             const popH = Math.min(600, Math.round(vh * 0.78));
 
             let left;
@@ -6082,7 +6082,7 @@
             const mmCount = (plannerData.mindMap?.nodes || []).length;
             const badge = document.getElementById('aiActiveProjectBadge');
             if (badge) {
-                badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${(plannerData.tasks || []).length} ${isPt ? 'tarefas' : 'tasks'} • ${bmcCount} BMC • ${mmCount} Mind Map`;
+                badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${(plannerData.tasks || []).length} ${isPt ? 'tarefas' : 'tasks'}`;
             }
             const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
             setTxt('aiAssistedLabel', 'Assistido', 'Assisted');
