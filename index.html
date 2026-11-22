@@ -1247,6 +1247,10 @@
                                 <i class="fa-solid fa-code-branch text-[10px]"></i>
                                 <span data-i18n="mm_add_child">Add Branch</span>
                             </button>
+                            <button onclick="autoLayoutMindMap(true)" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/60 text-slate-700 dark:text-slate-200 hover:text-sky-600 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer whitespace-nowrap">
+                                <i class="fa-solid fa-sitemap text-sky-500 text-[10px]"></i>
+                                <span>Auto-Layout</span>
+                            </button>
                         </div>
 
                         <div class="flex items-center gap-2 ml-auto">
@@ -1812,10 +1816,10 @@
                         </div>
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
-                        <button type="button" id="aiAssistedModeBtn" onclick="toggleAiAssistedMode()" title="Modo Assistido: Gemini navega e preenche ao vivo"
-                            class="h-7 px-2 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border transition cursor-pointer bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-400/40">
+                        <button type="button" id="aiAssistedModeBtn" onclick="toggleAiAssistedMode()"
+                            class="h-7 px-2.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border transition cursor-pointer bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-400/40">
                             <span id="aiAssistedDot" class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
-                            <span id="aiAssistedLabel">Assistido</span>
+                            <span id="aiAssistedLabel">Agent</span>
                         </button>
                         <div class="relative flex items-center">
                             <select id="aiModelSelect" onchange="changeGeminiModel(this.value)" aria-label="Gemini Model"
@@ -1836,32 +1840,22 @@
                     </div>
                 </div>
 
-                <!-- Integrated Workspace Quick Actions -->
+                <!-- 3 Essential Strategic Quick Actions -->
                 <div class="px-4 py-2 bg-slate-50/80 dark:bg-slate-900/50 border-b border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 shrink-0">
                     <button type="button" onclick="runAiQuickAction('analyze')"
                         class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-solid fa-chart-line text-sky-500 text-[10px]"></i>
                         <span data-i18n="ai_act_analyze">Analyze Project</span>
                     </button>
-                    <button type="button" onclick="runAiQuickAction('tasks')"
-                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-sky-400 hover:bg-sky-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
-                        <i class="fa-solid fa-list-check text-sky-500 text-[10px]"></i>
-                        <span data-i18n="ai_act_tasks">Generate Tasks</span>
-                    </button>
-                    <button type="button" onclick="runAiQuickAction('bmc')"
-                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
-                        <i class="fa-solid fa-table-cells-large text-indigo-500 text-[10px]"></i>
-                        <span id="aiBtnBmcLabel">BMC Cards</span>
-                    </button>
-                    <button type="button" onclick="runAiQuickAction('mindmap')"
-                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-emerald-400 hover:bg-emerald-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
-                        <i class="fa-solid fa-diagram-project text-emerald-500 text-[10px]"></i>
-                        <span id="aiBtnMindMapLabel">Mind Map</span>
-                    </button>
-                    <button type="button" onclick="runAiQuickAction('schedule')"
+                    <button type="button" onclick="runAiQuickAction('deadlines')"
                         class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-amber-400 hover:bg-amber-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
                         <i class="fa-regular fa-calendar-check text-amber-500 text-[10px]"></i>
-                        <span id="aiBtnScheduleLabel">Deadlines</span>
+                        <span id="aiBtnScheduleLabel">Tasks Next Due Date</span>
+                    </button>
+                    <button type="button" onclick="runAiQuickAction('benchmark')"
+                        class="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 hover:border-indigo-400 hover:bg-indigo-50/50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center gap-1.5 transition cursor-pointer shrink-0">
+                        <i class="fa-solid fa-compass text-indigo-500 text-[10px]"></i>
+                        <span id="aiBtnBenchmarkLabel">Market Benchmark</span>
                     </button>
                 </div>
 
@@ -2015,7 +2009,7 @@
     </div>
 
     <!-- Floating Draggable Living Neon Gemini Orb -->
-    <div id="geminiFloatingFab" class="gemini-fab-wrap group" style="right: 22px; bottom: 22px;" title="Worldaily Gemini AI (Arraste para mover)">
+    <div id="geminiFloatingFab" class="gemini-fab-wrap group" style="right: 22px; bottom: 22px;">
         <div class="gemini-fab-aura"></div>
         <div class="gemini-fab-ring">
             <div class="gemini-fab-core">
@@ -2031,9 +2025,6 @@
                 </svg>
             </div>
         </div>
-        <span class="pointer-events-none opacity-0 group-hover:opacity-100 group-[.is-dragging]:opacity-0 transition-opacity duration-150 absolute right-full mr-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-xl bg-slate-900/90 dark:bg-slate-800/95 text-white text-[11px] font-semibold whitespace-nowrap shadow-lg border border-white/10">
-            Worldaily Gemini ✦
-        </span>
     </div>
 
     <!-- Gemini Live Ghost Cursor (Assisted Mode) -->
@@ -5121,6 +5112,117 @@
             saveDataState('');
         }
 
+        // Web-Standard Bilateral Hierarchical Mind Map Auto-Layout (Whimsical / Miro / XMind style)
+        function autoLayoutMindMap(saveAfter = false) {
+            const mm = ensureProjectMindMap();
+            if (!mm.nodes || mm.nodes.length === 0) return;
+            const root = mm.nodes[0];
+            const centerX = 480;
+            const centerY = 280;
+            root.x = centerX;
+            root.y = centerY;
+
+            if (mm.nodes.length === 1) {
+                if (saveAfter) saveDataState('');
+                else renderMindMapView();
+                return;
+            }
+
+            // Build parent -> children adjacency starting from root (BFS so cycles don't loop)
+            const visited = new Set([root.id]);
+            const childrenMap = {};
+            mm.nodes.forEach(n => { childrenMap[n.id] = []; });
+
+            const queue = [root.id];
+            while (queue.length > 0) {
+                const currId = queue.shift();
+                mm.edges.forEach(ed => {
+                    let nextId = null;
+                    if (ed.from === currId && !visited.has(ed.to)) nextId = ed.to;
+                    else if (ed.to === currId && !visited.has(ed.from)) nextId = ed.from;
+                    if (nextId && mm.nodes.some(n => n.id === nextId)) {
+                        visited.add(nextId);
+                        childrenMap[currId].push(nextId);
+                        queue.push(nextId);
+                    }
+                });
+            }
+
+            // Any disconnected nodes get attached to root so nothing floats randomly
+            mm.nodes.forEach(n => {
+                if (!visited.has(n.id)) {
+                    visited.add(n.id);
+                    childrenMap[root.id].push(n.id);
+                    mm.edges.push({ id: 'e-auto-' + Date.now() + '-' + n.id, from: root.id, to: n.id });
+                }
+            });
+
+            const getNode = (id) => mm.nodes.find(n => n.id === id);
+            const getSubtreeUnits = (id) => {
+                const kids = childrenMap[id] || [];
+                if (kids.length === 0) return 1;
+                return kids.reduce((sum, cid) => sum + getSubtreeUnits(cid), 0);
+            };
+
+            const level1 = childrenMap[root.id] || [];
+            const rightBranches = [];
+            const leftBranches = [];
+            level1.forEach((bid, idx) => {
+                if (idx % 2 === 0) rightBranches.push(bid);
+                else leftBranches.push(bid);
+            });
+
+            const unitHeight = 68;
+            const horizStep1 = 250;
+            const horizStep2 = 225;
+
+            const layoutSide = (branchIds, dir) => {
+                if (branchIds.length === 0) return;
+                const totalUnits = branchIds.reduce((s, id) => s + getSubtreeUnits(id), 0);
+                let cursorY = Math.max(48, centerY - ((totalUnits * unitHeight) / 2) + (unitHeight / 2));
+
+                branchIds.forEach(bid => {
+                    const bNode = getNode(bid);
+                    const bUnits = getSubtreeUnits(bid);
+                    const branchCenterY = cursorY + ((bUnits - 1) * unitHeight) / 2;
+                    if (bNode) {
+                        bNode.x = Math.max(24, centerX + dir * horizStep1);
+                        bNode.y = Math.round(branchCenterY);
+                    }
+                    const kids = childrenMap[bid] || [];
+                    if (kids.length > 0) {
+                        let kidCursorY = cursorY;
+                        kids.forEach(kidId => {
+                            const kNode = getNode(kidId);
+                            const kUnits = getSubtreeUnits(kidId);
+                            const kCenterY = kidCursorY + ((kUnits - 1) * unitHeight) / 2;
+                            if (kNode) {
+                                kNode.x = Math.max(20, centerX + dir * (horizStep1 + horizStep2));
+                                kNode.y = Math.round(kCenterY);
+                            }
+                            // Level 3 if any
+                            const grandKids = childrenMap[kidId] || [];
+                            grandKids.forEach((gkId, gi) => {
+                                const gkNode = getNode(gkId);
+                                if (gkNode) {
+                                    gkNode.x = Math.max(16, centerX + dir * (horizStep1 + horizStep2 * 2));
+                                    gkNode.y = Math.round(kCenterY + (gi - (grandKids.length - 1) / 2) * 58);
+                                }
+                            });
+                            kidCursorY += kUnits * unitHeight;
+                        });
+                    }
+                    cursorY += bUnits * unitHeight;
+                });
+            };
+
+            layoutSide(rightBranches, 1);
+            layoutSide(leftBranches, -1);
+
+            if (saveAfter) saveDataState('');
+            else renderMindMapView();
+        }
+
         function editMindMapNodeText(nodeId, newText) {
             const mm = ensureProjectMindMap();
             const node = mm.nodes.find(n => n.id === nodeId);
@@ -6007,21 +6109,17 @@
             const btn = document.getElementById('aiAssistedModeBtn');
             const dot = document.getElementById('aiAssistedDot');
             const lbl = document.getElementById('aiAssistedLabel');
-            const isPt = currentLang === 'pt';
-            if (lbl) lbl.textContent = isPt ? 'Assistido' : 'Assisted';
+            if (lbl) lbl.textContent = 'Agent';
             if (btn) {
                 btn.className = aiAssistedMode
-                    ? 'h-7 px-2 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border transition cursor-pointer bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-400/40'
-                    : 'h-7 px-2 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 border transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
+                    ? 'h-7 px-2.5 rounded-lg text-[10px] font-bold flex items-center gap-1.5 border transition cursor-pointer bg-sky-500/15 text-sky-600 dark:text-sky-400 border-sky-400/40'
+                    : 'h-7 px-2.5 rounded-lg text-[10px] font-semibold flex items-center gap-1.5 border transition cursor-pointer bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700';
             }
             if (dot) {
                 dot.className = aiAssistedMode
                     ? 'w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse'
                     : 'w-1.5 h-1.5 rounded-full bg-slate-400';
             }
-            showToast(aiAssistedMode
-                ? (isPt ? 'Modo Assistido ativado: Gemini navega e preenche ao vivo!' : 'Assisted Mode ON: Gemini navigates & fills live!')
-                : (isPt ? 'Modo Assistido pausado (somente chat).' : 'Assisted Mode paused (chat only).'));
         }
 
         function positionAiPopupNearFab() {
@@ -6071,17 +6169,14 @@
         function openAiAssistantModal() {
             updateGeminiConfigUI();
             const isPt = currentLang === 'pt';
-            const bmcCount = Object.values(plannerData.bmc || {}).reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0);
-            const mmCount = (plannerData.mindMap?.nodes || []).length;
             const badge = document.getElementById('aiActiveProjectBadge');
             if (badge) {
                 badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${(plannerData.tasks || []).length} ${isPt ? 'tarefas' : 'tasks'}`;
             }
             const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
-            setTxt('aiAssistedLabel', 'Assistido', 'Assisted');
-            setTxt('aiBtnBmcLabel', 'Ideias BMC', 'BMC Cards');
-            setTxt('aiBtnMindMapLabel', 'Mapa Mental', 'Mind Map');
-            setTxt('aiBtnScheduleLabel', 'Prazos & Agenda', 'Deadlines');
+            setTxt('aiAssistedLabel', 'Agent', 'Agent');
+            setTxt('aiBtnScheduleLabel', 'Próximos Prazos', 'Tasks Next Due Date');
+            setTxt('aiBtnBenchmarkLabel', 'Benchmark de Mercado', 'Market Benchmark');
             setTxt('aiImportBmcLabel', 'Adicionar ao Canvas', 'Add to Canvas');
             setTxt('aiImportMindMapLabel', 'Adicionar ao Mapa', 'Add to Mind Map');
 
@@ -6111,27 +6206,36 @@
         }
 
         function buildProjectContextForAi() {
-            const stages = (plannerData.buckets || []).map(b => `${b.name} (${b.id})`).join(', ');
+            const stages = (plannerData.buckets || []).map(b => `${b.name} (id:${b.id})`).join(', ');
             const members = (plannerData.members || []).map(m => m.fullName).join(', ');
-            const tasksSummary = (plannerData.tasks || []).slice(0, 45).map(t => {
+            const tasksSummary = (plannerData.tasks || []).slice(0, 50).map(t => {
                 const stg = (plannerData.buckets || []).find(b => b.id === t.bucketId)?.name || t.bucketId;
-                return `- [${t.status} | ${t.priority} | Stage: ${stg}] ${t.title}${t.startDate ? ' | Start: ' + t.startDate : ''}${t.dueDate ? ' | Due: ' + t.dueDate : ''}`;
+                return `- [id:${t.id} | ${t.status} | ${t.priority} | Stage:${stg}] ${t.title}${t.startDate ? ' | Start:' + t.startDate : ''}${t.dueDate ? ' | Due:' + t.dueDate : ''}`;
             }).join('\n');
 
             const bmcObj = plannerData.bmc || {};
             const bmcSummary = (typeof BMC_BLOCKS !== 'undefined' ? BMC_BLOCKS : []).map(b => {
-                const items = (bmcObj[b.key] || []).map(c => c.text).join('; ');
+                const items = (bmcObj[b.key] || []).map(c => `[id:${c.id}] ${c.text}`).join('; ');
                 return `- ${b.en} (${b.key}): ${items || 'Empty'}`;
             }).join('\n');
 
-            const mmNodes = (plannerData.mindMap?.nodes || []).map(n => n.text).join(', ');
+            const mm = plannerData.mindMap || { nodes: [], edges: [] };
+            const mmNodes = (mm.nodes || []).map((n, idx) => {
+                const parents = (mm.edges || []).filter(e => e.to === n.id).map(e => {
+                    const p = (mm.nodes || []).find(x => x.id === e.from);
+                    return p ? p.text : e.from;
+                });
+                return `- [id:${n.id}${idx === 0 ? ' | ROOT' : ''}${parents.length ? ' | Parent:' + parents.join(',') : ''}] ${n.text}`;
+            }).join('\n');
+
             const projForum = (typeof forumPosts !== 'undefined' ? forumPosts : [])
                 .filter(p => !p.projectId || p.projectId === plannerData.id)
                 .slice(0, 6)
-                .map(p => `- ${p.title}: ${p.body || ''}`)
+                .map(p => `- [id:${p.id}] ${p.title}: ${p.body || ''}`)
                 .join('\n');
 
             return [
+                `Today's Date: ${toDateStrLocal(new Date())}`,
                 `Workspace: ${plannerData.planTitle} (${plannerData.category || 'Project'})`,
                 `Description: ${plannerData.description || 'N/A'}`,
                 `Team Members: ${members || 'N/A'}`,
@@ -6139,7 +6243,7 @@
                 `Google Calendar Linked: ${plannerData.googleCalendarName || 'Not linked'}`,
                 `\nTasks (${(plannerData.tasks || []).length}):\n${tasksSummary || 'No tasks yet.'}`,
                 `\nBusiness Model Canvas:\n${bmcSummary || 'Empty'}`,
-                `\nMind Map Nodes: ${mmNodes || 'None'}`,
+                `\nMind Map Nodes (${(mm.nodes || []).length}):\n${mmNodes || 'None'}`,
                 projForum ? `\nRecent Team Forum Posts:\n${projForum}` : ''
             ].filter(Boolean).join('\n');
         }
@@ -6211,39 +6315,16 @@
             const isPt = currentLang === 'pt';
 
             if (hist.length === 0 && !isThinking) {
-                const starters = isPt
-                    ? [
-                        { label: 'Resumo executivo do projeto', action: "runAiQuickAction('analyze')" },
-                        { label: 'Criar 5 tarefas para o Kanban', action: "runAiQuickAction('tasks')" },
-                        { label: 'Sugerir cards para o Business Model Canvas', action: "runAiQuickAction('bmc')" },
-                        { label: 'Expandir ideias no Mapa Mental', action: "runAiQuickAction('mindmap')" }
-                    ]
-                    : [
-                        { label: 'Executive summary of this project', action: "runAiQuickAction('analyze')" },
-                        { label: 'Generate 5 actionable Kanban tasks', action: "runAiQuickAction('tasks')" },
-                        { label: 'Suggest cards for Business Model Canvas', action: "runAiQuickAction('bmc')" },
-                        { label: 'Brainstorm Mind Map nodes', action: "runAiQuickAction('mindmap')" }
-                    ];
-
                 bodyEl.innerHTML = `
-                    <div class="py-6 px-2 flex flex-col items-center text-center space-y-4">
+                    <div class="py-12 px-3 flex flex-col items-center justify-center text-center space-y-3 h-full">
                         <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-sky-500/15 via-indigo-500/15 to-cyan-500/15 border border-sky-400/25 flex items-center justify-center shadow-sm">
-                            <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none">
+                            <svg class="w-6 h-6 gemini-fab-sparkle" viewBox="0 0 24 24" fill="none">
                                 <path d="M12 2C12.35 7.4 16.6 11.65 22 12C16.6 12.35 12.35 16.6 12 22C11.65 16.6 7.4 12.35 2 12C7.4 11.65 11.65 7.4 12 2Z" fill="url(#geminiSparkleGrad)"/>
                             </svg>
                         </div>
-                        <div class="space-y-1 max-w-md">
-                            <h4 class="font-display font-bold text-base text-slate-900 dark:text-white">${isPt ? `Olá! Sou o Gemini no ${escapeHtml(plannerData.planTitle || 'Worldaily')}` : `Hi! I'm Gemini for ${escapeHtml(plannerData.planTitle || 'Worldaily')}`}</h4>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400">${isPt ? 'Tenho contexto em tempo real das suas Tarefas, Kanban, Prazos, Business Model Canvas, Mapa Mental e Fórum.' : 'I have live context of your Tasks, Kanban, Schedule, Business Model Canvas, Mind Map, and Team Forum.'}</p>
-                        </div>
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg pt-1">
-                            ${starters.map(s => `
-                                <button type="button" onclick="${s.action}"
-                                    class="text-left px-3.5 py-2.5 rounded-2xl bg-white dark:bg-[#111827] border border-slate-200/80 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-600 text-[11px] font-semibold text-slate-700 dark:text-slate-200 flex items-center justify-between gap-2 shadow-2xs transition cursor-pointer group">
-                                    <span>${escapeHtml(s.label)}</span>
-                                    <i class="fa-solid fa-arrow-right text-[10px] text-slate-300 group-hover:text-sky-500 transition"></i>
-                                </button>
-                            `).join('')}
+                        <div class="space-y-1 max-w-sm">
+                            <h4 class="font-display font-bold text-sm text-slate-900 dark:text-white">${isPt ? `Olá! Sou o Gemini Agent em ${escapeHtml(plannerData.planTitle || 'Worldaily')}` : `Hi! I'm Gemini Agent for ${escapeHtml(plannerData.planTitle || 'Worldaily')}`}</h4>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">${isPt ? 'Peça para criar, organizar, editar ou apagar itens nas suas Tarefas, Kanban, Business Model Canvas, Mapa Mental ou Fórum.' : 'Ask me to create, organize, edit, or delete items across your Tasks, Kanban, Business Model Canvas, Mind Map, or Forum.'}</p>
                         </div>
                     </div>`;
                 return;
@@ -6325,17 +6406,27 @@
             renderAiChatStream(true);
 
             try {
-                const assistedGuide = aiAssistedMode ? `\n\nASSISTED CO-PILOT MODE IS ON:
-When the user asks you to create, fill, update, organize, or navigate anywhere in Worldaily, include a \`\`\`worldaily-actions\`\`\` JSON array block at the end of your reply (after a brief 1-2 line summary). Supported actions:
+                const assistedGuide = aiAssistedMode ? `\n\nAGENT MODE IS ON:
+Whenever the user asks you to create, fill, update, delete, clear, organize, or navigate anywhere in Worldaily, include a \`\`\`worldaily-actions\`\`\` JSON array block at the end of your reply.
+Always follow modern web layout best practices (Whimsical/Miro bilateral hierarchical trees for Mind Maps, Osterwalder 9-block methodology for BMC, and structured Kanban stages for Tasks):
 - {"type":"switch_view","view":"projects"|"grid"|"board"|"calendar"|"gantt"|"charts"|"bmc"|"mindmap","label":"short status"}
 - {"type":"select_project","projectName":"exact or partial project name","label":"short status"}
-- {"type":"create_task","title":"...","priority":"Low"|"Medium"|"Important"|"Urgent","status":"Not started"|"In progress"|"Completed","dueDate":"YYYY-MM-DD optional","notes":"...","checklist":["..."],"label":"short status"}
-- {"type":"update_task","titleMatch":"partial title","status":"...","priority":"...","dueDate":"YYYY-MM-DD","notes":"...","label":"short status"}
+- {"type":"create_task","title":"...","priority":"Low"|"Medium"|"Important"|"Urgent","status":"Not started"|"In progress"|"Completed","bucketName":"optional stage name","dueDate":"YYYY-MM-DD optional","notes":"...","checklist":["..."],"label":"short status"}
+- {"type":"update_task","id":"optional task id","titleMatch":"partial title","status":"...","priority":"...","dueDate":"YYYY-MM-DD","notes":"...","label":"short status"}
+- {"type":"delete_task","id":"optional task id","titleMatch":"partial title or ALL","label":"short status"}
 - {"type":"add_bmc_card","block":"keyPartners"|"keyActivities"|"keyResources"|"valuePropositions"|"customerRelationships"|"channels"|"customerSegments"|"costStructure"|"revenueStreams","text":"...","color":"sky"|"amber"|"emerald"|"violet"|"rose","label":"short status"}
-- {"type":"add_mindmap_node","text":"short node title","color":"#0284C7"|"#10B981"|"#F59E0B"|"#8B5CF6","label":"short status"}
+- {"type":"delete_bmc_card","id":"optional card id","block":"optional block or ALL","textMatch":"partial text or ALL","label":"short status"}
+- {"type":"build_mindmap_tree","rootTitle":"Central Topic","branches":[{"title":"Pillar 1","color":"#0284C7","children":["Sub-item A","Sub-item B"]},{"title":"Pillar 2","color":"#10B981","children":["Sub-item C","Sub-item D"]}],"clearExisting":true,"label":"Construindo Mapa Mental estruturado"}
+- {"type":"add_mindmap_node","text":"short node title","parentText":"optional parent node title (defaults to root)","color":"#0284C7"|"#10B981"|"#F59E0B"|"#8B5CF6"|"#F43F5E","label":"short status"}
+- {"type":"delete_mindmap_node","id":"optional node id","textMatch":"partial text or ALL","label":"short status"}
+- {"type":"clear_mindmap","rootTitle":"optional new root title","label":"Limpando Mapa Mental"}
+- {"type":"organize_mindmap","label":"Organizando layout do Mapa Mental"}
 - {"type":"create_forum_post","title":"...","body":"...","label":"short status"}
-Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navigate.` : '';
-                const systemCtx = `You are Worldaily Gemini, an integrated AI strategist inside the Worldaily project management workspace. You have live access to the user's Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
+- {"type":"delete_forum_post","id":"optional post id","titleMatch":"partial title","label":"short status"}
+IMPORTANT:
+1. When creating a new Mind Map or multiple Mind Map ideas, ALWAYS prefer "build_mindmap_tree" (or "add_mindmap_node" with "parentText") so it forms a clean Whimsical/Miro hierarchical tree (Root -> 4 to 6 Category Pillars -> 2 to 3 concise sub-nodes each, max 4 words per node).
+2. When the user asks to delete or clear items in the Mind Map, Tasks, BMC, or Forum, emit the matching delete/clear action ("delete_mindmap_node", "clear_mindmap", "delete_task", "delete_bmc_card", "delete_forum_post").` : '';
+                const systemCtx = `You are Worldaily Gemini Agent, an autonomous AI strategist and workspace operator inside Worldaily. You have live access to Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
                 const contents = [];
                 if (includeHistory) {
                     hist.slice(-10, -1).filter(m => !m.isError).forEach(m => {
@@ -6375,87 +6466,17 @@ Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navi
                 const label = isPt ? 'Analise o projeto atual (Tarefas, Kanban, BMC e Mapa Mental).' : 'Analyze the current project (Tasks, Kanban, BMC & Mind Map).';
                 const reply = await callGeminiApi(label, `${langNote}\nProvide a concise executive analysis of this workspace covering: 1) Current status across Tasks/Kanban/BMC/Mind Map, 2) Main bottlenecks or missing gaps, 3) Top 3 high-impact next actions.`);
                 if (reply) { hist.push({ role: 'model', text: reply, model: geminiModel }); renderAiChatStream(false); }
-            } else if (mode === 'schedule') {
-                const label = isPt ? 'Analise prazos, calendário e prioridades do projeto.' : 'Analyze deadlines, schedule, and priorities.';
-                const reply = await callGeminiApi(label, `${langNote}\nAnalyze the project's tasks, due dates, priorities, and stages. Highlight urgent/overdue risks and suggest an ideal execution order for this week.`);
+            } else if (mode === 'deadlines' || mode === 'schedule') {
+                const label = isPt ? 'Quais são os próximos prazos (due dates) e prioridades das tarefas?' : 'What are the tasks next due dates and urgent priorities?';
+                const reply = await callGeminiApi(label, `${langNote}\nReview all tasks in this project against today's date (${toDateStrLocal(new Date())}). List: 1) Overdue or immediate due tasks sorted by dueDate & priority, 2) Unscheduled high-priority tasks that need a due date, 3) Recommended execution sequence for the next 7 days.`);
                 if (reply) { hist.push({ role: 'model', text: reply, model: geminiModel }); renderAiChatStream(false); }
-            } else if (mode === 'tasks') {
-                const goalInput = (document.getElementById('aiCustomPromptInput')?.value || '').trim();
-                const focus = goalInput || plannerData.planTitle || 'Next milestone';
-                const label = isPt ? `Gerar tarefas acionáveis para: ${focus}` : `Generate actionable tasks for: ${focus}`;
-                const prompt = `Return ONLY a valid JSON array (no markdown fences) of 5 actionable tasks for "${focus}". Each item must have: {"title": string, "priority": "Low"|"Medium"|"Important"|"Urgent", "checklist": [string, string]}. Language: ${isPt ? 'Portuguese' : 'English'}.`;
-                const reply = await callGeminiApi(label, prompt, false);
-                if (!reply) return;
-                try {
-                    const parsed = JSON.parse(reply.replace(/```json/gi, '').replace(/```/g, '').trim());
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        aiPendingTasks = parsed;
-                        const tasksBar = document.getElementById('aiGeneratedTasksBar');
-                        const countEl = document.getElementById('aiGeneratedTasksCount');
-                        if (tasksBar) tasksBar.classList.remove('hidden');
-                        if (countEl) {
-                            countEl.querySelector('span').textContent = isPt
-                                ? `${parsed.length} tarefas prontas para importar no Kanban/Lista`
-                                : `${parsed.length} tasks ready to import`;
-                        }
-                        const preview = parsed.map((t, i) => `**${i + 1}. ${t.title}** (${t.priority || 'Medium'})\n` + (t.checklist || []).map(c => `- ${c}`).join('\n')).join('\n\n');
-                        hist.push({ role: 'model', text: preview, model: geminiModel });
-                        renderAiChatStream(false);
-                        return;
-                    }
-                } catch (e) {}
-                hist.push({ role: 'model', text: reply, model: geminiModel });
-                renderAiChatStream(false);
-            } else if (mode === 'bmc') {
-                const label = isPt ? 'Gerar cards estratégicos para o Business Model Canvas.' : 'Generate strategic cards for Business Model Canvas.';
-                const prompt = `Return ONLY a valid JSON array (no markdown fences) of 5 high-impact Business Model Canvas cards tailored to this project (avoiding duplicates of existing BMC cards). Each item must have: {"block": "keyPartners"|"keyActivities"|"keyResources"|"valuePropositions"|"customerRelationships"|"channels"|"customerSegments"|"costStructure"|"revenueStreams", "text": string, "color": "sky"|"amber"|"emerald"|"violet"|"rose"}. Language: ${isPt ? 'Portuguese' : 'English'}.`;
-                const reply = await callGeminiApi(label, prompt, false);
-                if (!reply) return;
-                try {
-                    const parsed = JSON.parse(reply.replace(/```json/gi, '').replace(/```/g, '').trim());
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        aiPendingBmcCards = parsed;
-                        const bar = document.getElementById('aiGeneratedBmcBar');
-                        const countEl = document.getElementById('aiGeneratedBmcCount');
-                        if (bar) bar.classList.remove('hidden');
-                        if (countEl) {
-                            countEl.querySelector('span').textContent = isPt
-                                ? `${parsed.length} cards prontos para o Business Model Canvas`
-                                : `${parsed.length} cards ready for Canvas`;
-                        }
-                        const preview = parsed.map(c => `- **${c.block}**: ${c.text}`).join('\n');
-                        hist.push({ role: 'model', text: preview, model: geminiModel });
-                        renderAiChatStream(false);
-                        return;
-                    }
-                } catch (e) {}
-                hist.push({ role: 'model', text: reply, model: geminiModel });
-                renderAiChatStream(false);
-            } else if (mode === 'mindmap') {
-                const label = isPt ? 'Sugerir novos nós de estratégia para o Mapa Mental.' : 'Suggest new strategy nodes for the Mind Map.';
-                const prompt = `Return ONLY a valid JSON array (no markdown fences) of 4 concise Mind Map node ideas (max 5 words each) to expand this project's strategy. Each item must have: {"text": string, "color": "#0284C7"|"#10B981"|"#F59E0B"|"#8B5CF6"}. Language: ${isPt ? 'Portuguese' : 'English'}.`;
-                const reply = await callGeminiApi(label, prompt, false);
-                if (!reply) return;
-                try {
-                    const parsed = JSON.parse(reply.replace(/```json/gi, '').replace(/```/g, '').trim());
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        aiPendingMindMapNodes = parsed;
-                        const bar = document.getElementById('aiGeneratedMindMapBar');
-                        const countEl = document.getElementById('aiGeneratedMindMapCount');
-                        if (bar) bar.classList.remove('hidden');
-                        if (countEl) {
-                            countEl.querySelector('span').textContent = isPt
-                                ? `${parsed.length} nós prontos para o Mapa Mental`
-                                : `${parsed.length} nodes ready for Mind Map`;
-                        }
-                        const preview = parsed.map((n, i) => `${i + 1}. **${n.text}**`).join('\n');
-                        hist.push({ role: 'model', text: preview, model: geminiModel });
-                        renderAiChatStream(false);
-                        return;
-                    }
-                } catch (e) {}
-                hist.push({ role: 'model', text: reply, model: geminiModel });
-                renderAiChatStream(false);
+            } else if (mode === 'benchmark') {
+                const label = isPt ? 'Benchmark de mercado: compare minha estratégia e BMC com players do mesmo segmento.' : 'Market Benchmark: compare my strategy & BMC against players in the same segment.';
+                const reply = await callGeminiApi(label, `${langNote}\nRead this project's title, description, Tasks, Mind Map, and Business Model Canvas (BMC) to identify the exact industry/market segment it operates in. Then provide a structured Market Benchmark:
+1) **Segment & Reference Players**: Identify the market segment and name 3–4 real reference players/benchmarks (local or global leaders/D2C brands in this niche) and what they do best.
+2) **Strategy vs. Market (BMC Comparison)**: Compare the user's current Value Proposition, Channels, Customer Relationships, and Revenue Streams against industry benchmarks.
+3) **Competitive Gaps & Differentiators**: Point out what is missing in the current strategy and 3 concrete moves to stand out from competitors.`);
+                if (reply) { hist.push({ role: 'model', text: reply, model: geminiModel }); renderAiChatStream(false); }
             }
         }
 
@@ -6579,31 +6600,35 @@ Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navi
                         const navBtn = document.getElementById(`pill-${act.view}`);
                         await moveGeminiGhostCursorTo(navBtn, `✦ ${label}`);
                         switchView(act.view);
-                        await sleepMs(380);
+                        await sleepMs(360);
                     } else if (act.type === 'select_project' && act.projectName) {
                         const needle = String(act.projectName).toLowerCase();
                         const proj = (workspaceStore.projects || []).find(p => (p.planTitle || '').toLowerCase().includes(needle));
                         if (proj) {
                             await moveGeminiGhostCursorTo(document.getElementById('sidebarProjectSwitchBtn'), `✦ ${label}`);
                             selectProject(proj.id, false);
-                            await sleepMs(350);
+                            await sleepMs(320);
                         }
                     } else if (act.type === 'create_task' && act.title) {
                         if (currentView !== 'grid' && currentView !== 'board' && currentView !== 'calendar') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-board'), isPt ? '✦ Abrindo Kanban...' : '✦ Opening Kanban...');
                             switchView('board');
-                            await sleepMs(350);
+                            await sleepMs(340);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
-                        const defaultBucket = plannerData.buckets[0]?.id || 'b-backlog';
+                        let targetBucketId = plannerData.buckets[0]?.id || 'b-backlog';
+                        if (act.bucketName) {
+                            const bMatch = (plannerData.buckets || []).find(b => (b.name || '').toLowerCase().includes(String(act.bucketName).toLowerCase()));
+                            if (bMatch) targetBucketId = bMatch.id;
+                        }
                         plannerData.tasks.push({
                             id: 't-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
                             title: String(act.title).trim(),
                             assignedTo: activeUserId || '',
-                            startDate: '',
+                            startDate: act.startDate || '',
                             finishDate: '',
                             dueDate: act.dueDate || '',
-                            bucketId: defaultBucket,
+                            bucketId: targetBucketId,
                             status: ['Not started', 'In progress', 'Completed'].includes(act.status) ? act.status : 'Not started',
                             priority: ['Low', 'Medium', 'Important', 'Urgent'].includes(act.priority) ? act.priority : 'Medium',
                             labels: [],
@@ -6617,10 +6642,12 @@ Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navi
                         });
                         changedData = true;
                         renderCurrentView();
-                        await sleepMs(320);
-                    } else if (act.type === 'update_task' && act.titleMatch) {
-                        const needle = String(act.titleMatch).toLowerCase();
-                        const task = (plannerData.tasks || []).find(t => (t.title || '').toLowerCase().includes(needle));
+                        await sleepMs(300);
+                    } else if (act.type === 'update_task' && (act.id || act.titleMatch)) {
+                        const needle = String(act.titleMatch || '').toLowerCase();
+                        const task = (plannerData.tasks || []).find(t =>
+                            (act.id && t.id === act.id) || (needle && (t.title || '').toLowerCase().includes(needle))
+                        );
                         if (task) {
                             await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
                             if (act.status && ['Not started', 'In progress', 'Completed'].includes(act.status)) task.status = act.status;
@@ -6629,13 +6656,28 @@ Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navi
                             if (act.notes !== undefined) task.notes = act.notes;
                             changedData = true;
                             renderCurrentView();
-                            await sleepMs(300);
+                            await sleepMs(280);
                         }
+                    } else if (act.type === 'delete_task' && (act.id || act.titleMatch)) {
+                        await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
+                        const needle = String(act.titleMatch || '').trim().toLowerCase();
+                        if (needle === 'all') {
+                            plannerData.tasks = [];
+                        } else {
+                            plannerData.tasks = (plannerData.tasks || []).filter(t => {
+                                if (act.id && t.id === act.id) return false;
+                                if (needle && (t.title || '').toLowerCase().includes(needle)) return false;
+                                return true;
+                            });
+                        }
+                        changedData = true;
+                        renderCurrentView();
+                        await sleepMs(280);
                     } else if (act.type === 'add_bmc_card' && act.block && act.text) {
                         if (currentView !== 'bmc') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-bmc'), isPt ? '✦ Abrindo Canvas...' : '✦ Opening Canvas...');
                             switchView('bmc');
-                            await sleepMs(380);
+                            await sleepMs(360);
                         }
                         const bmc = ensureProjectBmc();
                         if (bmc[act.block]) {
@@ -6644,7 +6686,7 @@ Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navi
                                 inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 await moveGeminiGhostCursorTo(inp, `✦ ${label}`);
                                 inp.value = String(act.text);
-                                await sleepMs(220);
+                                await sleepMs(200);
                                 inp.value = '';
                             }
                             bmc[act.block].push({
@@ -6654,49 +6696,173 @@ Only emit \`\`\`worldaily-actions\`\`\` when the user wants you to act/fill/navi
                             });
                             changedData = true;
                             renderBmcView();
-                            await sleepMs(260);
+                            await sleepMs(240);
                         }
+                    } else if (act.type === 'delete_bmc_card') {
+                        if (currentView !== 'bmc') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-bmc'), isPt ? '✦ Abrindo Canvas...' : '✦ Opening Canvas...');
+                            switchView('bmc');
+                            await sleepMs(360);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-bmc'), `✦ ${label}`);
+                        const bmc = ensureProjectBmc();
+                        const needle = String(act.textMatch || '').trim().toLowerCase();
+                        const blocks = (act.block && act.block !== 'ALL' && bmc[act.block]) ? [act.block] : Object.keys(bmc);
+                        blocks.forEach(bKey => {
+                            if (!Array.isArray(bmc[bKey])) return;
+                            if (needle === 'all' && (!act.id)) {
+                                bmc[bKey] = [];
+                            } else {
+                                bmc[bKey] = bmc[bKey].filter(c => {
+                                    if (act.id && c.id === act.id) return false;
+                                    if (needle && (c.text || '').toLowerCase().includes(needle)) return false;
+                                    return true;
+                                });
+                            }
+                        });
+                        changedData = true;
+                        renderBmcView();
+                        await sleepMs(260);
+                    } else if (act.type === 'build_mindmap_tree') {
+                        if (currentView !== 'mindmap') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
+                            switchView('mindmap');
+                            await sleepMs(360);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
+                        const mm = ensureProjectMindMap();
+                        const rootTitle = String(act.rootTitle || plannerData.planTitle || 'Core Strategy').trim();
+                        if (act.clearExisting !== false || mm.nodes.length === 0) {
+                            const rootId = mm.nodes[0]?.id || 'mm-root';
+                            mm.nodes = [{ id: rootId, text: rootTitle, x: 480, y: 280, color: '#0284C7' }];
+                            mm.edges = [];
+                        } else if (mm.nodes[0] && act.rootTitle) {
+                            mm.nodes[0].text = rootTitle;
+                        }
+                        const rootId = mm.nodes[0].id;
+                        const palette = ['#0284C7', '#10B981', '#F59E0B', '#8B5CF6', '#F43F5E'];
+                        (act.branches || []).forEach((br, bIdx) => {
+                            if (!br || !br.title) return;
+                            const bColor = br.color || palette[bIdx % palette.length];
+                            const bId = 'mm-br-' + Date.now() + '-' + bIdx + '-' + Math.random().toString(36).slice(2, 5);
+                            mm.nodes.push({ id: bId, text: String(br.title).trim(), x: 480, y: 280, color: bColor });
+                            mm.edges.push({ id: 'me-br-' + Date.now() + '-' + bIdx, from: rootId, to: bId });
+                            (br.children || []).forEach((chTxt, cIdx) => {
+                                if (!chTxt) return;
+                                const cId = 'mm-ch-' + Date.now() + '-' + bIdx + '-' + cIdx + '-' + Math.random().toString(36).slice(2, 5);
+                                mm.nodes.push({ id: cId, text: String(chTxt).trim(), x: 480, y: 280, color: bColor });
+                                mm.edges.push({ id: 'me-ch-' + Date.now() + '-' + bIdx + '-' + cIdx, from: bId, to: cId });
+                            });
+                        });
+                        autoLayoutMindMap(false);
+                        changedData = true;
+                        await sleepMs(320);
                     } else if (act.type === 'add_mindmap_node' && act.text) {
                         if (currentView !== 'mindmap') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
                             switchView('mindmap');
-                            await sleepMs(380);
+                            await sleepMs(360);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
                         const mm = ensureProjectMindMap();
-                        const rootNode = mm.nodes[0];
-                        const angle = (mm.nodes.length * 0.95) % (Math.PI * 2);
+                        let parentNode = mm.nodes[0];
+                        if (act.parentText) {
+                            const pNeedle = String(act.parentText).toLowerCase();
+                            const foundParent = mm.nodes.find(n => (n.text || '').toLowerCase().includes(pNeedle));
+                            if (foundParent) parentNode = foundParent;
+                        }
                         const nid = 'mm-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5);
                         mm.nodes.push({
                             id: nid,
                             text: String(act.text).trim(),
-                            x: Math.round((rootNode ? rootNode.x : 380) + Math.cos(angle) * 210),
-                            y: Math.round((rootNode ? rootNode.y : 230) + Math.sin(angle) * 145),
-                            color: act.color || '#0284C7'
+                            x: 480,
+                            y: 280,
+                            color: act.color || parentNode?.color || '#0284C7'
                         });
-                        if (rootNode) mm.edges.push({ id: 'me-ai-' + Date.now(), from: rootNode.id, to: nid });
+                        if (parentNode) {
+                            mm.edges.push({ id: 'me-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5), from: parentNode.id, to: nid });
+                        }
+                        autoLayoutMindMap(false);
                         changedData = true;
-                        renderMindMapView();
+                        await sleepMs(260);
+                    } else if (act.type === 'delete_mindmap_node' || act.type === 'clear_mindmap') {
+                        if (currentView !== 'mindmap') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
+                            switchView('mindmap');
+                            await sleepMs(360);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
+                        const mm = ensureProjectMindMap();
+                        const needle = String(act.textMatch || '').trim().toLowerCase();
+                        if (act.type === 'clear_mindmap' || needle === 'all' || needle === 'non_root' || needle === '*') {
+                            const rootNode = mm.nodes[0] || { id: 'mm-root', text: plannerData.planTitle || 'Core Strategy', x: 480, y: 280, color: '#0284C7' };
+                            if (act.rootTitle) rootNode.text = String(act.rootTitle).trim();
+                            rootNode.x = 480;
+                            rootNode.y = 280;
+                            mm.nodes = [rootNode];
+                            mm.edges = [];
+                            mm.strokes = [];
+                        } else {
+                            const toRemove = new Set();
+                            mm.nodes.forEach((n, idx) => {
+                                if (idx === 0) return; // keep root unless clear_mindmap
+                                if ((act.id && n.id === act.id) || (needle && (n.text || '').toLowerCase().includes(needle))) {
+                                    toRemove.add(n.id);
+                                }
+                            });
+                            // Also remove descendants of removed branches so no orphan children remain
+                            let addedDesc = true;
+                            while (addedDesc) {
+                                addedDesc = false;
+                                mm.edges.forEach(ed => {
+                                    if (toRemove.has(ed.from) && !toRemove.has(ed.to)) {
+                                        toRemove.add(ed.to);
+                                        addedDesc = true;
+                                    }
+                                });
+                            }
+                            mm.nodes = mm.nodes.filter(n => !toRemove.has(n.id));
+                            mm.edges = mm.edges.filter(e => !toRemove.has(e.from) && !toRemove.has(e.to));
+                        }
+                        autoLayoutMindMap(false);
+                        changedData = true;
                         await sleepMs(280);
+                    } else if (act.type === 'organize_mindmap') {
+                        if (currentView !== 'mindmap') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
+                            switchView('mindmap');
+                            await sleepMs(360);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
+                        autoLayoutMindMap(false);
+                        changedData = true;
+                        await sleepMs(260);
                     } else if (act.type === 'create_forum_post' && (act.title || act.body)) {
                         if (currentView !== 'projects') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-projects'), isPt ? '✦ Abrindo Fórum...' : '✦ Opening Forum...');
                             switchView('projects');
-                            await sleepMs(380);
+                            await sleepMs(360);
                         }
                         const titleEl = document.getElementById('forumPostTitleInput');
                         const bodyEl = document.getElementById('forumPostBodyInput');
                         await moveGeminiGhostCursorTo(titleEl || document.getElementById('view-projects'), `✦ ${label}`);
                         if (titleEl) titleEl.value = String(act.title || '');
                         if (bodyEl) bodyEl.value = String(act.body || '');
-                        await sleepMs(280);
+                        await sleepMs(260);
                         if (typeof createForumPost === 'function' && fbDb && fbCurrentUser) {
                             await createForumPost();
+                        }
+                    } else if (act.type === 'delete_forum_post' && (act.id || act.titleMatch)) {
+                        const needle = String(act.titleMatch || '').toLowerCase();
+                        const post = (forumPosts || []).find(p => (act.id && p.id === act.id) || (needle && (p.title || '').toLowerCase().includes(needle)));
+                        if (post && typeof deleteForumPost === 'function') {
+                            await moveGeminiGhostCursorTo(document.getElementById('forumPostsFeed'), `✦ ${label}`);
+                            await deleteForumPost(post.id);
                         }
                     }
                 }
                 if (changedData) {
-                    saveDataState(isPt ? '✦ Gemini concluiu as ações!' : '✦ Gemini finished actions!');
+                    saveDataState('');
                 }
             } finally {
                 hideGeminiGhostCursor();
