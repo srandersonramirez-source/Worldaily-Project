@@ -222,14 +222,14 @@
 
         /* Calendar */
         .calendar-cell {
-            min-height: 72px;
+            min-height: 110px;
             border-right: 1px solid var(--border-subtle);
             border-bottom: 1px solid var(--border-subtle);
             transition: background-color 0.15s ease;
         }
         @media (min-width: 768px) {
             .calendar-cell {
-                min-height: 115px;
+                min-height: 150px;
             }
         }
         .calendar-cell.drag-over {
@@ -1923,15 +1923,21 @@
     <!-- GOOGLE CALENDAR PER-PROJECT INTEGRATION MODAL -->
     <!-- ============================================================================ -->
     <div id="gcalModal" onclick="if(event.target === this) closeGcalModal()" class="fixed inset-0 bg-slate-950/50 backdrop-blur-xs z-50 hidden items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-gradient-to-r from-sky-400 via-sky-500 to-cyan-500 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col">
+        <div class="bg-gradient-to-r from-emerald-400 via-sky-500 to-cyan-500 pt-1 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
             <div class="bg-white dark:bg-[#111827] w-full flex-1 flex flex-col overflow-hidden">
             <div class="px-5 py-3.5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0">
-                        <i class="fa-brands fa-google text-sm"></i>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <i class="fa-regular fa-calendar-days text-sm"></i>
                     </div>
                     <div>
-                        <h3 id="gcalModalTitle" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Google Calendar</h3>
+                        <div class="flex items-center gap-2">
+                            <h3 id="gcalModalTitle" class="font-display font-bold text-sm text-slate-900 dark:text-white leading-tight">Google Calendar</h3>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span id="gcalSyncedBadge">Synced</span>
+                            </span>
+                        </div>
                         <p id="gcalProjectNameBadge" class="text-[11px] text-slate-500 dark:text-slate-400 leading-tight mt-0.5">—</p>
                     </div>
                 </div>
@@ -1940,23 +1946,37 @@
                 </button>
             </div>
 
-            <div class="p-5 space-y-3.5 text-xs">
+            <div class="p-5 space-y-4 text-xs">
                 <div id="gcalPickerSection" class="space-y-1.5">
-                    <label for="gcalCalendarSelect" id="gcalSelectLabel" class="font-semibold text-slate-700 dark:text-slate-200 block">Calendar</label>
+                    <div class="flex items-center justify-between gap-2">
+                        <label for="gcalCalendarSelect" id="gcalSelectLabel" class="font-semibold text-slate-700 dark:text-slate-200">Calendar linked to project</label>
+                        <button type="button" onclick="createProjectGoogleCalendar()"
+                            class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1 cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span id="gcalCreateNewLabel">New calendar</span>
+                        </button>
+                    </div>
                     <div class="relative flex items-center">
                         <select id="gcalCalendarSelect" onchange="selectProjectGoogleCalendar(this.value)"
-                            class="w-full h-9 appearance-none pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-sky-500 cursor-pointer leading-none transition">
+                            class="w-full h-9 appearance-none pl-3 pr-8 bg-slate-50 dark:bg-slate-900 border border-slate-200/80 dark:border-slate-700 rounded-xl text-xs font-medium text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 cursor-pointer leading-none transition">
                             <option value="">— Select calendar —</option>
                         </select>
                         <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 absolute right-3 pointer-events-none"></i>
                     </div>
                 </div>
 
-                <button type="button" onclick="handleGcalSimpleSync()"
-                    class="w-full py-2.5 px-4 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center justify-center gap-2 shadow-sm shadow-sky-500/20 transition cursor-pointer">
-                    <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
-                    <span id="gcalSyncNowLabel">Sync</span>
-                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" onclick="handleGcalSimpleSync()"
+                        class="py-2.5 px-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-sm shadow-emerald-500/20 transition cursor-pointer">
+                        <i class="fa-solid fa-arrows-rotate text-[11px]"></i>
+                        <span id="gcalSyncNowLabel">Sync Events</span>
+                    </button>
+                    <button type="button" onclick="pushTasksToGoogleCalendar()"
+                        class="py-2.5 px-3.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-emerald-400 text-slate-700 dark:text-slate-200 text-[11px] font-semibold flex items-center justify-center gap-1.5 transition cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up text-emerald-500 text-[11px]"></i>
+                        <span id="gcalPushTasksLabel">Push Tasks</span>
+                    </button>
+                </div>
             </div>
             </div>
         </div>
@@ -3872,11 +3892,13 @@
             return `rgba(${r}, ${g}, ${b}, ${alpha})`;
         }
 
-        function getGcalWorldailyPillStyle(hexColor) {
+        function getGcalWorldailyPillStyle(hexColor, slimRibbon = false, continuesLeft = false, continuesRight = false) {
             const isDark = document.documentElement.classList.contains('dark');
-            const bgTint = hexToRgba(hexColor, isDark ? 0.22 : 0.13);
-            const borderTint = hexToRgba(hexColor, isDark ? 0.45 : 0.32);
-            return `background-color:${bgTint};border:1px solid ${borderTint};border-left:3px solid ${hexColor};`;
+            const bgTint = hexToRgba(hexColor, slimRibbon ? (isDark ? 0.30 : 0.18) : (isDark ? 0.22 : 0.13));
+            const borderTint = hexToRgba(hexColor, isDark ? 0.50 : 0.36);
+            const leftBar = (!continuesLeft) ? `border-left:3px solid ${hexColor};` : `border-left:0;`;
+            const rightBorder = continuesRight ? `border-right:0;` : '';
+            return `background-color:${bgTint};border-top:1px solid ${borderTint};border-bottom:1px solid ${borderTint};border-right:1px solid ${borderTint};${leftBar}${rightBorder}`;
         }
 
         function renderCalendarView() {
@@ -3908,6 +3930,13 @@
                 const daysInMonth = new Date(calendarYear, calendarMonth + 1, 0).getDate();
                 const daysInPrev = new Date(calendarYear, calendarMonth, 0).getDate();
 
+                const allDayDatesByEvent = {};
+                gcalEvents.filter(ev => ev.isAllDay).forEach(ev => {
+                    const key = ev.id || `${ev.title}::${ev.bgColor}`;
+                    if (!allDayDatesByEvent[key]) allDayDatesByEvent[key] = new Set();
+                    allDayDatesByEvent[key].add(ev.dateStr);
+                });
+
                 for (let i = firstDay - 1; i >= 0; i--) {
                     const cell = document.createElement('div');
                     cell.className = "calendar-cell p-2 bg-slate-50/50 dark:bg-slate-900/40 text-slate-300 dark:text-slate-600 text-xs";
@@ -3916,15 +3945,24 @@
                 }
                 for (let day = 1; day <= daysInMonth; day++) {
                     const dateStr = `${calendarYear}-${String(calendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    const prevDateStr = toDateStrLocal(new Date(calendarYear, calendarMonth, day - 1));
+                    const nextDateStr = toDateStrLocal(new Date(calendarYear, calendarMonth, day + 1));
+                    const colIdx = (firstDay + day - 1) % 7;
                     const isToday = dateStr === todayStr;
                     const dayTasks = tasks.filter(t => t.dueDate === dateStr);
-                    const dayGcalAllDay = gcalEvents.filter(ev => ev.isAllDay && ev.dateStr === dateStr);
+                    const dayGcalAllDay = gcalEvents
+                        .filter(ev => ev.isAllDay && ev.dateStr === dateStr)
+                        .sort((a, b) => {
+                            const ka = a.id || `${a.title}::${a.bgColor}`;
+                            const kb = b.id || `${b.title}::${b.bgColor}`;
+                            const sa = (allDayDatesByEvent[ka]?.size || 1) > 1 ? 0 : 1;
+                            const sb = (allDayDatesByEvent[kb]?.size || 1) > 1 ? 0 : 1;
+                            return sa !== sb ? sa - sb : String(a.title).localeCompare(String(b.title));
+                        });
                     const dayGcalTimed = gcalEvents.filter(ev => !ev.isAllDay && ev.dateStr === dateStr).sort((a, b) => a.startMinutes - b.startMinutes);
-                    const hasAllDayGroup = dayTasks.length > 0 || dayGcalAllDay.length > 0;
-                    const hasTimedGroup = dayGcalTimed.length > 0;
 
                     const cell = document.createElement('div');
-                    cell.className = `calendar-cell p-2 flex flex-col gap-1 bg-white dark:bg-[#111827] ${isToday ? 'bg-sky-50/30 dark:bg-sky-950/20' : ''}`;
+                    cell.className = `calendar-cell p-1.5 sm:p-2 flex flex-col bg-white dark:bg-[#111827] ${isToday ? 'bg-sky-50/30 dark:bg-sky-950/20' : ''}`;
                     cell.ondragover = handleDragOver; cell.ondragleave = handleDragLeave;
                     cell.ondrop = (e) => {
                         e.preventDefault(); cell.classList.remove('drag-over');
@@ -3932,16 +3970,31 @@
                         const task = plannerData.tasks.find(t => t.id === taskId);
                         if (task) { task.dueDate = dateStr; saveDataState(`Scheduled for ${formatShortDate(dateStr)}!`); }
                     };
+
+                    const allDayRibbonsHtml = dayGcalAllDay.map(ev => {
+                        const key = ev.id || `${ev.title}::${ev.bgColor}`;
+                        const dateSet = allDayDatesByEvent[key];
+                        const hasPrev = Boolean(dateSet && dateSet.has(prevDateStr));
+                        const hasNext = Boolean(dateSet && dateSet.has(nextDateStr));
+                        const continuesLeft = hasPrev && colIdx > 0;
+                        const continuesRight = hasNext && colIdx < 6;
+                        const showLabel = !hasPrev || colIdx === 0;
+                        const spanClasses = [
+                            continuesLeft ? '-ml-1.5 sm:-ml-2 pl-2 rounded-l-none' : 'rounded-l',
+                            continuesRight ? '-mr-1.5 sm:-mr-2 pr-2 rounded-r-none' : 'rounded-r'
+                        ].join(' ');
+                        return `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)} (${isPt ? 'Dia todo' : 'All day'})" style="${getGcalWorldailyPillStyle(ev.bgColor, true, continuesLeft, continuesRight)}" class="flex items-center gap-1 px-1.5 h-[18px] leading-[18px] text-[10px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-90 transition ${spanClasses}">${showLabel ? `<span class="truncate">${escapeHtml(ev.title)}</span>` : `<span class="truncate opacity-65">${escapeHtml(ev.title)}</span>`}</a>`;
+                    }).join('');
+
                     cell.innerHTML = `
-                        <div class="flex items-center justify-between mb-1">
+                        <div class="flex items-center justify-between mb-1 shrink-0">
                             <span class="${isToday ? 'px-1.5 py-0.5 rounded-md bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-300 font-semibold'} text-xs">${day}</span>
                             ${(dayTasks.length + dayGcalAllDay.length + dayGcalTimed.length) > 0 ? `<span class="text-[10px] font-medium text-slate-400">${dayTasks.length + dayGcalAllDay.length + dayGcalTimed.length}</span>` : ''}
                         </div>
-                        <div class="space-y-1 overflow-y-auto max-h-28 pr-0.5">
-                            ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-2 py-1 rounded-md text-[11px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
-                            ${dayGcalAllDay.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.title)} (${isPt ? 'Dia todo' : 'All day'})" style="${getGcalWorldailyPillStyle(ev.bgColor)}" class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold text-slate-800 dark:text-slate-100 truncate hover:opacity-90 transition"><i class="fa-regular fa-calendar text-[9px] shrink-0" style="color:${escapeHtml(ev.bgColor)}"></i><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
-                            ${(hasAllDayGroup && hasTimedGroup) ? `<div class="border-t border-dashed border-slate-200/80 dark:border-slate-800 my-1"></div>` : ''}
-                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel)} • ${escapeHtml(ev.title)}" class="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-200 hover:border-sky-300 dark:hover:border-sky-700 truncate transition"><span class="w-2 h-2 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[10px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
+                        <div class="flex-1 min-h-0 flex flex-col gap-0.5">
+                            ${allDayRibbonsHtml}
+                            ${dayTasks.map(t => `<div onclick="openTaskModal('${t.id}')" draggable="true" ondragstart="event.dataTransfer.setData('text/plain', '${t.id}')" class="px-1.5 py-0.5 rounded text-[10.5px] font-medium bg-sky-50 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300 border border-sky-200/70 dark:border-sky-800 truncate cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900 transition">${escapeHtml(t.title)}</div>`).join('')}
+                            ${dayGcalTimed.map(ev => `<a href="${escapeHtml(ev.htmlLink || '#')}" target="_blank" rel="noopener" title="${escapeHtml(ev.timeRangeLabel)} • ${escapeHtml(ev.title)}" class="flex items-center gap-1 px-1.5 py-0.5 rounded text-[10.5px] font-medium bg-slate-50/90 dark:bg-slate-800/60 border border-slate-200/70 dark:border-slate-700/70 text-slate-700 dark:text-slate-200 hover:border-sky-300 dark:hover:border-sky-700 truncate transition"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${escapeHtml(ev.bgColor)}"></span><span class="text-[9.5px] font-semibold text-slate-500 dark:text-slate-400 shrink-0">${escapeHtml(ev.timeLabel)}</span><span class="truncate">${escapeHtml(ev.title)}</span></a>`).join('')}
                         </div>
                     `;
                     grid.appendChild(cell);
@@ -4236,9 +4289,12 @@
             const isPt = currentLang === 'pt';
             const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
             setTxt('gcalModalTitle', 'Google Agenda', 'Google Calendar');
-            setTxt('gcalProjectNameBadge', plannerData.planTitle || 'Worldaily', plannerData.planTitle || 'Worldaily');
-            setTxt('gcalSelectLabel', 'Agenda do projeto', 'Project calendar');
-            setTxt('gcalSyncNowLabel', 'Sincronizar', 'Sync');
+            setTxt('gcalSyncedBadge', 'Sincronizado', 'Synced');
+            setTxt('gcalProjectNameBadge', `Projeto: ${plannerData.planTitle || 'Worldaily'}`, `Project: ${plannerData.planTitle || 'Worldaily'}`);
+            setTxt('gcalSelectLabel', 'Agenda vinculada ao projeto', 'Calendar linked to project');
+            setTxt('gcalCreateNewLabel', 'Nova agenda', 'New calendar');
+            setTxt('gcalSyncNowLabel', 'Sincronizar Eventos', 'Sync Events');
+            setTxt('gcalPushTasksLabel', 'Enviar Tarefas', 'Push Tasks');
         }
 
         async function handleGcalSimpleSync() {
