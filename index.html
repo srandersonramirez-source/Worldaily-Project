@@ -5230,6 +5230,22 @@
             saveDataState(currentLang === 'pt' ? 'Card removido.' : 'Card removed.');
         }
 
+        const BMC_COLOR_SWATCHES = [
+            { key: 'sky',     hex: '#0EA5E9' },
+            { key: 'amber',   hex: '#F59E0B' },
+            { key: 'emerald', hex: '#10B981' },
+            { key: 'violet',  hex: '#8B5CF6' },
+            { key: 'rose',    hex: '#F43F5E' }
+        ];
+
+        function updateBmcCardColor(blockKey, cardId, newColor) {
+            const bmc = ensureProjectBmc();
+            const card = (bmc[blockKey] || []).find(c => c.id === cardId);
+            if (!card || card.color === newColor) return;
+            card.color = newColor;
+            saveDataState('');
+        }
+
         function renderBmcView() {
             const container = document.getElementById('bmcGridContainer');
             const badge = document.getElementById('bmcTotalCardsBadge');
@@ -5256,13 +5272,21 @@
                         </div>
                         <div class="flex-1 p-3 space-y-2 overflow-y-auto">
                             ${cards.map(c => `
-                                <div class="group relative p-2.5 pr-7 rounded-xl border ${BMC_COLOR_STYLES[c.color] || BMC_COLOR_STYLES.sky} text-[11px] leading-relaxed shadow-2xs">
+                                <div class="group relative p-2.5 pr-7 rounded-xl border ${BMC_COLOR_STYLES[c.color] || BMC_COLOR_STYLES.sky} text-[11px] leading-relaxed shadow-2xs transition-colors">
                                     <div contenteditable="true" onblur="updateBmcCardText('${block.key}','${c.id}', this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); this.blur();}"
                                         class="outline-none whitespace-pre-wrap break-words select-text">${escapeHtml(c.text)}</div>
-                                    <button onclick="deleteBmcCard('${block.key}','${c.id}')" title="Remove"
-                                        class="opacity-0 group-hover:opacity-100 absolute top-1.5 right-1.5 w-5 h-5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer">
-                                        <i class="fa-solid fa-xmark text-[10px]"></i>
-                                    </button>
+                                    <div class="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 absolute top-1.5 right-1.5 flex items-center gap-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xs px-1.5 py-0.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-xs transition">
+                                        ${BMC_COLOR_SWATCHES.map(sw => `
+                                            <button type="button" onclick="event.stopPropagation(); updateBmcCardColor('${block.key}','${c.id}','${sw.key}')" title="${sw.key}"
+                                                style="background:${sw.hex}"
+                                                class="w-2.5 h-2.5 rounded-full transition cursor-pointer hover:scale-125 ${(c.color || 'sky') === sw.key ? 'ring-1 ring-offset-1 ring-slate-600 dark:ring-white dark:ring-offset-slate-900 scale-110' : 'opacity-70 hover:opacity-100'}"></button>
+                                        `).join('')}
+                                        <span class="w-px h-3 bg-slate-200 dark:bg-slate-700 mx-0.5"></span>
+                                        <button type="button" onclick="event.stopPropagation(); deleteBmcCard('${block.key}','${c.id}')" title="Remove"
+                                            class="w-4 h-4 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer">
+                                            <i class="fa-solid fa-xmark text-[10px]"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
