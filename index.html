@@ -556,11 +556,6 @@
                 </div>
 
                 <p id="gateErrorMsg" class="hidden text-[11px] text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 rounded-xl px-3 py-2"></p>
-
-                <div class="pt-2 border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-center gap-1.5 text-[10px] text-slate-400 dark:text-slate-500">
-                    <i class="fa-solid fa-shield-halved text-sky-500"></i>
-                    <span data-i18n="gate_session_note">Session expires automatically every 24 hours for security.</span>
-                </div>
             </div>
         </div>
     </div>
@@ -7482,9 +7477,7 @@ IMPORTANT:
             if (isSessionExpired(fbCurrentUser)) {
                 try { localStorage.removeItem(SESSION_LOGIN_AT_KEY); } catch (e) {}
                 await fbAuth.signOut();
-                showLoginGate(currentLang === 'pt'
-                    ? 'Sua sessão de 24 horas expirou. Faça login novamente.'
-                    : 'Your 24-hour session expired. Please sign in again.');
+                showLoginGate();
                 return true;
             }
             return false;
@@ -7509,9 +7502,7 @@ IMPORTANT:
                     if (user && isSessionExpired(user)) {
                         try { localStorage.removeItem(SESSION_LOGIN_AT_KEY); } catch (e) {}
                         await fbAuth.signOut();
-                        showLoginGate(currentLang === 'pt'
-                            ? 'Sua sessão de 24 horas expirou. Faça login novamente.'
-                            : 'Your 24-hour session expired. Please sign in again.');
+                        showLoginGate();
                         hideBootOverlay();
                         return;
                     }
