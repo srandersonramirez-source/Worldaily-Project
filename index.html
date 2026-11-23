@@ -6540,9 +6540,25 @@
             return found ? found.id : null;
         }
 
+        function getActiveChatUserName() {
+            const activeMember = (plannerData.members || []).find(m => m.id === activeUserId);
+            return (typeof fbCurrentUser !== 'undefined' && fbCurrentUser && fbCurrentUser.displayName)
+                || (activeMember && activeMember.fullName)
+                || (typeof fbCurrentUser !== 'undefined' && fbCurrentUser && fbCurrentUser.email)
+                || '';
+        }
+
         function buildProjectContextForAi() {
+            const activeMember = (plannerData.members || []).find(m => m.id === activeUserId);
+            const currentUserName = getActiveChatUserName();
+            const currentUserEmail = (typeof fbCurrentUser !== 'undefined' && fbCurrentUser && fbCurrentUser.email)
+                || (activeMember && activeMember.email)
+                || '';
             const stages = (plannerData.buckets || []).map(b => `${b.name} (id:${b.id})`).join(', ');
-            const members = (plannerData.members || []).map(m => `${m.fullName} (id:${m.id})`).join(', ');
+            const members = (plannerData.members || []).map(m => {
+                const isMe = (activeUserId && m.id === activeUserId) || (currentUserEmail && m.email && m.email.toLowerCase() === currentUserEmail.toLowerCase());
+                return `${m.fullName} (id:${m.id}${isMe ? ' | CURRENT USER TALKING TO YOU' : ' | Teammate'})`;
+            }).join(', ');
             const tasksSummary = (plannerData.tasks || []).slice(0, 60).map(t => {
                 const stg = (plannerData.buckets || []).find(b => b.id === t.bucketId)?.name || t.bucketId;
                 const assignees = getTaskAssignees(t).map(id => (plannerData.members || []).find(m => m.id === id)?.fullName || id).join(', ');
@@ -6575,6 +6591,7 @@
 
             return [
                 `Today's Date: ${toDateStrLocal(new Date())}`,
+                currentUserName ? `Current Logged-In User (speaking with you right now): ${currentUserName}${currentUserEmail ? ' <' + currentUserEmail + '>' : ''}${activeUserId ? ' (id:' + activeUserId + ')' : ''}` : '',
                 `Active View Tab: ${currentView}`,
                 `Workspace: ${plannerData.planTitle} (${plannerData.category || 'Project'})`,
                 `Description: ${plannerData.description || 'N/A'}`,
@@ -6781,8 +6798,12 @@ SUPPORTED ACTION SCHEMAS (put inside \`\`\`worldaily-actions [ ... ] \`\`\`):
   {"type":"update_forum_post","id":"optional post id","titleMatch":"existing post title","newTitle":"...","newBody":"...","label":"short status"}
   {"type":"add_forum_comment","id":"optional post id","titleMatch":"post title","text":"comment text","label":"short status"}
   {"type":"delete_forum_post","id":"optional post id","titleMatch":"partial title or ALL","label":"short status"}` : '';
+                const chatUserName = getActiveChatUserName();
+                const userIdentityRule = chatUserName
+                    ? `\nCRITICAL USER IDENTITY RULE: The logged-in user speaking with you right now is "${chatUserName}". If you greet or address the user by name, ALWAYS call them "${chatUserName.split(' ')[0]}" (or "${chatUserName}") — NEVER address them by the name of another team member in the project.`
+                    : '';
                 const systemCtx = `You are Worldaily Gemini Agent, an autonomous AI strategist and workspace operator inside Worldaily. You have live read/write access to Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas (BMC), Mind Map, and Team Forum.
-CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user writes in (if the user's prompt is in Portuguese, respond 100% in Portuguese; if the user's prompt is in English, respond 100% in English), regardless of the app's UI language.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
+CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user writes in (if the user's prompt is in Portuguese, respond 100% in Portuguese; if the user's prompt is in English, respond 100% in English), regardless of the app's UI language.${userIdentityRule}\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
                 const contents = [];
                 if (includeHistory) {
                     hist.slice(-10, -1).filter(m => !m.isError).forEach(m => {
