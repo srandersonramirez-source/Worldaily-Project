@@ -6317,7 +6317,7 @@
                 select.value = geminiModel;
             }
             const badge = document.getElementById('aiActiveProjectBadge');
-            if (badge) badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${geminiModel}`;
+            if (badge) badge.textContent = plannerData.planTitle || 'Worldaily';
         }
 
         async function changeGeminiModel(model) {
@@ -6432,7 +6432,7 @@
             const isPt = currentLang === 'pt';
             const badge = document.getElementById('aiActiveProjectBadge');
             if (badge) {
-                badge.textContent = `${plannerData.planTitle || 'Worldaily'} • ${(plannerData.tasks || []).length} ${isPt ? 'tarefas' : 'tasks'}`;
+                badge.textContent = plannerData.planTitle || 'Worldaily';
             }
             const setTxt = (id, pt, en) => { const el = document.getElementById(id); if (el) el.textContent = isPt ? pt : en; };
             setTxt('aiAssistedLabel', 'Agent', 'Agent');
