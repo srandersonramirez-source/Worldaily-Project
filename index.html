@@ -1175,7 +1175,7 @@
                 <!-- ============================================================================ -->
                 <!-- VIEW 5: BUSINESS MODEL CANVAS (Strategy & Operations) -->
                 <!-- ============================================================================ -->
-                <section id="view-bmc" class="h-full w-full flex flex-col overflow-hidden hidden">
+                <section id="view-bmc" onclick="clearBmcCardSelection(event)" class="h-full w-full flex flex-col overflow-hidden hidden">
                     <!-- Top Toolbar -->
                     <div class="bg-white/90 dark:bg-[#111827]/90 border-b border-slate-200/80 dark:border-slate-800 px-3.5 sm:px-6 py-2.5 flex flex-wrap items-center justify-between gap-2.5 shrink-0">
                         <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
@@ -5158,6 +5158,7 @@
         // VIEW 5: BUSINESS MODEL CANVAS (Strategy & Operations)
         // ============================================================================
         let bmcActiveColor = 'sky';
+        let bmcSelectedCard = null; // { blockKey, cardId }
         const BMC_BLOCKS = [
             { key: 'kp',   en: 'Key Partners',           pt: 'Parcerias-Chave',         icon: 'fa-handshake',         span: 'col-span-2 row-span-2', highlight: false },
             { key: 'ka',   en: 'Key Activities',         pt: 'Atividades-Chave',        icon: 'fa-gears',             span: 'col-span-2 row-span-1', highlight: false },
@@ -5196,6 +5197,42 @@
                 btn.classList.toggle('ring-offset-2', isSel);
                 btn.classList.toggle('ring-sky-500', isSel);
             });
+            if (bmcSelectedCard) {
+                const bmc = ensureProjectBmc();
+                const card = (bmc[bmcSelectedCard.blockKey] || []).find(c => c.id === bmcSelectedCard.cardId);
+                if (card && card.color !== color) {
+                    card.color = color;
+                    saveDataState('');
+                }
+            }
+        }
+
+        function selectBmcCard(blockKey, cardId) {
+            bmcSelectedCard = { blockKey, cardId };
+            const bmc = ensureProjectBmc();
+            const card = (bmc[blockKey] || []).find(c => c.id === cardId);
+            const cardColor = card?.color || 'sky';
+            bmcActiveColor = cardColor;
+            document.querySelectorAll('#bmcColorPicker [data-bmc-color]').forEach(btn => {
+                const isSel = btn.getAttribute('data-bmc-color') === cardColor;
+                btn.classList.toggle('ring-2', isSel);
+                btn.classList.toggle('ring-offset-2', isSel);
+                btn.classList.toggle('ring-sky-500', isSel);
+            });
+            document.querySelectorAll('[data-bmc-card]').forEach(el => {
+                const isSelected = el.getAttribute('data-bmc-card') === cardId;
+                el.classList.toggle('ring-2', isSelected);
+                el.classList.toggle('ring-sky-500', isSelected);
+            });
+        }
+
+        function clearBmcCardSelection(e) {
+            if (!bmcSelectedCard) return;
+            if (e && (e.target.closest('[data-bmc-card]') || e.target.closest('#bmcColorPicker'))) return;
+            bmcSelectedCard = null;
+            document.querySelectorAll('[data-bmc-card]').forEach(el => {
+                el.classList.remove('ring-2', 'ring-sky-500');
+            });
         }
 
         function addBmcCard(blockKey) {
@@ -5227,23 +5264,8 @@
         function deleteBmcCard(blockKey, cardId) {
             const bmc = ensureProjectBmc();
             bmc[blockKey] = bmc[blockKey].filter(c => c.id !== cardId);
+            if (bmcSelectedCard && bmcSelectedCard.cardId === cardId) bmcSelectedCard = null;
             saveDataState(currentLang === 'pt' ? 'Card removido.' : 'Card removed.');
-        }
-
-        const BMC_COLOR_SWATCHES = [
-            { key: 'sky',     hex: '#0EA5E9' },
-            { key: 'amber',   hex: '#F59E0B' },
-            { key: 'emerald', hex: '#10B981' },
-            { key: 'violet',  hex: '#8B5CF6' },
-            { key: 'rose',    hex: '#F43F5E' }
-        ];
-
-        function updateBmcCardColor(blockKey, cardId, newColor) {
-            const bmc = ensureProjectBmc();
-            const card = (bmc[blockKey] || []).find(c => c.id === cardId);
-            if (!card || card.color === newColor) return;
-            card.color = newColor;
-            saveDataState('');
         }
 
         function renderBmcView() {
@@ -5271,24 +5293,19 @@
                             <span class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 font-semibold shrink-0">${cards.length}</span>
                         </div>
                         <div class="flex-1 p-3 space-y-2 overflow-y-auto">
-                            ${cards.map(c => `
-                                <div class="group relative p-2.5 pr-7 rounded-xl border ${BMC_COLOR_STYLES[c.color] || BMC_COLOR_STYLES.sky} text-[11px] leading-relaxed shadow-2xs transition-colors">
-                                    <div contenteditable="true" onblur="updateBmcCardText('${block.key}','${c.id}', this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); this.blur();}"
+                            ${cards.map(c => {
+                                const isSel = bmcSelectedCard && bmcSelectedCard.cardId === c.id;
+                                return `
+                                <div data-bmc-card="${c.id}" onclick="selectBmcCard('${block.key}','${c.id}')"
+                                    class="group relative p-2.5 pr-7 rounded-xl border ${BMC_COLOR_STYLES[c.color] || BMC_COLOR_STYLES.sky} ${isSel ? 'ring-2 ring-sky-500' : ''} text-[11px] leading-relaxed shadow-2xs transition-colors cursor-pointer">
+                                    <div contenteditable="true" onfocus="selectBmcCard('${block.key}','${c.id}')" onblur="updateBmcCardText('${block.key}','${c.id}', this)" onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault(); this.blur();}"
                                         class="outline-none whitespace-pre-wrap break-words select-text">${escapeHtml(c.text)}</div>
-                                    <div class="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 absolute top-1.5 right-1.5 flex items-center gap-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xs px-1.5 py-0.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 shadow-xs transition">
-                                        ${BMC_COLOR_SWATCHES.map(sw => `
-                                            <button type="button" onclick="event.stopPropagation(); updateBmcCardColor('${block.key}','${c.id}','${sw.key}')" title="${sw.key}"
-                                                style="background:${sw.hex}"
-                                                class="w-2.5 h-2.5 rounded-full transition cursor-pointer hover:scale-125 ${(c.color || 'sky') === sw.key ? 'ring-1 ring-offset-1 ring-slate-600 dark:ring-white dark:ring-offset-slate-900 scale-110' : 'opacity-70 hover:opacity-100'}"></button>
-                                        `).join('')}
-                                        <span class="w-px h-3 bg-slate-200 dark:bg-slate-700 mx-0.5"></span>
-                                        <button type="button" onclick="event.stopPropagation(); deleteBmcCard('${block.key}','${c.id}')" title="Remove"
-                                            class="w-4 h-4 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer">
-                                            <i class="fa-solid fa-xmark text-[10px]"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                            `).join('')}
+                                    <button onclick="event.stopPropagation(); deleteBmcCard('${block.key}','${c.id}')" title="Remove"
+                                        class="opacity-0 group-hover:opacity-100 absolute top-1.5 right-1.5 w-5 h-5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 flex items-center justify-center transition cursor-pointer">
+                                        <i class="fa-solid fa-xmark text-[10px]"></i>
+                                    </button>
+                                </div>`;
+                            }).join('')}
                         </div>
                         <div class="p-2 border-t border-slate-100 dark:border-slate-800/70 bg-slate-50/50 dark:bg-slate-900/40 flex items-center gap-1.5 shrink-0">
                             <input id="bmc-input-${block.key}" type="text" placeholder="${t('bmc_add_ph')}" onkeydown="if(event.key==='Enter') addBmcCard('${block.key}')"
