@@ -6768,6 +6768,7 @@ CRITICAL EXECUTION RULE:
 1. You CANNOT modify Worldaily by writing plain text descriptions or bullet lists like "Ações executadas ao vivo:". The Worldaily app ONLY executes actions that you place inside a \`\`\`worldaily-actions\`\`\` JSON array block at the very end of your response.
 2. NEVER write "Ações executadas ao vivo:" or "Live actions executed:" in your markdown text — the UI appends that automatically after executing your \`\`\`worldaily-actions\`\`\` JSON block.
 3. Whenever the user asks to create, add, fill, edit, update, rename, move, schedule, organize, delete, remove, or clear ANYTHING in Tasks (Executive List / Kanban / Schedule / Gantt), Business Model Canvas (BMC), Mind Map, or Team Forum, you MUST output a valid \`\`\`worldaily-actions\`\`\` JSON array block at the end of your reply.
+4. MULTI-ITEM RULE: Whenever the user asks for multiple items (or you mention 2+ cards, tasks, or nodes to create/edit/delete), you MUST include ALL of them in the \`\`\`worldaily-actions\`\`\` JSON array (one action object per item, e.g. 3 separate \`add_bmc_card\` objects for 3 cards). Never execute only 1 item when multiple items are needed.
 
 SUPPORTED ACTION SCHEMAS (put inside \`\`\`worldaily-actions [ ... ] \`\`\`):
 - Navigation & Workspace:
@@ -7656,10 +7657,9 @@ ${assistantReply}`;
                             executedLabels.push(label);
                         }
                     }
-
-                    if (changedData) {
-                        saveDataState('');
-                    }
+                }
+                if (changedData) {
+                    saveDataState('');
                 }
             } finally {
                 hideGeminiGhostCursor();
@@ -7670,8 +7670,8 @@ ${assistantReply}`;
         function detectPromptIsPortuguese(text) {
             const s = String(text || '').toLowerCase();
             if (/[ãõçáéíóúâêôà]/.test(s)) return true;
-            if (/\b(oi|olá|ola|como|para|voce|você|meu|minha|projeto|tarefa|tarefas|crie|criar|apague|apagar|limpe|limpar|adicione|adicionar|edite|editar|atualize|atualizar|preencha|preencher|analise|qual|quais|sobre|fazer|faça|faca|mapa|mental|prazo|prazos|agenda|não|nao|sim|quero|pode|por|favor|estratégia|estrategia|mercado)\b/.test(s)) return true;
-            if (/\b(the|what|how|create|delete|add|edit|update|fill|please|project|task|tasks|schedule|can|you|my|for|with|from|this|that)\b/.test(s)) return false;
+            if (/\b(oi|olá|ola|bom|dia|boa|tarde|noite|como|para|pra|voce|você|meu|minha|meus|minhas|nosso|nossa|projeto|tarefa|tarefas|crie|criar|apague|apagar|limpe|limpar|adicione|adicionar|adicionado|adicionada|edite|editar|atualize|atualizar|preencha|preencher|analise|qual|quais|sobre|fazer|faça|faca|falta|faltam|faltou|agora|depois|antes|ainda|aqui|isso|isto|esse|essa|este|esta|ele|ela|eles|elas|mapa|mental|prazo|prazos|agenda|não|nao|sim|quero|pode|consegue|conseguiu|por|favor|estratégia|estrategia|mercado|segmento|segmentos|bloco|blocos|publico|alvo|cliente|clientes|valor|valores|receita|custos|canais|parcerias|recursos|atividades|relacionamento|tudo|todos|todas|mais|menos|muito|pouco|ser|estar|ficou|ficar|deve|precisa|preciso|coloque|colocar|mude|mudar|altere|alterar|remova|remover|exclua|excluir|olha|veja|chama|chamou|nome)\b/.test(s)) return true;
+            if (/\b(the|what|how|when|where|why|who|create|delete|remove|add|edit|update|fill|please|project|task|tasks|schedule|can|could|would|should|you|your|my|our|for|with|from|this|that|these|those|now|missing|need|want|make|show|list)\b/.test(s)) return false;
             return currentLang === 'pt';
         }
 
