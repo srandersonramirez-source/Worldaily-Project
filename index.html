@@ -2265,7 +2265,7 @@
                 members_auto_hint: 'Members appear here automatically when they sign in with an authorized account.',
                 gate_subtitle: 'Sign in to access your team workspace',
                 gate_session_note: 'Session expires automatically every 24 hours for security.',
-                sync_realtime: 'Synced in cloud',
+                sync_realtime: 'Live',
                 sync_signin_prompt: 'Sign in to cloud',
                 sync_connecting: 'Connecting to cloud...',
                 sync_sub_online: 'Cloud Firestore active',
@@ -2475,7 +2475,7 @@
                 members_auto_hint: 'Os membros aparecem aqui automaticamente ao entrar com uma conta autorizada.',
                 gate_subtitle: 'Entre para acessar o espaço de trabalho da equipe',
                 gate_session_note: 'Por segurança, sua sessão expira automaticamente a cada 24 horas.',
-                sync_realtime: 'Sincronizado na nuvem',
+                sync_realtime: 'Live',
                 sync_signin_prompt: 'Entre para sincronizar',
                 sync_connecting: 'Conectando à nuvem...',
                 sync_sub_online: 'Cloud Firestore ativo',
@@ -6687,7 +6687,8 @@ Always follow modern web layout best practices (Whimsical/Miro bilateral hierarc
 IMPORTANT:
 1. When creating a new Mind Map or multiple Mind Map ideas, ALWAYS prefer "build_mindmap_tree" (or "add_mindmap_node" with "parentText") so it forms a clean Whimsical/Miro hierarchical tree (Root -> 4 to 6 Category Pillars -> 2 to 3 concise sub-nodes each, max 4 words per node).
 2. When the user asks to delete or clear items in the Mind Map, Tasks, BMC, or Forum, emit the matching delete/clear action ("delete_mindmap_node", "clear_mindmap", "delete_task", "delete_bmc_card", "delete_forum_post").` : '';
-                const systemCtx = `You are Worldaily Gemini Agent, an autonomous AI strategist and workspace operator inside Worldaily. You have live access to Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
+                const systemCtx = `You are Worldaily Gemini Agent, an autonomous AI strategist and workspace operator inside Worldaily. You have live access to Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.
+CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user writes in (if the user's prompt is in Portuguese, respond 100% in Portuguese; if the user's prompt is in English, respond 100% in English), regardless of the app's UI language.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
                 const contents = [];
                 if (includeHistory) {
                     hist.slice(-10, -1).filter(m => !m.isError).forEach(m => {
@@ -7130,14 +7131,24 @@ IMPORTANT:
             }
         }
 
+        function detectPromptIsPortuguese(text) {
+            const s = String(text || '').toLowerCase();
+            if (/[ãõçáéíóúâêôà]/.test(s)) return true;
+            if (/\b(oi|olá|ola|como|para|voce|você|meu|minha|projeto|tarefa|tarefas|crie|criar|apague|apagar|limpe|limpar|adicione|adicionar|analise|qual|quais|sobre|fazer|faça|faca|mapa|mental|prazo|prazos|agenda|não|nao|sim|quero|pode|por|favor|estratégia|estrategia|mercado)\b/.test(s)) return true;
+            if (/\b(the|what|how|create|delete|add|please|project|task|tasks|schedule|can|you|my|for|with|from|this|that)\b/.test(s)) return false;
+            return currentLang === 'pt';
+        }
+
         async function askAiCustomPrompt() {
             const input = document.getElementById('aiCustomPromptInput');
             const q = (input?.value || '').trim();
             if (!q) return;
             input.value = '';
-            const isPt = currentLang === 'pt';
-            const langNote = isPt ? 'Responda em Português.' : 'Respond in English.';
-            const reply = await callGeminiApi(q, `${langNote}\n${q}`);
+            const isPromptPt = detectPromptIsPortuguese(q);
+            const langDirective = isPromptPt
+                ? '[IMPORTANTE: O usuário escreveu em Português. Responda 100% em Português (incluindo títulos, textos e labels das ações).]'
+                : '[IMPORTANT: The user wrote in English. Respond 100% in English (including titles, texts, and action labels).]';
+            const reply = await callGeminiApi(q, `${langDirective}\n${q}`);
             if (!reply) return;
 
             let displayReply = reply;
@@ -7153,10 +7164,10 @@ IMPORTANT:
 
             if (parsedActions.length > 0) {
                 const stepsSummary = parsedActions.map(a => `- **✓** ${a.label || a.type}`).join('\n');
-                displayReply = `${displayReply ? displayReply + '\n\n' : ''}**${isPt ? 'Ações executadas ao vivo:' : 'Live actions executed:'}**\n${stepsSummary}`;
+                displayReply = `${displayReply ? displayReply + '\n\n' : ''}**${isPromptPt ? 'Ações executadas ao vivo:' : 'Live actions executed:'}**\n${stepsSummary}`;
             }
 
-            getActiveAiChatHistory().push({ role: 'model', text: displayReply || (isPt ? 'Feito!' : 'Done!'), model: geminiModel });
+            getActiveAiChatHistory().push({ role: 'model', text: displayReply || (isPromptPt ? 'Feito!' : 'Done!'), model: geminiModel });
             renderAiChatStream(false);
 
             if (parsedActions.length > 0) {
