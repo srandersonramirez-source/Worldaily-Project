@@ -6466,21 +6466,99 @@
             }, 260);
         }
 
+        function resolveBmcBlockKey(rawBlock) {
+            if (!rawBlock) return null;
+            const s = String(rawBlock).trim().toLowerCase()
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-z0-9]/g, '');
+            const map = {
+                kp: 'kp', keypartners: 'kp', keypartner: 'kp', partners: 'kp', parceriaschave: 'kp', parcerias: 'kp', parceiros: 'kp', parceiroschave: 'kp',
+                ka: 'ka', keyactivities: 'ka', keyactivity: 'ka', activities: 'ka', atividadeschave: 'ka', atividades: 'ka',
+                vp: 'vp', valuepropositions: 'vp', valueproposition: 'vp', value: 'vp', propostadevalor: 'vp', propostasdevalor: 'vp', proposta: 'vp',
+                cr: 'cr', customerrelationships: 'cr', customerrelationship: 'cr', relationships: 'cr', relacionamento: 'cr', relacionamentocomclientes: 'cr',
+                cs: 'cs', customersegments: 'cs', customersegment: 'cs', segments: 'cs', segmentosdeclientes: 'cs', segmentodeclientes: 'cs', segmentos: 'cs', publicoalvo: 'cs', clientes: 'cs',
+                kr: 'kr', keyresources: 'kr', keyresource: 'kr', resources: 'kr', recursoschave: 'kr', recursos: 'kr',
+                ch: 'ch', channels: 'ch', channel: 'ch', canais: 'ch', canal: 'ch',
+                cost: 'cost', coststructure: 'cost', costs: 'cost', estruturadecustos: 'cost', custos: 'cost',
+                rev: 'rev', revenuestreams: 'rev', revenuestream: 'rev', revenue: 'rev', fontesdereceita: 'rev', receitas: 'rev', receita: 'rev'
+            };
+            if (map[s]) return map[s];
+            if (s.includes('partner') || s.includes('parceir')) return 'kp';
+            if (s.includes('activit') || s.includes('atividad')) return 'ka';
+            if (s.includes('value') || s.includes('proposta') || s.includes('valor')) return 'vp';
+            if (s.includes('relation') || s.includes('relacion')) return 'cr';
+            if (s.includes('segment') || s.includes('cliente') || s.includes('publico')) return 'cs';
+            if (s.includes('resourc') || s.includes('recurso')) return 'kr';
+            if (s.includes('channel') || s.includes('canai') || s.includes('canal')) return 'ch';
+            if (s.includes('cost') || s.includes('custo')) return 'cost';
+            if (s.includes('rev') || s.includes('receita')) return 'rev';
+            return null;
+        }
+
+        function normalizeAgentTaskStatus(rawStatus) {
+            if (!rawStatus) return null;
+            const s = String(rawStatus).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (s === 'not started' || s.includes('nao iniciad') || s.includes('pendente') || s === 'todo' || s === 'to do' || s === 'backlog') return 'Not started';
+            if (s === 'in progress' || s.includes('andamento') || s.includes('progresso') || s === 'doing' || s === 'active' || s === 'ativo') return 'In progress';
+            if (s === 'completed' || s.includes('concluid') || s.includes('finalizad') || s === 'done' || s === 'feito') return 'Completed';
+            return null;
+        }
+
+        function normalizeAgentTaskPriority(rawPriority) {
+            if (!rawPriority) return null;
+            const s = String(rawPriority).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            if (s === 'urgent' || s.includes('urgent') || s.includes('critic')) return 'Urgent';
+            if (s === 'important' || s.includes('important') || s === 'high' || s === 'alta') return 'Important';
+            if (s === 'medium' || s.includes('medi') || s === 'normal') return 'Medium';
+            if (s === 'low' || s.includes('baix')) return 'Low';
+            return null;
+        }
+
+        function resolveAgentBucketId(rawBucket) {
+            if (!rawBucket) return null;
+            const buckets = plannerData.buckets || [];
+            const needle = String(rawBucket).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const exactId = buckets.find(b => b.id.toLowerCase() === needle);
+            if (exactId) return exactId.id;
+            const nameMatch = buckets.find(b => {
+                const bn = String(b.name || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                return bn === needle || bn.includes(needle) || needle.includes(bn);
+            });
+            return nameMatch ? nameMatch.id : null;
+        }
+
+        function resolveAgentMemberId(rawMember) {
+            if (!rawMember) return null;
+            const members = plannerData.members || [];
+            const needle = String(rawMember).trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+            const found = members.find(m => {
+                if (m.id && m.id.toLowerCase() === needle) return true;
+                const fn = String(m.fullName || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                const em = String(m.email || '').toLowerCase();
+                return (fn && (fn.includes(needle) || needle.includes(fn))) || (em && em.includes(needle));
+            });
+            return found ? found.id : null;
+        }
+
         function buildProjectContextForAi() {
             const stages = (plannerData.buckets || []).map(b => `${b.name} (id:${b.id})`).join(', ');
-            const members = (plannerData.members || []).map(m => m.fullName).join(', ');
-            const tasksSummary = (plannerData.tasks || []).slice(0, 50).map(t => {
+            const members = (plannerData.members || []).map(m => `${m.fullName} (id:${m.id})`).join(', ');
+            const tasksSummary = (plannerData.tasks || []).slice(0, 60).map(t => {
                 const stg = (plannerData.buckets || []).find(b => b.id === t.bucketId)?.name || t.bucketId;
-                return `- [id:${t.id} | ${t.status} | ${t.priority} | Stage:${stg}] ${t.title}${t.startDate ? ' | Start:' + t.startDate : ''}${t.dueDate ? ' | Due:' + t.dueDate : ''}`;
+                const assignees = getTaskAssignees(t).map(id => (plannerData.members || []).find(m => m.id === id)?.fullName || id).join(', ');
+                const cl = Array.isArray(t.checklist) && t.checklist.length > 0
+                    ? ` | Subtasks: ${t.checklist.map(c => `${c.done ? '[x]' : '[ ]'} ${c.text}`).join('; ')}`
+                    : '';
+                return `- [id:${t.id} | Status:${t.status} | Priority:${t.priority} | Stage:${stg}${assignees ? ' | Assigned:' + assignees : ''}] ${t.title}${t.startDate ? ' | Start:' + t.startDate : ''}${t.finishDate ? ' | Finish:' + t.finishDate : ''}${t.dueDate ? ' | Due:' + t.dueDate : ''}${t.goals ? ' | Goal:' + t.goals : ''}${t.notes ? ' | Notes:' + t.notes : ''}${cl}`;
             }).join('\n');
 
-            const bmcObj = plannerData.bmc || {};
+            const bmcObj = ensureProjectBmc();
             const bmcSummary = (typeof BMC_BLOCKS !== 'undefined' ? BMC_BLOCKS : []).map(b => {
-                const items = (bmcObj[b.key] || []).map(c => `[id:${c.id}] ${c.text}`).join('; ');
-                return `- ${b.en} (${b.key}): ${items || 'Empty'}`;
+                const items = (bmcObj[b.key] || []).map(c => `[id:${c.id} | color:${c.color || 'sky'}] ${c.text}`).join(' ; ');
+                return `- ${b.en} / ${b.pt} (block:"${b.key}"): ${items || 'Empty'}`;
             }).join('\n');
 
-            const mm = plannerData.mindMap || { nodes: [], edges: [] };
+            const mm = ensureProjectMindMap();
             const mmNodes = (mm.nodes || []).map((n, idx) => {
                 const parents = (mm.edges || []).filter(e => e.to === n.id).map(e => {
                     const p = (mm.nodes || []).find(x => x.id === e.from);
@@ -6491,19 +6569,20 @@
 
             const projForum = (typeof forumPosts !== 'undefined' ? forumPosts : [])
                 .filter(p => !p.projectId || p.projectId === plannerData.id)
-                .slice(0, 6)
+                .slice(0, 10)
                 .map(p => `- [id:${p.id}] ${p.title}: ${p.body || ''}`)
                 .join('\n');
 
             return [
                 `Today's Date: ${toDateStrLocal(new Date())}`,
+                `Active View Tab: ${currentView}`,
                 `Workspace: ${plannerData.planTitle} (${plannerData.category || 'Project'})`,
                 `Description: ${plannerData.description || 'N/A'}`,
                 `Team Members: ${members || 'N/A'}`,
                 `Kanban Stages: ${stages}`,
                 `Google Calendar Linked: ${plannerData.googleCalendarName || 'Not linked'}`,
                 `\nTasks (${(plannerData.tasks || []).length}):\n${tasksSummary || 'No tasks yet.'}`,
-                `\nBusiness Model Canvas:\n${bmcSummary || 'Empty'}`,
+                `\nBusiness Model Canvas (9 blocks — use exact block keys kp, ka, vp, cr, cs, kr, ch, cost, rev):\n${bmcSummary || 'Empty'}`,
                 `\nMind Map Nodes (${(mm.nodes || []).length}):\n${mmNodes || 'None'}`,
                 projForum ? `\nRecent Team Forum Posts:\n${projForum}` : ''
             ].filter(Boolean).join('\n');
@@ -6667,32 +6746,47 @@
             renderAiChatStream(true);
 
             try {
-                const assistedGuide = aiAssistedMode ? `\n\nAGENT MODE IS ON:
-Whenever the user asks you to create, fill, update, delete, clear, organize, or navigate anywhere in Worldaily, include a \`\`\`worldaily-actions\`\`\` JSON array block at the end of your reply.
-Always follow modern web layout best practices (Whimsical/Miro bilateral hierarchical trees for Mind Maps, Osterwalder 9-block methodology for BMC, and structured Kanban stages for Tasks):
-- {"type":"switch_view","view":"projects"|"grid"|"board"|"calendar"|"gantt"|"charts"|"bmc"|"mindmap","label":"short status"}
-- {"type":"select_project","projectName":"exact or partial project name","label":"short status"}
-- {"type":"create_task","title":"...","priority":"Low"|"Medium"|"Important"|"Urgent","status":"Not started"|"In progress"|"Completed","bucketName":"optional stage name","dueDate":"YYYY-MM-DD optional","notes":"...","checklist":["..."],"label":"short status"}
-- {"type":"update_task","id":"optional task id","titleMatch":"partial title","status":"...","priority":"...","dueDate":"YYYY-MM-DD","notes":"...","label":"short status"}
-- {"type":"delete_task","id":"optional task id","titleMatch":"partial title or ALL","label":"short status"}
-- {"type":"add_bmc_card","block":"keyPartners"|"keyActivities"|"keyResources"|"valuePropositions"|"customerRelationships"|"channels"|"customerSegments"|"costStructure"|"revenueStreams","text":"...","color":"sky"|"amber"|"emerald"|"violet"|"rose","label":"short status"}
-- {"type":"delete_bmc_card","id":"optional card id","block":"optional block or ALL","textMatch":"partial text or ALL","label":"short status"}
-- {"type":"build_mindmap_tree","rootTitle":"Central Topic","branches":[{"title":"Pillar 1","color":"#0284C7","children":["Sub-item A","Sub-item B"]},{"title":"Pillar 2","color":"#10B981","children":["Sub-item C","Sub-item D"]}],"clearExisting":true,"label":"Construindo Mapa Mental estruturado"}
-- {"type":"add_mindmap_node","text":"short node title","parentText":"optional parent node title (defaults to root)","color":"#0284C7"|"#10B981"|"#F59E0B"|"#8B5CF6"|"#F43F5E","label":"short status"}
-- {"type":"delete_mindmap_node","id":"optional node id","textMatch":"partial text or ALL","label":"short status"}
-- {"type":"clear_mindmap","rootTitle":"optional new root title","label":"Limpando Mapa Mental"}
-- {"type":"organize_mindmap","label":"Organizando layout do Mapa Mental"}
-- {"type":"create_forum_post","title":"...","body":"...","label":"short status"}
-- {"type":"delete_forum_post","id":"optional post id","titleMatch":"partial title","label":"short status"}
-IMPORTANT:
-1. When creating a new Mind Map or multiple Mind Map ideas, ALWAYS prefer "build_mindmap_tree" (or "add_mindmap_node" with "parentText") so it forms a clean Whimsical/Miro hierarchical tree (Root -> 4 to 6 Category Pillars -> 2 to 3 concise sub-nodes each, max 4 words per node).
-2. When the user asks to delete or clear items in the Mind Map, Tasks, BMC, or Forum, emit the matching delete/clear action ("delete_mindmap_node", "clear_mindmap", "delete_task", "delete_bmc_card", "delete_forum_post").` : '';
-                const systemCtx = `You are Worldaily Gemini Agent, an autonomous AI strategist and workspace operator inside Worldaily. You have live access to Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas, Mind Map, and Team Forum.
+                const assistedGuide = aiAssistedMode ? `\n\nAGENT MODE IS ON (AUTONOMOUS WORKSPACE OPERATOR):
+CRITICAL EXECUTION RULE:
+1. You CANNOT modify Worldaily by writing plain text descriptions or bullet lists like "Ações executadas ao vivo:". The Worldaily app ONLY executes actions that you place inside a \`\`\`worldaily-actions\`\`\` JSON array block at the very end of your response.
+2. NEVER write "Ações executadas ao vivo:" or "Live actions executed:" in your markdown text — the UI appends that automatically after executing your \`\`\`worldaily-actions\`\`\` JSON block.
+3. Whenever the user asks to create, add, fill, edit, update, rename, move, schedule, organize, delete, remove, or clear ANYTHING in Tasks (Executive List / Kanban / Schedule / Gantt), Business Model Canvas (BMC), Mind Map, or Team Forum, you MUST output a valid \`\`\`worldaily-actions\`\`\` JSON array block at the end of your reply.
+
+SUPPORTED ACTION SCHEMAS (put inside \`\`\`worldaily-actions [ ... ] \`\`\`):
+- Navigation & Workspace:
+  {"type":"switch_view","view":"projects"|"grid"|"board"|"calendar"|"gantt"|"charts"|"bmc"|"mindmap","label":"short status"}
+  {"type":"select_project","projectName":"exact or partial project name","label":"short status"}
+- Tasks (Executive List, Kanban Board, Schedule Calendar, Gantt Chart):
+  {"type":"create_task","title":"...","priority":"Low"|"Medium"|"Important"|"Urgent","status":"Not started"|"In progress"|"Completed","bucketName":"optional stage name","startDate":"YYYY-MM-DD optional","finishDate":"YYYY-MM-DD optional","dueDate":"YYYY-MM-DD optional","assigneeName":"optional member name","goals":"optional goal","notes":"...","checklist":["subtask 1","subtask 2"],"label":"short status"}
+  {"type":"update_task","id":"optional task id","titleMatch":"existing partial title","newTitle":"optional new title","status":"Not started"|"In progress"|"Completed","priority":"Low"|"Medium"|"Important"|"Urgent","bucketName":"optional target stage name","startDate":"YYYY-MM-DD","finishDate":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","assigneeName":"optional member name","goals":"...","notes":"...","checklist":["..."],"label":"short status"}
+  {"type":"delete_task","id":"optional task id","titleMatch":"partial title or ALL","bucketName":"optional stage filter","label":"short status"}
+- Kanban Board Stages (Columns):
+  {"type":"add_kanban_stage","name":"Stage Name","color":"#0284C7","label":"short status"}
+  {"type":"update_kanban_stage","id":"optional stage id","nameMatch":"current stage name","newName":"New Stage Name","color":"#10B981","label":"short status"}
+  {"type":"delete_kanban_stage","id":"optional stage id","nameMatch":"stage name to remove","label":"short status"}
+- Business Model Canvas (9 blocks — use exact block keys: "kp" = Key Partners / Parcerias-Chave, "ka" = Key Activities / Atividades-Chave, "vp" = Value Propositions / Proposta de Valor, "cr" = Customer Relationships / Relacionamento, "cs" = Customer Segments / Segmentos de Clientes, "kr" = Key Resources / Recursos-Chave, "ch" = Channels / Canais, "cost" = Cost Structure / Estrutura de Custos, "rev" = Revenue Streams / Fontes de Receita):
+  {"type":"add_bmc_card","block":"kp"|"ka"|"vp"|"cr"|"cs"|"kr"|"ch"|"cost"|"rev","text":"Card content","color":"sky"|"amber"|"emerald"|"violet"|"rose","label":"short status"}
+  {"type":"update_bmc_card","id":"optional card id","block":"optional block key","textMatch":"existing partial card text","newText":"updated card text","color":"sky"|"amber"|"emerald"|"violet"|"rose","newBlock":"optional block key to move card","label":"short status"}
+  {"type":"delete_bmc_card","id":"optional card id","block":"kp"|"ka"|"vp"|"cr"|"cs"|"kr"|"ch"|"cost"|"rev"|"ALL","textMatch":"partial text or ALL","label":"short status"}
+  {"type":"clear_bmc","block":"optional block key or ALL","label":"short status"}
+- Strategy Mind Map:
+  {"type":"build_mindmap_tree","rootTitle":"Central Topic","branches":[{"title":"Pillar 1","color":"#0284C7","children":["Sub-item A","Sub-item B"]},{"title":"Pillar 2","color":"#10B981","children":["Sub-item C","Sub-item D"]}],"clearExisting":true,"label":"Construindo Mapa Mental estruturado"}
+  {"type":"add_mindmap_node","text":"short node title","parentText":"optional parent node title (defaults to root)","color":"#0284C7"|"#10B981"|"#F59E0B"|"#8B5CF6"|"#F43F5E","label":"short status"}
+  {"type":"update_mindmap_node","id":"optional node id","textMatch":"existing node text or ROOT","newText":"updated node title","color":"#0284C7","parentText":"optional new parent node text","label":"short status"}
+  {"type":"delete_mindmap_node","id":"optional node id","textMatch":"partial text or ALL","label":"short status"}
+  {"type":"clear_mindmap","rootTitle":"optional new root title","label":"Limpando Mapa Mental"}
+  {"type":"organize_mindmap","label":"Organizando layout do Mapa Mental"}
+- Team Forum:
+  {"type":"create_forum_post","title":"...","body":"...","label":"short status"}
+  {"type":"update_forum_post","id":"optional post id","titleMatch":"existing post title","newTitle":"...","newBody":"...","label":"short status"}
+  {"type":"add_forum_comment","id":"optional post id","titleMatch":"post title","text":"comment text","label":"short status"}
+  {"type":"delete_forum_post","id":"optional post id","titleMatch":"partial title or ALL","label":"short status"}` : '';
+                const systemCtx = `You are Worldaily Gemini Agent, an autonomous AI strategist and workspace operator inside Worldaily. You have live read/write access to Tasks, Kanban stages, Schedule/Gantt dates, Business Model Canvas (BMC), Mind Map, and Team Forum.
 CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user writes in (if the user's prompt is in Portuguese, respond 100% in Portuguese; if the user's prompt is in English, respond 100% in English), regardless of the app's UI language.\n\nLIVE PROJECT CONTEXT:\n${buildProjectContextForAi()}${assistedGuide}`;
                 const contents = [];
                 if (includeHistory) {
                     hist.slice(-10, -1).filter(m => !m.isError).forEach(m => {
-                        contents.push({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.text }] });
+                        contents.push({ role: m.role === 'user' ? 'user' : 'model', parts: [{ text: m.apiText || m.text }] });
                     });
                 }
                 contents.push({ role: 'user', parts: [{ text: promptText }] });
@@ -6777,10 +6871,12 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
             const bmc = ensureProjectBmc();
             let added = 0;
             aiPendingBmcCards.forEach((item, idx) => {
-                if (bmc[item.block] && item.text) {
-                    bmc[item.block].push({
+                const blockKey = resolveBmcBlockKey(item.block || item.section || item.category);
+                const txt = item.text || item.title || item.content;
+                if (blockKey && bmc[blockKey] && txt) {
+                    bmc[blockKey].push({
                         id: 'bmc-ai-' + Date.now() + '-' + idx,
-                        text: String(item.text).trim(),
+                        text: String(txt).trim(),
                         color: ['sky', 'amber', 'emerald', 'violet', 'rose'].includes(item.color) ? item.color : 'sky'
                     });
                     added++;
@@ -6840,7 +6936,7 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
             }
             cursor.style.left = `${tx}px`;
             cursor.style.top = `${ty}px`;
-            await sleepMs(520);
+            await sleepMs(420);
         }
 
         function hideGeminiGhostCursor() {
@@ -6850,129 +6946,447 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
             cursor.classList.remove('flex');
         }
 
+        function tryParseActionJsonBlock(rawJsonStr) {
+            if (!rawJsonStr) return null;
+            const cleaned = String(rawJsonStr).trim()
+                .replace(/,\s*([\]}])/g, '$1');
+            try {
+                const parsed = JSON.parse(cleaned);
+                if (Array.isArray(parsed)) return parsed.filter(x => x && typeof x === 'object' && (x.type || x.action));
+                if (parsed && typeof parsed === 'object') {
+                    if (Array.isArray(parsed.actions)) return parsed.actions.filter(x => x && typeof x === 'object' && (x.type || x.action));
+                    if (parsed.type || parsed.action) return [parsed];
+                }
+            } catch (e) {}
+            return null;
+        }
+
+        function extractGeminiActionsFromReply(reply) {
+            let cleanText = String(reply || '');
+            let actions = [];
+
+            // 1. Check ```worldaily-actions ... ```
+            const wdBlocks = [...cleanText.matchAll(/```(?:worldaily-actions|wd-actions|actions)\s*([\s\S]*?)```/gi)];
+            for (const m of wdBlocks) {
+                const arr = tryParseActionJsonBlock(m[1]);
+                if (arr && arr.length) actions.push(...arr);
+            }
+            cleanText = cleanText.replace(/```(?:worldaily-actions|wd-actions|actions)[\s\S]*?```/gi, '').trim();
+
+            // 2. Check ```json ... ``` blocks that contain action objects
+            if (actions.length === 0) {
+                const jsonBlocks = [...cleanText.matchAll(/```(?:json)?\s*([\s\S]*?)```/gi)];
+                for (const m of jsonBlocks) {
+                    const arr = tryParseActionJsonBlock(m[1]);
+                    if (arr && arr.length) {
+                        actions.push(...arr);
+                        cleanText = cleanText.replace(m[0], '').trim();
+                    }
+                }
+            }
+
+            // 3. Check <worldaily-actions>...</worldaily-actions> or <wd_actions>...</wd_actions>
+            if (actions.length === 0) {
+                const xmlBlocks = [...cleanText.matchAll(/<(?:worldaily-actions|wd_actions)>([\s\S]*?)<\/(?:worldaily-actions|wd_actions)>/gi)];
+                for (const m of xmlBlocks) {
+                    const arr = tryParseActionJsonBlock(m[1]);
+                    if (arr && arr.length) {
+                        actions.push(...arr);
+                        cleanText = cleanText.replace(m[0], '').trim();
+                    }
+                }
+            }
+
+            // 4. Check unfenced JSON array [{"type":...}] in the reply
+            if (actions.length === 0) {
+                const rawArrMatch = cleanText.match(/(\[\s*\{\s*"(?:type|action)"[\s\S]*?\}\s*\])/);
+                if (rawArrMatch) {
+                    const arr = tryParseActionJsonBlock(rawArrMatch[1]);
+                    if (arr && arr.length) {
+                        actions.push(...arr);
+                        cleanText = cleanText.replace(rawArrMatch[1], '').trim();
+                    }
+                }
+            }
+
+            // 5. Strip any hallucinated "Ações executadas ao vivo:" / "Live actions executed:" section from model text
+            cleanText = cleanText
+                .replace(/\n*(?:\*\*|#{1,3}\s*)?(?:Ações executadas ao vivo|Live actions executed):?\*?\*?[\s\S]*$/i, '')
+                .trim();
+
+            return { cleanText, actions };
+        }
+
+        async function synthesizeActionsFromReplyFallback(userQuery, assistantReply) {
+            if (!geminiApiKey) return [];
+            try {
+                const prompt = `Convert the user's request and the assistant's planned response below into a valid JSON array of Worldaily actions.
+Output ONLY a raw JSON array (no markdown text, no explanations).
+Valid action types:
+- {"type":"add_bmc_card","block":"kp"|"ka"|"vp"|"cr"|"cs"|"kr"|"ch"|"cost"|"rev","text":"...","color":"sky"|"amber"|"emerald"|"violet"|"rose","label":"..."}
+- {"type":"update_bmc_card","id":"optional","block":"optional","textMatch":"existing text","newText":"updated text","color":"sky","label":"..."}
+- {"type":"delete_bmc_card","id":"optional","block":"kp"|"ka"|"vp"|"cr"|"cs"|"kr"|"ch"|"cost"|"rev"|"ALL","textMatch":"partial text or ALL","label":"..."}
+- {"type":"clear_bmc","block":"optional block or ALL","label":"..."}
+- {"type":"create_task","title":"...","priority":"Low"|"Medium"|"Important"|"Urgent","status":"Not started"|"In progress"|"Completed","bucketName":"optional","startDate":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","notes":"...","checklist":["..."],"label":"..."}
+- {"type":"update_task","id":"optional","titleMatch":"...","newTitle":"optional","status":"...","priority":"...","bucketName":"...","startDate":"YYYY-MM-DD","dueDate":"YYYY-MM-DD","notes":"...","label":"..."}
+- {"type":"delete_task","id":"optional","titleMatch":"partial title or ALL","label":"..."}
+- {"type":"add_kanban_stage","name":"...","color":"#0284C7","label":"..."}
+- {"type":"update_kanban_stage","nameMatch":"...","newName":"...","label":"..."}
+- {"type":"delete_kanban_stage","nameMatch":"...","label":"..."}
+- {"type":"build_mindmap_tree","rootTitle":"...","branches":[{"title":"...","color":"#0284C7","children":["..."]}],"clearExisting":true,"label":"..."}
+- {"type":"add_mindmap_node","text":"...","parentText":"optional","color":"#0284C7","label":"..."}
+- {"type":"update_mindmap_node","textMatch":"...","newText":"...","color":"#0284C7","label":"..."}
+- {"type":"delete_mindmap_node","textMatch":"partial text or ALL","label":"..."}
+- {"type":"clear_mindmap","rootTitle":"optional","label":"..."}
+- {"type":"create_forum_post","title":"...","body":"...","label":"..."}
+- {"type":"update_forum_post","titleMatch":"...","newTitle":"...","newBody":"...","label":"..."}
+- {"type":"add_forum_comment","titleMatch":"...","text":"...","label":"..."}
+- {"type":"delete_forum_post","titleMatch":"...","label":"..."}
+
+LIVE WORKSPACE CONTEXT:
+${buildProjectContextForAi()}
+
+USER REQUEST:
+${userQuery}
+
+ASSISTANT PLANNED RESPONSE:
+${assistantReply}`;
+
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(geminiModel)}:generateContent?key=${encodeURIComponent(geminiApiKey)}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: 'user', parts: [{ text: prompt }] }],
+                        generationConfig: { responseMimeType: 'application/json' }
+                    })
+                });
+                const data = await res.json();
+                const raw = data?.candidates?.[0]?.content?.parts?.map(p => p.text || '').join('\n') || '';
+                const parsed = tryParseActionJsonBlock(raw) || extractGeminiActionsFromReply(raw).actions;
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (e) {
+                console.warn('Action fallback extraction warning:', e);
+                return [];
+            }
+        }
+
         async function executeGeminiAssistedActions(actions) {
-            if (!Array.isArray(actions) || actions.length === 0) return;
+            if (!Array.isArray(actions) || actions.length === 0) return [];
             const isPt = currentLang === 'pt';
             let changedData = false;
+            const executedLabels = [];
 
             try {
-                for (const act of actions) {
+                for (const rawAct of actions) {
+                    if (!rawAct || typeof rawAct !== 'object') continue;
+                    const act = { ...rawAct, type: String(rawAct.type || rawAct.action || '').trim().toLowerCase() };
                     const label = act.label || act.type;
+
+                    // 1. SWITCH VIEW
                     if (act.type === 'switch_view' && act.view) {
                         const navBtn = document.getElementById(`pill-${act.view}`);
                         await moveGeminiGhostCursorTo(navBtn, `✦ ${label}`);
                         switchView(act.view);
-                        await sleepMs(360);
-                    } else if (act.type === 'select_project' && act.projectName) {
-                        const needle = String(act.projectName).toLowerCase();
-                        const proj = (workspaceStore.projects || []).find(p => (p.planTitle || '').toLowerCase().includes(needle));
+                        executedLabels.push(label);
+                        await sleepMs(300);
+
+                    // 2. SELECT PROJECT
+                    } else if (act.type === 'select_project' && (act.projectName || act.id)) {
+                        const needle = String(act.projectName || act.id).toLowerCase();
+                        const proj = (workspaceStore.projects || []).find(p =>
+                            p.id.toLowerCase() === needle || (p.planTitle || '').toLowerCase().includes(needle)
+                        );
                         if (proj) {
                             await moveGeminiGhostCursorTo(document.getElementById('sidebarProjectSwitchBtn'), `✦ ${label}`);
                             selectProject(proj.id, false);
-                            await sleepMs(320);
-                        }
-                    } else if (act.type === 'create_task' && act.title) {
-                        if (currentView !== 'grid' && currentView !== 'board' && currentView !== 'calendar') {
-                            await moveGeminiGhostCursorTo(document.getElementById('pill-board'), isPt ? '✦ Abrindo Kanban...' : '✦ Opening Kanban...');
-                            switchView('board');
-                            await sleepMs(340);
-                        }
-                        await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
-                        let targetBucketId = plannerData.buckets[0]?.id || 'b-backlog';
-                        if (act.bucketName) {
-                            const bMatch = (plannerData.buckets || []).find(b => (b.name || '').toLowerCase().includes(String(act.bucketName).toLowerCase()));
-                            if (bMatch) targetBucketId = bMatch.id;
-                        }
-                        plannerData.tasks.push({
-                            id: 't-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
-                            title: String(act.title).trim(),
-                            assignedTo: activeUserId || '',
-                            startDate: act.startDate || '',
-                            finishDate: '',
-                            dueDate: act.dueDate || '',
-                            bucketId: targetBucketId,
-                            status: ['Not started', 'In progress', 'Completed'].includes(act.status) ? act.status : 'Not started',
-                            priority: ['Low', 'Medium', 'Important', 'Urgent'].includes(act.priority) ? act.priority : 'Medium',
-                            labels: [],
-                            goals: '',
-                            notes: act.notes ? String(act.notes) : '',
-                            checklist: Array.isArray(act.checklist) ? act.checklist.map((c, ci) => ({
-                                id: 'c-ai-' + Date.now() + '-' + ci,
-                                text: String(c),
-                                done: false
-                            })) : []
-                        });
-                        changedData = true;
-                        renderCurrentView();
-                        await sleepMs(300);
-                    } else if (act.type === 'update_task' && (act.id || act.titleMatch)) {
-                        const needle = String(act.titleMatch || '').toLowerCase();
-                        const task = (plannerData.tasks || []).find(t =>
-                            (act.id && t.id === act.id) || (needle && (t.title || '').toLowerCase().includes(needle))
-                        );
-                        if (task) {
-                            await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
-                            if (act.status && ['Not started', 'In progress', 'Completed'].includes(act.status)) task.status = act.status;
-                            if (act.priority && ['Low', 'Medium', 'Important', 'Urgent'].includes(act.priority)) task.priority = act.priority;
-                            if (act.dueDate !== undefined) task.dueDate = act.dueDate;
-                            if (act.notes !== undefined) task.notes = act.notes;
-                            changedData = true;
-                            renderCurrentView();
+                            executedLabels.push(label);
                             await sleepMs(280);
                         }
-                    } else if (act.type === 'delete_task' && (act.id || act.titleMatch)) {
+
+                    // 3. CREATE TASK (Executive List, Kanban, Schedule Calendar, Gantt)
+                    } else if ((act.type === 'create_task' || act.type === 'add_task') && (act.title || act.text || act.name)) {
+                        const taskTitle = String(act.title || act.text || act.name).trim();
+                        if (!['grid', 'board', 'calendar', 'gantt'].includes(currentView)) {
+                            const targetView = (act.startDate || act.finishDate) ? 'gantt' : (act.dueDate ? 'calendar' : 'board');
+                            await moveGeminiGhostCursorTo(document.getElementById(`pill-${targetView}`), isPt ? '✦ Abrindo Tarefas...' : '✦ Opening Tasks...');
+                            switchView(targetView);
+                            await sleepMs(280);
+                        }
                         await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
-                        const needle = String(act.titleMatch || '').trim().toLowerCase();
-                        if (needle === 'all') {
+                        const targetBucketId = resolveAgentBucketId(act.bucketName || act.stage || act.bucketId) || plannerData.buckets[0]?.id || 'b-backlog';
+                        const resolvedMember = resolveAgentMemberId(act.assigneeName || act.assignedTo || act.member) || activeUserId || '';
+                        const normStatus = normalizeAgentTaskStatus(act.status) || 'Not started';
+                        const normPriority = normalizeAgentTaskPriority(act.priority) || 'Medium';
+                        const rawChecklist = Array.isArray(act.checklist) ? act.checklist : (Array.isArray(act.subtasks) ? act.subtasks : []);
+
+                        plannerData.tasks.push({
+                            id: 't-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
+                            title: taskTitle,
+                            assignedTo: resolvedMember,
+                            startDate: act.startDate || '',
+                            finishDate: act.finishDate || '',
+                            dueDate: act.dueDate || '',
+                            bucketId: targetBucketId,
+                            status: normStatus,
+                            priority: normPriority,
+                            labels: [],
+                            goals: act.goals || act.goal ? String(act.goals || act.goal) : '',
+                            notes: (act.notes || act.description) ? String(act.notes || act.description) : '',
+                            checklist: rawChecklist.map((c, ci) => ({
+                                id: 'c-ai-' + Date.now() + '-' + ci,
+                                text: typeof c === 'object' && c !== null ? String(c.text || c.title || '') : String(c),
+                                done: Boolean(typeof c === 'object' && c !== null && c.done)
+                            })).filter(c => c.text)
+                        });
+                        changedData = true;
+                        executedLabels.push(label);
+                        renderCurrentView();
+                        await sleepMs(240);
+
+                    // 4. UPDATE / EDIT TASK
+                    } else if ((act.type === 'update_task' || act.type === 'edit_task') && (act.id || act.titleMatch || act.oldTitle || act.title)) {
+                        const rawMatch = act.titleMatch || act.oldTitle || (!act.id ? act.title : '');
+                        const needle = String(rawMatch || '').trim().toLowerCase();
+                        const matchedTasks = (plannerData.tasks || []).filter(t => {
+                            if (act.id && t.id === act.id) return true;
+                            if (needle === 'all' || needle === '*') return true;
+                            if (needle && (t.title || '').toLowerCase().includes(needle)) return true;
+                            return false;
+                        });
+                        if (matchedTasks.length > 0) {
+                            await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
+                            matchedTasks.forEach(task => {
+                                if (act.newTitle) task.title = String(act.newTitle).trim();
+                                else if (act.title && (act.id || act.titleMatch || act.oldTitle)) task.title = String(act.title).trim();
+                                const normSt = normalizeAgentTaskStatus(act.status);
+                                if (normSt) task.status = normSt;
+                                const normPr = normalizeAgentTaskPriority(act.priority);
+                                if (normPr) task.priority = normPr;
+                                const nextBucket = resolveAgentBucketId(act.bucketName || act.stage || act.bucketId);
+                                if (nextBucket) task.bucketId = nextBucket;
+                                if (act.assigneeName || act.assignedTo || act.member) {
+                                    const mId = resolveAgentMemberId(act.assigneeName || act.assignedTo || act.member);
+                                    if (mId) task.assignedTo = mId;
+                                }
+                                if (act.startDate !== undefined) task.startDate = act.startDate;
+                                if (act.finishDate !== undefined) task.finishDate = act.finishDate;
+                                if (act.dueDate !== undefined) task.dueDate = act.dueDate;
+                                if (act.goals !== undefined || act.goal !== undefined) task.goals = String(act.goals ?? act.goal ?? '');
+                                if (act.notes !== undefined || act.description !== undefined) task.notes = String(act.notes ?? act.description ?? '');
+                                const cl = act.checklist || act.subtasks;
+                                if (Array.isArray(cl)) {
+                                    task.checklist = cl.map((c, ci) => ({
+                                        id: 'c-ai-' + Date.now() + '-' + ci,
+                                        text: typeof c === 'object' && c !== null ? String(c.text || c.title || '') : String(c),
+                                        done: Boolean(typeof c === 'object' && c !== null && c.done)
+                                    })).filter(c => c.text);
+                                }
+                            });
+                            changedData = true;
+                            executedLabels.push(label);
+                            renderCurrentView();
+                            await sleepMs(240);
+                        }
+
+                    // 5. DELETE / CLEAR TASKS
+                    } else if (act.type === 'delete_task' || act.type === 'remove_task' || act.type === 'clear_tasks') {
+                        await moveGeminiGhostCursorTo(document.getElementById(`view-${currentView}`), `✦ ${label}`);
+                        const needle = String(act.titleMatch || act.title || '').trim().toLowerCase();
+                        const bucketFilterId = resolveAgentBucketId(act.bucketName || act.stage || act.bucketId);
+                        const statusFilter = normalizeAgentTaskStatus(act.status);
+                        const beforeLen = (plannerData.tasks || []).length;
+
+                        if (act.type === 'clear_tasks' || ((needle === 'all' || needle === '*') && !bucketFilterId && !statusFilter)) {
                             plannerData.tasks = [];
                         } else {
                             plannerData.tasks = (plannerData.tasks || []).filter(t => {
                                 if (act.id && t.id === act.id) return false;
-                                if (needle && (t.title || '').toLowerCase().includes(needle)) return false;
+                                if (bucketFilterId && t.bucketId === bucketFilterId && (!needle || needle === 'all' || (t.title || '').toLowerCase().includes(needle))) return false;
+                                if (statusFilter && t.status === statusFilter && (!needle || needle === 'all' || (t.title || '').toLowerCase().includes(needle))) return false;
+                                if (needle && needle !== 'all' && (t.title || '').toLowerCase().includes(needle)) return false;
                                 return true;
                             });
                         }
+                        if ((plannerData.tasks || []).length !== beforeLen || act.type === 'clear_tasks') {
+                            changedData = true;
+                            executedLabels.push(label);
+                            renderCurrentView();
+                            await sleepMs(240);
+                        }
+
+                    // 6. KANBAN STAGES (ADD, RENAME/UPDATE, DELETE)
+                    } else if ((act.type === 'add_kanban_stage' || act.type === 'create_kanban_stage' || act.type === 'add_stage') && (act.name || act.title)) {
+                        if (currentView !== 'board') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-board'), isPt ? '✦ Abrindo Kanban...' : '✦ Opening Kanban...');
+                            switchView('board');
+                            await sleepMs(300);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-board'), `✦ ${label}`);
+                        const stageName = String(act.name || act.title).trim();
+                        const dot = act.color || act.dot || STAGE_DOT_PALETTE[plannerData.buckets.length % STAGE_DOT_PALETTE.length];
+                        plannerData.buckets.push({ id: 'b-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5), name: stageName, dot });
                         changedData = true;
-                        renderCurrentView();
-                        await sleepMs(280);
-                    } else if (act.type === 'add_bmc_card' && act.block && act.text) {
+                        executedLabels.push(label);
+                        renderBoardView();
+                        await sleepMs(240);
+
+                    } else if ((act.type === 'update_kanban_stage' || act.type === 'rename_kanban_stage' || act.type === 'edit_stage') && (act.id || act.nameMatch || act.oldName || act.name)) {
+                        if (currentView !== 'board') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-board'), isPt ? '✦ Abrindo Kanban...' : '✦ Opening Kanban...');
+                            switchView('board');
+                            await sleepMs(300);
+                        }
+                        const bucketId = resolveAgentBucketId(act.id || act.nameMatch || act.oldName || act.name);
+                        const bucket = (plannerData.buckets || []).find(b => b.id === bucketId);
+                        if (bucket) {
+                            await moveGeminiGhostCursorTo(document.getElementById('view-board'), `✦ ${label}`);
+                            if (act.newName || (act.name && (act.id || act.nameMatch || act.oldName))) {
+                                bucket.name = String(act.newName || act.name).trim();
+                            }
+                            if (act.color || act.dot) bucket.dot = act.color || act.dot;
+                            changedData = true;
+                            executedLabels.push(label);
+                            renderBoardView();
+                            await sleepMs(240);
+                        }
+
+                    } else if ((act.type === 'delete_kanban_stage' || act.type === 'remove_kanban_stage' || act.type === 'delete_stage') && (act.id || act.nameMatch || act.name)) {
+                        if ((plannerData.buckets || []).length > 1) {
+                            if (currentView !== 'board') {
+                                await moveGeminiGhostCursorTo(document.getElementById('pill-board'), isPt ? '✦ Abrindo Kanban...' : '✦ Opening Kanban...');
+                                switchView('board');
+                                await sleepMs(300);
+                            }
+                            const bucketId = resolveAgentBucketId(act.id || act.nameMatch || act.name);
+                            if (bucketId) {
+                                await moveGeminiGhostCursorTo(document.getElementById('view-board'), `✦ ${label}`);
+                                const remaining = plannerData.buckets.filter(b => b.id !== bucketId);
+                                if (remaining.length > 0) {
+                                    const fallbackId = remaining[0].id;
+                                    (plannerData.tasks || []).forEach(t => { if (t.bucketId === bucketId) t.bucketId = fallbackId; });
+                                    plannerData.buckets = remaining;
+                                    changedData = true;
+                                    executedLabels.push(label);
+                                    renderBoardView();
+                                    await sleepMs(240);
+                                }
+                            }
+                        }
+
+                    // 7. BUSINESS MODEL CANVAS: ADD / FILL CARDS
+                    } else if (act.type === 'add_bmc_card' || act.type === 'create_bmc_card' || act.type === 'fill_bmc') {
                         if (currentView !== 'bmc') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-bmc'), isPt ? '✦ Abrindo Canvas...' : '✦ Opening Canvas...');
                             switchView('bmc');
-                            await sleepMs(360);
+                            await sleepMs(300);
                         }
                         const bmc = ensureProjectBmc();
-                        if (bmc[act.block]) {
-                            const inp = document.getElementById(`bmc-input-${act.block}`);
+                        const blockKey = resolveBmcBlockKey(act.block || act.section || act.category || act.column);
+                        const cardTexts = [];
+                        if (Array.isArray(act.cards || act.items)) {
+                            (act.cards || act.items).forEach(it => {
+                                if (typeof it === 'string') cardTexts.push({ text: it, color: act.color, block: blockKey });
+                                else if (it && typeof it === 'object') {
+                                    cardTexts.push({
+                                        text: it.text || it.title || it.content || '',
+                                        color: it.color || act.color,
+                                        block: resolveBmcBlockKey(it.block || it.section) || blockKey
+                                    });
+                                }
+                            });
+                        } else {
+                            const singleText = act.text || act.title || act.content || act.value;
+                            if (singleText) cardTexts.push({ text: singleText, color: act.color, block: blockKey });
+                        }
+
+                        for (const item of cardTexts) {
+                            const targetKey = item.block || blockKey;
+                            const cleanTxt = String(item.text || '').trim();
+                            if (!targetKey || !bmc[targetKey] || !cleanTxt) continue;
+                            const inp = document.getElementById(`bmc-input-${targetKey}`);
                             if (inp) {
                                 inp.scrollIntoView({ behavior: 'smooth', block: 'center' });
                                 await moveGeminiGhostCursorTo(inp, `✦ ${label}`);
-                                inp.value = String(act.text);
-                                await sleepMs(200);
+                                inp.value = cleanTxt;
+                                await sleepMs(140);
                                 inp.value = '';
                             }
-                            bmc[act.block].push({
-                                id: 'bmc-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5),
-                                text: String(act.text).trim(),
-                                color: ['sky', 'amber', 'emerald', 'violet', 'rose'].includes(act.color) ? act.color : 'sky'
+                            bmc[targetKey].push({
+                                id: 'bmc-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+                                text: cleanTxt,
+                                color: ['sky', 'amber', 'emerald', 'violet', 'rose'].includes(item.color) ? item.color : 'sky'
                             });
                             changedData = true;
                             renderBmcView();
-                            await sleepMs(240);
+                            await sleepMs(180);
                         }
-                    } else if (act.type === 'delete_bmc_card') {
+                        if (changedData) executedLabels.push(label);
+
+                    // 8. BUSINESS MODEL CANVAS: UPDATE / EDIT CARD
+                    } else if (act.type === 'update_bmc_card' || act.type === 'edit_bmc_card') {
                         if (currentView !== 'bmc') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-bmc'), isPt ? '✦ Abrindo Canvas...' : '✦ Opening Canvas...');
                             switchView('bmc');
-                            await sleepMs(360);
+                            await sleepMs(300);
+                        }
+                        const bmc = ensureProjectBmc();
+                        const targetBlockKey = resolveBmcBlockKey(act.block || act.section || act.category);
+                        const newBlockKey = resolveBmcBlockKey(act.newBlock || act.targetBlock);
+                        const searchBlocks = (targetBlockKey && bmc[targetBlockKey]) ? [targetBlockKey] : Object.keys(bmc);
+                        const needle = String(act.textMatch || act.oldText || act.match || act.titleMatch || '').trim().toLowerCase();
+                        const nextText = String(act.newText || act.text || act.content || act.title || '').trim();
+                        let updatedAny = false;
+
+                        for (const bKey of searchBlocks) {
+                            const list = bmc[bKey] || [];
+                            for (let i = 0; i < list.length; i++) {
+                                const card = list[i];
+                                const isMatch = (act.id && card.id === act.id) || (needle && (card.text || '').toLowerCase().includes(needle));
+                                if (isMatch) {
+                                    const inp = document.getElementById(`bmc-input-${bKey}`);
+                                    await moveGeminiGhostCursorTo(inp || document.getElementById('view-bmc'), `✦ ${label}`);
+                                    if (nextText) card.text = nextText;
+                                    if (act.color && ['sky', 'amber', 'emerald', 'violet', 'rose'].includes(act.color)) {
+                                        card.color = act.color;
+                                    }
+                                    if (newBlockKey && newBlockKey !== bKey && bmc[newBlockKey]) {
+                                        list.splice(i, 1);
+                                        i--;
+                                        bmc[newBlockKey].push(card);
+                                    }
+                                    updatedAny = true;
+                                }
+                            }
+                        }
+                        if (updatedAny) {
+                            changedData = true;
+                            executedLabels.push(label);
+                            renderBmcView();
+                            await sleepMs(220);
+                        }
+
+                    // 9. BUSINESS MODEL CANVAS: DELETE / CLEAR CARDS
+                    } else if (act.type === 'delete_bmc_card' || act.type === 'remove_bmc_card' || act.type === 'clear_bmc') {
+                        if (currentView !== 'bmc') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-bmc'), isPt ? '✦ Abrindo Canvas...' : '✦ Opening Canvas...');
+                            switchView('bmc');
+                            await sleepMs(300);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById('view-bmc'), `✦ ${label}`);
                         const bmc = ensureProjectBmc();
-                        const needle = String(act.textMatch || '').trim().toLowerCase();
-                        const blocks = (act.block && act.block !== 'ALL' && bmc[act.block]) ? [act.block] : Object.keys(bmc);
+                        const rawBlock = String(act.block || act.section || '').trim();
+                        const resolvedBlock = (rawBlock && rawBlock.toUpperCase() !== 'ALL' && rawBlock !== '*')
+                            ? resolveBmcBlockKey(rawBlock)
+                            : null;
+                        const needle = String(act.textMatch || act.text || act.titleMatch || '').trim().toLowerCase();
+                        const blocks = (resolvedBlock && bmc[resolvedBlock]) ? [resolvedBlock] : Object.keys(bmc);
+                        let removedAny = false;
+
                         blocks.forEach(bKey => {
                             if (!Array.isArray(bmc[bKey])) return;
-                            if (needle === 'all' && (!act.id)) {
+                            const before = bmc[bKey].length;
+                            if (act.type === 'clear_bmc' || ((needle === 'all' || needle === '*' || !needle) && !act.id && (act.type === 'clear_bmc' || resolvedBlock || rawBlock.toUpperCase() === 'ALL'))) {
                                 bmc[bKey] = [];
                             } else {
                                 bmc[bKey] = bmc[bKey].filter(c => {
@@ -6981,15 +7395,21 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
                                     return true;
                                 });
                             }
+                            if (bmc[bKey].length !== before) removedAny = true;
                         });
-                        changedData = true;
-                        renderBmcView();
-                        await sleepMs(260);
+                        if (removedAny || act.type === 'clear_bmc') {
+                            changedData = true;
+                            executedLabels.push(label);
+                            renderBmcView();
+                            await sleepMs(220);
+                        }
+
+                    // 10. MIND MAP: BUILD TREE
                     } else if (act.type === 'build_mindmap_tree') {
                         if (currentView !== 'mindmap') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
                             switchView('mindmap');
-                            await sleepMs(360);
+                            await sleepMs(300);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
                         const mm = ensureProjectMindMap();
@@ -7004,12 +7424,13 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
                         const rootId = mm.nodes[0].id;
                         const palette = ['#0284C7', '#10B981', '#F59E0B', '#8B5CF6', '#F43F5E'];
                         (act.branches || []).forEach((br, bIdx) => {
-                            if (!br || !br.title) return;
+                            if (!br || !(br.title || br.text)) return;
                             const bColor = br.color || palette[bIdx % palette.length];
                             const bId = 'mm-br-' + Date.now() + '-' + bIdx + '-' + Math.random().toString(36).slice(2, 5);
-                            mm.nodes.push({ id: bId, text: String(br.title).trim(), x: 480, y: 280, color: bColor });
+                            mm.nodes.push({ id: bId, text: String(br.title || br.text).trim(), x: 480, y: 280, color: bColor });
                             mm.edges.push({ id: 'me-br-' + Date.now() + '-' + bIdx, from: rootId, to: bId });
-                            (br.children || []).forEach((chTxt, cIdx) => {
+                            (br.children || []).forEach((chItem, cIdx) => {
+                                const chTxt = typeof chItem === 'object' && chItem !== null ? (chItem.title || chItem.text) : chItem;
                                 if (!chTxt) return;
                                 const cId = 'mm-ch-' + Date.now() + '-' + bIdx + '-' + cIdx + '-' + Math.random().toString(36).slice(2, 5);
                                 mm.nodes.push({ id: cId, text: String(chTxt).trim(), x: 480, y: 280, color: bColor });
@@ -7018,25 +7439,28 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
                         });
                         autoLayoutMindMap(false);
                         changedData = true;
-                        await sleepMs(320);
-                    } else if (act.type === 'add_mindmap_node' && act.text) {
+                        executedLabels.push(label);
+                        await sleepMs(260);
+
+                    // 11. MIND MAP: ADD NODE
+                    } else if ((act.type === 'add_mindmap_node' || act.type === 'create_mindmap_node') && (act.text || act.title)) {
                         if (currentView !== 'mindmap') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
                             switchView('mindmap');
-                            await sleepMs(360);
+                            await sleepMs(300);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
                         const mm = ensureProjectMindMap();
                         let parentNode = mm.nodes[0];
-                        if (act.parentText) {
-                            const pNeedle = String(act.parentText).toLowerCase();
-                            const foundParent = mm.nodes.find(n => (n.text || '').toLowerCase().includes(pNeedle));
+                        if (act.parentId || act.parentText) {
+                            const pNeedle = String(act.parentId || act.parentText).toLowerCase();
+                            const foundParent = mm.nodes.find(n => n.id.toLowerCase() === pNeedle || (n.text || '').toLowerCase().includes(pNeedle));
                             if (foundParent) parentNode = foundParent;
                         }
                         const nid = 'mm-ai-' + Date.now() + '-' + Math.random().toString(36).slice(2, 5);
                         mm.nodes.push({
                             id: nid,
-                            text: String(act.text).trim(),
+                            text: String(act.text || act.title).trim(),
                             x: 480,
                             y: 280,
                             color: act.color || parentNode?.color || '#0284C7'
@@ -7046,16 +7470,51 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
                         }
                         autoLayoutMindMap(false);
                         changedData = true;
-                        await sleepMs(260);
-                    } else if (act.type === 'delete_mindmap_node' || act.type === 'clear_mindmap') {
+                        executedLabels.push(label);
+                        await sleepMs(220);
+
+                    // 12. MIND MAP: UPDATE / EDIT NODE
+                    } else if ((act.type === 'update_mindmap_node' || act.type === 'edit_mindmap_node') && (act.id || act.textMatch || act.oldText || act.titleMatch)) {
                         if (currentView !== 'mindmap') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
                             switchView('mindmap');
-                            await sleepMs(360);
+                            await sleepMs(300);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
                         const mm = ensureProjectMindMap();
-                        const needle = String(act.textMatch || '').trim().toLowerCase();
+                        const needle = String(act.textMatch || act.oldText || act.titleMatch || '').trim().toLowerCase();
+                        const targetNode = (needle === 'root' && mm.nodes[0])
+                            ? mm.nodes[0]
+                            : mm.nodes.find(n => (act.id && n.id === act.id) || (needle && (n.text || '').toLowerCase().includes(needle)));
+                        if (targetNode) {
+                            if (act.newText || act.text || act.title) {
+                                targetNode.text = String(act.newText || act.text || act.title).trim();
+                            }
+                            if (act.color) targetNode.color = act.color;
+                            if (act.parentText && targetNode.id !== mm.nodes[0]?.id) {
+                                const pNeedle = String(act.parentText).toLowerCase();
+                                const newParent = mm.nodes.find(n => n.id !== targetNode.id && (n.text || '').toLowerCase().includes(pNeedle));
+                                if (newParent) {
+                                    mm.edges = mm.edges.filter(e => e.to !== targetNode.id);
+                                    mm.edges.push({ id: 'me-ai-' + Date.now(), from: newParent.id, to: targetNode.id });
+                                }
+                            }
+                            autoLayoutMindMap(false);
+                            changedData = true;
+                            executedLabels.push(label);
+                            await sleepMs(220);
+                        }
+
+                    // 13. MIND MAP: DELETE NODE / CLEAR
+                    } else if (act.type === 'delete_mindmap_node' || act.type === 'remove_mindmap_node' || act.type === 'clear_mindmap') {
+                        if (currentView !== 'mindmap') {
+                            await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
+                            switchView('mindmap');
+                            await sleepMs(300);
+                        }
+                        await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
+                        const mm = ensureProjectMindMap();
+                        const needle = String(act.textMatch || act.text || '').trim().toLowerCase();
                         if (act.type === 'clear_mindmap' || needle === 'all' || needle === 'non_root' || needle === '*') {
                             const rootNode = mm.nodes[0] || { id: 'mm-root', text: plannerData.planTitle || 'Core Strategy', x: 480, y: 280, color: '#0284C7' };
                             if (act.rootTitle) rootNode.text = String(act.rootTitle).trim();
@@ -7067,12 +7526,11 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
                         } else {
                             const toRemove = new Set();
                             mm.nodes.forEach((n, idx) => {
-                                if (idx === 0) return; // keep root unless clear_mindmap
+                                if (idx === 0) return;
                                 if ((act.id && n.id === act.id) || (needle && (n.text || '').toLowerCase().includes(needle))) {
                                     toRemove.add(n.id);
                                 }
                             });
-                            // Also remove descendants of removed branches so no orphan children remain
                             let addedDesc = true;
                             while (addedDesc) {
                                 addedDesc = false;
@@ -7088,55 +7546,121 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
                         }
                         autoLayoutMindMap(false);
                         changedData = true;
-                        await sleepMs(280);
+                        executedLabels.push(label);
+                        await sleepMs(240);
+
+                    // 14. MIND MAP: ORGANIZE LAYOUT
                     } else if (act.type === 'organize_mindmap') {
                         if (currentView !== 'mindmap') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-mindmap'), isPt ? '✦ Abrindo Mapa Mental...' : '✦ Opening Mind Map...');
                             switchView('mindmap');
-                            await sleepMs(360);
+                            await sleepMs(300);
                         }
                         await moveGeminiGhostCursorTo(document.getElementById('view-mindmap'), `✦ ${label}`);
                         autoLayoutMindMap(false);
                         changedData = true;
-                        await sleepMs(260);
-                    } else if (act.type === 'create_forum_post' && (act.title || act.body)) {
+                        executedLabels.push(label);
+                        await sleepMs(220);
+
+                    // 15. TEAM FORUM: CREATE, UPDATE, COMMENT, DELETE
+                    } else if ((act.type === 'create_forum_post' || act.type === 'add_forum_post') && (act.title || act.body || act.text)) {
                         if (currentView !== 'projects') {
                             await moveGeminiGhostCursorTo(document.getElementById('pill-projects'), isPt ? '✦ Abrindo Fórum...' : '✦ Opening Forum...');
                             switchView('projects');
-                            await sleepMs(360);
+                            await sleepMs(300);
                         }
                         const titleEl = document.getElementById('forumPostTitleInput');
                         const bodyEl = document.getElementById('forumPostBodyInput');
                         await moveGeminiGhostCursorTo(titleEl || document.getElementById('view-projects'), `✦ ${label}`);
                         if (titleEl) titleEl.value = String(act.title || '');
-                        if (bodyEl) bodyEl.value = String(act.body || '');
-                        await sleepMs(260);
+                        if (bodyEl) bodyEl.value = String(act.body || act.text || '');
+                        await sleepMs(220);
                         if (typeof createForumPost === 'function' && fbDb && fbCurrentUser) {
                             await createForumPost();
+                            executedLabels.push(label);
                         }
-                    } else if (act.type === 'delete_forum_post' && (act.id || act.titleMatch)) {
+
+                    } else if ((act.type === 'update_forum_post' || act.type === 'edit_forum_post') && (act.id || act.titleMatch || act.oldTitle)) {
+                        const needle = String(act.titleMatch || act.oldTitle || '').toLowerCase();
+                        const post = (forumPosts || []).find(p => (act.id && p.id === act.id) || (needle && (p.title || '').toLowerCase().includes(needle)));
+                        if (post && fbDb && fbCurrentUser) {
+                            await moveGeminiGhostCursorTo(document.getElementById('forumPostsFeed'), `✦ ${label}`);
+                            const updates = {};
+                            if (act.newTitle || act.title) {
+                                updates.title = String(act.newTitle || act.title).trim();
+                                post.title = updates.title;
+                            }
+                            if (act.newBody !== undefined || act.body !== undefined) {
+                                updates.body = String(act.newBody ?? act.body ?? '').trim();
+                                post.body = updates.body;
+                            }
+                            try { await fbDb.collection('forum_posts').doc(post.id).update(updates); } catch (e) {}
+                            renderGlobalForum();
+                            executedLabels.push(label);
+                            await sleepMs(220);
+                        }
+
+                    } else if ((act.type === 'add_forum_comment' || act.type === 'reply_forum_post') && (act.id || act.titleMatch) && (act.text || act.body)) {
                         const needle = String(act.titleMatch || '').toLowerCase();
                         const post = (forumPosts || []).find(p => (act.id && p.id === act.id) || (needle && (p.title || '').toLowerCase().includes(needle)));
-                        if (post && typeof deleteForumPost === 'function') {
+                        if (post && fbDb && fbCurrentUser) {
                             await moveGeminiGhostCursorTo(document.getElementById('forumPostsFeed'), `✦ ${label}`);
-                            await deleteForumPost(post.id);
+                            const comment = {
+                                id: 'fc-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6),
+                                text: String(act.text || act.body).trim(),
+                                authorUid: fbCurrentUser.uid,
+                                authorName: fbCurrentUser.displayName || fbCurrentUser.email || 'Team Member',
+                                authorPhoto: fbCurrentUser.photoURL || '',
+                                createdAt: new Date().toISOString()
+                            };
+                            try {
+                                await fbDb.collection('forum_posts').doc(post.id).update({
+                                    comments: firebase.firestore.FieldValue.arrayUnion(comment)
+                                });
+                            } catch (e) {}
+                            executedLabels.push(label);
+                            await sleepMs(220);
+                        }
+
+                    } else if ((act.type === 'delete_forum_post' || act.type === 'remove_forum_post') && (act.id || act.titleMatch)) {
+                        const needle = String(act.titleMatch || '').trim().toLowerCase();
+                        const matching = (forumPosts || []).filter(p =>
+                            (act.id && p.id === act.id) || needle === 'all' || (needle && (p.title || '').toLowerCase().includes(needle))
+                        );
+                        if (matching.length > 0 && typeof deleteForumPost === 'function') {
+                            await moveGeminiGhostCursorTo(document.getElementById('forumPostsFeed'), `✦ ${label}`);
+                            for (const post of matching) {
+                                await deleteForumPost(post.id);
+                            }
+                            executedLabels.push(label);
                         }
                     }
-                }
-                if (changedData) {
-                    saveDataState('');
+
+                    if (changedData) {
+                        saveDataState('');
+                    }
                 }
             } finally {
                 hideGeminiGhostCursor();
             }
+            return executedLabels;
         }
 
         function detectPromptIsPortuguese(text) {
             const s = String(text || '').toLowerCase();
             if (/[ãõçáéíóúâêôà]/.test(s)) return true;
-            if (/\b(oi|olá|ola|como|para|voce|você|meu|minha|projeto|tarefa|tarefas|crie|criar|apague|apagar|limpe|limpar|adicione|adicionar|analise|qual|quais|sobre|fazer|faça|faca|mapa|mental|prazo|prazos|agenda|não|nao|sim|quero|pode|por|favor|estratégia|estrategia|mercado)\b/.test(s)) return true;
-            if (/\b(the|what|how|create|delete|add|please|project|task|tasks|schedule|can|you|my|for|with|from|this|that)\b/.test(s)) return false;
+            if (/\b(oi|olá|ola|como|para|voce|você|meu|minha|projeto|tarefa|tarefas|crie|criar|apague|apagar|limpe|limpar|adicione|adicionar|edite|editar|atualize|atualizar|preencha|preencher|analise|qual|quais|sobre|fazer|faça|faca|mapa|mental|prazo|prazos|agenda|não|nao|sim|quero|pode|por|favor|estratégia|estrategia|mercado)\b/.test(s)) return true;
+            if (/\b(the|what|how|create|delete|add|edit|update|fill|please|project|task|tasks|schedule|can|you|my|for|with|from|this|that)\b/.test(s)) return false;
             return currentLang === 'pt';
+        }
+
+        function isActionOrientedPromptOrReply(userQuery, modelReply) {
+            const q = String(userQuery || '').toLowerCase();
+            const r = String(modelReply || '').toLowerCase();
+            const actionVerbs = /\b(adicione|adicionar|adicionando|crie|criar|criando|preencha|preencher|preenchendo|insira|inserir|inserindo|edite|editar|editando|atualize|atualizar|atualizando|altere|alterar|mude|mudar|renomeie|renomear|mova|mover|apague|apagar|apagando|remova|remover|removendo|exclua|excluir|delete|deletar|limpe|limpar|organize|organizar|add|adding|create|creating|fill|filling|insert|inserting|update|updating|edit|editing|rename|move|delete|deleting|remove|removing|clear|clearing)\b/i;
+            if (actionVerbs.test(q)) return true;
+            if (/ações executadas|live actions executed/i.test(r)) return true;
+            return false;
         }
 
         async function askAiCustomPrompt() {
@@ -7146,32 +7670,50 @@ CRITICAL LANGUAGE RULE: Always respond in the exact same language that the user 
             input.value = '';
             const isPromptPt = detectPromptIsPortuguese(q);
             const langDirective = isPromptPt
-                ? '[IMPORTANTE: O usuário escreveu em Português. Responda 100% em Português (incluindo títulos, textos e labels das ações).]'
-                : '[IMPORTANT: The user wrote in English. Respond 100% in English (including titles, texts, and action labels).]';
+                ? '[IMPORTANTE: O usuário escreveu em Português. Responda 100% em Português (incluindo títulos, textos e labels das ações). Se o usuário pediu para adicionar, criar, preencher, editar, mover ou apagar qualquer item, inclua obrigatoriamente o bloco ```worldaily-actions [ ... ] ``` no final.]'
+                : '[IMPORTANT: The user wrote in English. Respond 100% in English (including titles, texts, and action labels). If the user asked to add, create, fill, edit, move, or delete any item, you MUST include the ```worldaily-actions [ ... ] ``` block at the end.]';
             const reply = await callGeminiApi(q, `${langDirective}\n${q}`);
             if (!reply) return;
 
-            let displayReply = reply;
-            let parsedActions = [];
-            const actionMatch = reply.match(/```worldaily-actions\s*([\s\S]*?)```/i);
-            if (actionMatch && aiAssistedMode) {
-                try {
-                    const candidate = JSON.parse(actionMatch[1].trim());
-                    if (Array.isArray(candidate)) parsedActions = candidate;
-                } catch (e) {}
-                displayReply = reply.replace(/```worldaily-actions[\s\S]*?```/gi, '').trim();
+            let { cleanText: displayReply, actions: parsedActions } = extractGeminiActionsFromReply(reply);
+
+            // Fallback: if Agent Mode is ON and the user asked to perform actions (or the model claimed it is executing actions)
+            // but forgot to emit the JSON block, automatically synthesize the actions array from the model's reply.
+            if (aiAssistedMode && parsedActions.length === 0 && isActionOrientedPromptOrReply(q, reply)) {
+                parsedActions = await synthesizeActionsFromReplyFallback(q, reply);
             }
 
-            if (parsedActions.length > 0) {
-                const stepsSummary = parsedActions.map(a => `- **✓** ${a.label || a.type}`).join('\n');
-                displayReply = `${displayReply ? displayReply + '\n\n' : ''}**${isPromptPt ? 'Ações executadas ao vivo:' : 'Live actions executed:'}**\n${stepsSummary}`;
-            }
+            // Preserve clean text + valid worldaily-actions block in history for the API so future turns never hallucinate plain-text checkmarks
+            const apiHistoryText = parsedActions.length > 0
+                ? `${displayReply}\n\n\`\`\`worldaily-actions\n${JSON.stringify(parsedActions)}\n\`\`\``
+                : displayReply;
 
-            getActiveAiChatHistory().push({ role: 'model', text: displayReply || (isPromptPt ? 'Feito!' : 'Done!'), model: geminiModel });
-            renderAiChatStream(false);
+            let executedLabels = [];
+            if (aiAssistedMode && parsedActions.length > 0) {
+                // Render initial reply while the ghost cursor executes the live actions
+                const hist = getActiveAiChatHistory();
+                const msgObj = {
+                    role: 'model',
+                    text: displayReply || (isPromptPt ? 'Executando ações...' : 'Executing actions...'),
+                    apiText: apiHistoryText,
+                    model: geminiModel
+                };
+                hist.push(msgObj);
+                renderAiChatStream(false);
 
-            if (parsedActions.length > 0) {
-                await executeGeminiAssistedActions(parsedActions);
+                executedLabels = await executeGeminiAssistedActions(parsedActions);
+                const finalLabels = executedLabels.length > 0 ? executedLabels : parsedActions.map(a => a.label || a.type);
+                const stepsSummary = finalLabels.map(lbl => `- **✓** ${lbl}`).join('\n');
+                msgObj.text = `${displayReply ? displayReply + '\n\n' : ''}**${isPromptPt ? 'Ações executadas ao vivo:' : 'Live actions executed:'}**\n${stepsSummary}`;
+                renderAiChatStream(false);
+            } else {
+                getActiveAiChatHistory().push({
+                    role: 'model',
+                    text: displayReply || (isPromptPt ? 'Feito!' : 'Done!'),
+                    apiText: apiHistoryText,
+                    model: geminiModel
+                });
+                renderAiChatStream(false);
             }
         }
 
